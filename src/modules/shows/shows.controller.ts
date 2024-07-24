@@ -1,6 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CreateShowDto } from './dto/create-show.dto';
 import { ShowsService } from 'src/modules/shows/shows.service';
+import { ShowCategory } from 'src/commons/types/shows/show-category.type';
+import { User } from 'src/entities/users/user.entity';
+
 
 @Controller('shows')
 export class ShowsController {
@@ -54,8 +57,8 @@ export class ShowsController {
    * @returns
    */
   @Post(':showId/bookmark')
-  async createBookmark(@Param('showId') showId: number) {
-    return this.showsService.createBookmark(showId);
+  async createBookmark(@Param('showId') showId: number, user: User) {
+    return this.showsService.createBookmark(showId, user);
   }
 
   /**
