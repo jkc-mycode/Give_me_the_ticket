@@ -5,15 +5,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Payment</title>
-  <!-- portone 결제 -->
-  <!-- <script src="https://cdn.iamport.kr/v1/iamport.js"></script> -->
   <!-- jQuery -->
   <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
   <!-- iamport.payment.js -->
   <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
   <script type="text/javascript">
 
-    // 상점 식별
+    // 고객사 식별 (SDK 초기화)
     const IMP = window.IMP;
     IMP.init("imp72580830");
 
@@ -22,15 +20,34 @@
       IMP.request_pay({
         pg: "uplus",
         pay_method: "card",
-        merchant_uid: "iamporttest_13",
+        merchant_uid: "iamporttest_15", // 주문 '고유' 번호
         name: "Musical",
         amount: 100,
         buyer_email: "modify@sample.com",
         buyer_name: "Charlie"
-      }, function (response) { // 결제 후 호출되는 callback 로직
+      }, async function (response) { // 결제 후 호출되는 callback 로직
         console.log(response);
         if (response.success) { // 결제 성공
-          alert('결제 성공 : ' + response);
+          alert('결제 성공 : ' + response.paid_amount);
+
+          // 결제 결과 처리
+          try {
+            const notified = await fetch('/payment/complete', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                imp_uid: response.imp_uid,
+                merchant_uid: response.merchant_uid,
+              }),
+            });
+
+            const data = await notified.json();
+            alert(data.message);
+          } catch (err) {
+            alert('결제 검증 실패 : ' + err.message);
+          }
         } else { // 결제 실패
           alert('결제 실패 : ' + response.error_msg);
         }
