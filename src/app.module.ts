@@ -11,8 +11,7 @@ import { ShowsModule } from './modules/shows/shows.module';
 import { TradesModule } from './modules/trades/trades.module';
 import { ImagesModule } from './modules/images/images.module';
 import { RedisModule } from './modules/redis/redis.module';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import { BullModule } from '@nestjs/bull';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
@@ -20,14 +19,12 @@ import { BullModule } from '@nestjs/bull';
       isGlobal: true,
       validationSchema: configModuleValidationSchema,
     }),
-    EventEmitterModule.forRoot({
-      global: true,
-    }),
+
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        redis: {
+        connection: {
           host: configService.get<string>('REDIS_HOST'),
           port: configService.get<number>('REDIS_PORT'),
           password: configService.get<string>('REDIS_PASSWORD'),

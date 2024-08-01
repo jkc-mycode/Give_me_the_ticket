@@ -19,6 +19,7 @@ import { UpdateTradeDto } from './dto/update-trade.dto';
 import { User } from 'src/entities/users/user.entity';
 import { number } from 'joi';
 import { TestDto } from './dto/test-dto';
+import { MESSAGES } from 'src/commons/constants/trades/messages';
 
 @Controller('trades')
 export class TradesController {
@@ -50,11 +51,12 @@ export class TradesController {
 
   //테스트 메서드==============================
 
-  //첫 주솟값을 param으로 받는 콘트롤러 메서드
-  //중고 거래 상세 조회
-  @Get('/:tradeId')
-  async getTradeDetail(@Param('tradeId', ParseIntPipe) tradeId) {
-    return await this.tradesService.getTradeDetail(tradeId);
+  //중고 거래 로그 종회
+  @Get('tradelogs')
+  @UseGuards(AuthGuard('jwt'))
+  async getLogs(@Req() req: { user: User }) {
+    const user = req.user;
+    return await this.tradesService.getLogs(user.id);
   }
 
   //중고 거래 목록 조회
@@ -71,6 +73,12 @@ export class TradesController {
     return await this.tradesService.createTrade(createTradeDto, user.id);
   }
 
+  //중고 거래 상세 조회
+  @Get('/:tradeId')
+  async getTradeDetail(@Param('tradeId', ParseIntPipe) tradeId) {
+    return await this.tradesService.getTradeDetail(tradeId);
+  }
+  //첫 주솟값을 param으로 받는 콘트롤러 메서드
   //중고 거래 수정
   @Patch('/:tradeId')
   @UseGuards(AuthGuard('jwt'))
@@ -89,7 +97,7 @@ export class TradesController {
   async deleteTrade(@Param('tradeId', ParseIntPipe) tradeId, @Req() req: { user: User }) {
     const user = req.user;
     await this.tradesService.deleteTrade(tradeId, user.id);
-    return { message: '성공적으로 거래가 제거 되었습니다!' };
+    return { message: MESSAGES.TRADES.SUCCESSFULLY_DELETE.TRADE };
   }
 
   //중고 거래 구매

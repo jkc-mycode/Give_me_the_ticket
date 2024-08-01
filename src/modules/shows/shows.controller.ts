@@ -63,7 +63,7 @@ export class ShowsController {
    * */
   @Get(':showId')
   async getShow(@Param('showId') showId: number) {
-    return await this.showsService.getShow(+showId);
+    return await this.showsService.getShow(showId);
   }
 
   /**
@@ -78,7 +78,7 @@ export class ShowsController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.ADMIN)
   async updateShow(@Param('showId') showId: number, @Body() updateShowDto: UpdateShowDto) {
-    return await this.showsService.updateShow(+showId, updateShowDto);
+    return await this.showsService.updateShow(showId, updateShowDto);
   }
 
   /**
@@ -91,7 +91,7 @@ export class ShowsController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.ADMIN)
   async deleteShow(@Param('showId') showId: number) {
-    return await this.showsService.deleteShow(+showId);
+    return await this.showsService.deleteShow(showId);
   }
 
   /**
@@ -134,6 +134,7 @@ export class ShowsController {
   /**
    * 티켓 예매
    * @param showId
+   * @param createTicketDto
    * @returns
    */
   @ApiBearerAuth()
@@ -147,10 +148,11 @@ export class ShowsController {
     @Body() createTicketDto: CreateTicketDto,
     @Req() req: any
   ) {
-    this.showsService.addTicketQueue(showId, createTicketDto, req.user);
+    const ticket = await this.showsService.addTicketQueue(showId, createTicketDto, req.user);
     return {
-      status: HttpStatus.CREATED,
+      status: HttpStatus.OK,
       message: SHOW_TICKET_MESSAGES.COMMON.TICKET.SUCCESS,
+      ticket,
     };
   }
   /**
@@ -171,6 +173,9 @@ export class ShowsController {
     @Req() req: any
   ) {
     await this.showsService.refundTicket(showId, ticketId, req.user);
-    return { status: HttpStatus.OK, message: SHOW_TICKET_MESSAGES.COMMON.REFUND.SUCCESS };
+    return {
+      status: HttpStatus.OK,
+      message: SHOW_TICKET_MESSAGES.COMMON.REFUND.SUCCESS,
+    };
   }
 }

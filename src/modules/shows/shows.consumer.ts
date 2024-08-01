@@ -1,15 +1,19 @@
-import { Process, Processor } from '@nestjs/bull';
-import { Job } from 'bull';
+import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Job } from 'bullmq';
 import { ShowsService } from './shows.service';
+import { QUEUES } from 'src/commons/constants/queue.constant';
 
-@Processor('ticketQueue')
-export class ShowsConsumer {
-  constructor(private readonly showsService: ShowsService) {}
-
-  @Process('ticket')
-  async getJoinQueue(job: Job) {
-    const { showId, createTicketDto, user } = job.data;
-    const ticket = await this.showsService.createTicket(showId, createTicketDto, user);
-    return ticket;
+//대기열에 넣은 걸 차례대로 꺼내는 consumer 로직
+@Processor(QUEUES.TICKET_QUEUE)
+export class QueueConsumer extends WorkerHost {
+  constructor(private readonly showsService: ShowsService) {
+    super();
+  }
+  async process(job: Job): Promise<any> {
+    return await this.showsService.createTicket(
+      job.data.showId,
+      job.data.createTicketDto,
+      job.data.user
+    );
   }
 }
