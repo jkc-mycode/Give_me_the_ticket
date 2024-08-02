@@ -13,6 +13,7 @@ import { ImagesModule } from './modules/images/images.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { BullModule } from '@nestjs/bullmq';
 import { SearchModule } from './modules/shows/search/search.module';
+import { PaymentsModule } from './payments/payments.module';
 import { ViewsController } from './views/index.view.controller';
 import { AuthViewsController } from './views/auth/auth.view.controller';
 @Module({
@@ -41,6 +42,7 @@ import { AuthViewsController } from './views/auth/auth.view.controller';
     ImagesModule,
     RedisModule,
     SearchModule,
+    PaymentsModule,
   ],
   controllers: [AppController, ViewsController, AuthViewsController],
   providers: [AppService],

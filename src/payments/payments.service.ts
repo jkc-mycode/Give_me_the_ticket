@@ -82,14 +82,11 @@ export class PaymentsService {
       }
 
       switch (payment.status) {
-        case 'ready':
-          // 가상 계좌 발급 처리
-          break;
         case 'paid':
           // 결제 완료 처리
-          // 티켓 상태 업데이트
-          ticket.status = TicketStatus.USEABLE; // 티켓 상태 - 판매(거래) 완료 로 바꾸기 !!
-          await this.ticketRepository.save(ticket);
+          // // 티켓 상태 업데이트
+          // ticket.status = TicketStatus.USEABLE; // 티켓 상태 - 판매(거래) 완료 로 바꾸기 !!
+          // await this.ticketRepository.save(ticket);
 
           // 포인트 로그 기록
           const pointLog = this.pointLogRepository.create({
@@ -100,9 +97,9 @@ export class PaymentsService {
           });
           await this.pointLogRepository.save(pointLog);
 
-          // 사용자 포인트 업데이트
-          user.point -= payment.amount;
-          await this.userRepository.save(user);
+          // // 사용자 포인트 업데이트
+          // user.point -= payment.amount;
+          // await this.userRepository.save(user);
 
           break;
         default:
@@ -110,6 +107,65 @@ export class PaymentsService {
       }
     } catch (err) {
       throw new InternalServerErrorException('결제 결과 검증 실패');
+    }
+  }
+
+  // 웹훅 요청 검증
+  async webhook(imp_uid: string, merchant_uid: string) {
+    try {
+      const token = await this.getToken();
+
+      const response = await lastValueFrom(
+        this.httpService.get(`https://api.iamport.kr/payments/${imp_uid}`, {
+          headers: { Authorization: token },
+        })
+      );
+
+      const paymentData = response.data.response;
+
+      if (!paymentData) {
+        throw new NotFoundException('결제 정보를 찾을 수 없습니다.');
+      }
+
+      // DB에서 결제되어야 하는 금액 조회
+      const ticket = await this.ticketRepository.findOne({ where: { id: +merchant_uid } });
+
+      if (!ticket) {
+        throw new NotFoundException('티켓 정보를 찾을 수 없습니다.');
+      }
+
+      const user = await this.userRepository.findOne({ where: { id: ticket.userId } });
+
+      if (!user) {
+        throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
+      }
+
+      const amountToBePaid = ticket.price;
+      const { amount, status } = paymentData;
+
+      // 결제 금액 불일치 시 예외 처리
+      if (amount !== amountToBePaid) {
+        throw new InternalServerErrorException('위조된 결제 시도');
+      }
+
+      switch (status) {
+        case 'paid':
+          // 결제 완료
+          // 포인트 로그 기록
+          const pointLog = this.pointLogRepository.create({
+            userId: user.id,
+            price: amount,
+            description: `${ticket.title} 티켓 결제`,
+            type: PointType.WITHDRAW,
+          });
+          await this.pointLogRepository.save(pointLog);
+
+          break;
+        default:
+          throw new InternalServerErrorException('결제 상태 불일치');
+      }
+    } catch (err) {
+      throw new InternalServerErrorException('웹훅 처리 중 오류 발생');
     }
   }
 }
