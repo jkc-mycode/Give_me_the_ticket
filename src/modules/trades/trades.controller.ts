@@ -119,15 +119,15 @@ export class TradesController {
 
   //테스트 메서드========================================================
 
-  //<1>중고 거래 로그 종회
+  //<1>중고 거래 로그 조회
   @ApiBearerAuth()
   @Get('tradelogs')
   @ApiOperation({
     summary: SWAGGER.TRADES.GET_TRADE_LOGS.API_OPERATION.SUMMARY,
     description: SWAGGER.TRADES.GET_TRADE_LOGS.API_OPERATION.DESCRIPTION,
   })
+  @ApiNotFoundResponse({ description: `중고 거래가 하나도 존재하지 않을 때 발생합니다` })
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(Role.USER)
   async getLogs(@Req() req: { user: User }) {
     const user = req.user;
     return await this.tradesService.getLogs(user.id);
@@ -151,6 +151,9 @@ export class TradesController {
     summary: SWAGGER.TRADES.CREATE_TRADE.API_OPERATION.SUMMARY,
     description: SWAGGER.TRADES.CREATE_TRADE.API_OPERATION.DESCRIPTION,
   })
+  @ApiUnauthorizedResponse({
+    description: `요구하는 인가의 역할을 가지지 않았을 경우에 발생합니다`,
+  })
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.USER)
   async createTrade(@Body() createTradeDto: CreateTradeDto, @Req() req: { user: User }) {
@@ -165,6 +168,9 @@ export class TradesController {
     summary: SWAGGER.TRADES.GET_DETAILED_TRADE.API_OPERATION.SUMMARY,
     description: SWAGGER.TRADES.GET_DETAILED_TRADE.API_OPERATION.DESCRIPTION,
   })
+  @ApiUnauthorizedResponse({
+    description: `요구하는 인가의 역할을 가지지 않았을 경우에 발생합니다`,
+  })
   async getTradeDetail(@Param('tradeId', ParseIntPipe) tradeId) {
     return await this.tradesService.getTradeDetail(tradeId);
   }
@@ -176,6 +182,9 @@ export class TradesController {
   @ApiOperation({
     summary: SWAGGER.TRADES.UPDATE_TRADE.API_OPERATION.SUMMARY,
     description: SWAGGER.TRADES.UPDATE_TRADE.API_OPERATION.DESCRIPTION,
+  })
+  @ApiUnauthorizedResponse({
+    description: `요구하는 인가의 역할을 가지지 않았을 경우에 발생합니다`,
   })
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.USER)
@@ -195,6 +204,9 @@ export class TradesController {
     summary: SWAGGER.TRADES.DELETE_TRADE.API_OPERATION.SUMMARY,
     description: SWAGGER.TRADES.DELETE_TRADE.API_OPERATION.DESCRIPTION,
   })
+  @ApiUnauthorizedResponse({
+    description: `요구하는 인가의 역할을 가지지 않았을 경우에 발생합니다`,
+  })
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.USER)
   async deleteTrade(@Param('tradeId', ParseIntPipe) tradeId, @Req() req: { user: User }) {
@@ -209,6 +221,9 @@ export class TradesController {
   @ApiOperation({
     summary: SWAGGER.TRADES.PURCHASE_TICKET.API_OPERATION.SUMMARY,
     description: SWAGGER.TRADES.PURCHASE_TICKET.API_OPERATION.DESCRIPTION,
+  })
+  @ApiUnauthorizedResponse({
+    description: `요구하는 인가의 역할을 가지지 않았을 경우에 발생합니다`,
   })
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.USER)

@@ -1,3 +1,4 @@
+import { DESTRUCTION } from 'dns';
 import { Role } from 'src/commons/types/users/user-role.type';
 export const SWAGGER = {
   TRADES: {
@@ -79,6 +80,9 @@ export const SWAGGER = {
     QUEUE 또한 구현되어 있어, 동시성 문제와, 선착순 문재룰 해결하였습니다
     인가를 통해 사용자 정보를 받으며, 해당 거래의 Id를 사용자게 param으로 받습니다.`,
       },
+    },
+    UNAUTHORIZED_EXCEPTION: {
+      DESTRUCTION: `요구하는 인가의 역할을 가지지 않았을 경우에 발생합니다`,
     },
   },
 };
