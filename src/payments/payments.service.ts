@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -28,7 +33,7 @@ export class PaymentsService {
   // portone API access_token 발급
   async getToken() {
     const impKey = this.configService.get('IMP_KEY');
-    const impSecret = this.configService.get('IMP_SECRET_KEY');
+    const impSecret = this.configService.get('IMP_SECRET');
 
     // portone 서버에 토큰 요청
     const { data } = await lastValueFrom(
@@ -50,6 +55,7 @@ export class PaymentsService {
   async verifyPayment(imp_uid: string, merchant_uid: string) {
     try {
       const token = await this.getToken();
+      console.log(token);
 
       // portone 서버에서 결제 정보 가져오기
       const response = await lastValueFrom(
@@ -64,8 +70,14 @@ export class PaymentsService {
         throw new NotFoundException('결제 내역을 찾을 수 없습니다.');
       }
 
+      const [type, id] = merchant_uid.split(':');
+
+      if (type !== 'ticket') {
+        throw new BadRequestException('유효하지 않은 merchant_uid');
+      }
+
       // 티켓 & 결제 금액 검증
-      const ticket = await this.ticketRepository.findOne({ where: { id: +merchant_uid } });
+      const ticket = await this.ticketRepository.findOne({ where: { id: +id } });
 
       if (!ticket) {
         throw new NotFoundException('티켓 내역을 찾을 수 없습니다.');
@@ -76,6 +88,10 @@ export class PaymentsService {
       if (!user) {
         throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
       }
+
+      console.log(`결제 검증 - imp_uid: ${imp_uid}, merchant_uid: ${merchant_uid}`);
+      console.log('결제 데이터 : ', payment);
+      console.log('티켓 : ', ticket);
 
       if (ticket.price !== payment.amount) {
         throw new InternalServerErrorException('결제 금액 불일치');
@@ -106,6 +122,7 @@ export class PaymentsService {
           throw new InternalServerErrorException('결제 상태 불일치');
       }
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException('결제 결과 검증 실패');
     }
   }
@@ -139,6 +156,9 @@ export class PaymentsService {
       if (!user) {
         throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
       }
+
+      console.log(`웹훅 처리 - imp_uid: ${imp_uid}, merchant_uid: ${merchant_uid}`);
+      console.log('결제 데이터 : ', paymentData);
 
       const amountToBePaid = ticket.price;
       const { amount, status } = paymentData;

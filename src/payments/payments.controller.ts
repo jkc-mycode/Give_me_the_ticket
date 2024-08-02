@@ -13,6 +13,7 @@ export class PaymentsController {
    */
   @Post('/complete')
   async completePayment(@Body() completePaymentDto: CompletePaymentDto) {
+    console.log('결제 결과 검증 : ', completePaymentDto);
     const completePayment = await this.paymentsService.verifyPayment(
       completePaymentDto.imp_uid,
       completePaymentDto.merchant_uid
@@ -34,6 +35,7 @@ export class PaymentsController {
   async webhook(@Req() req: any, @Res() res: any) {
     try {
       const { imp_uid, merchant_uid } = req.body;
+      console.log('웹훅 요청 : ', req.body);
 
       await this.paymentsService.webhook(imp_uid, merchant_uid);
 

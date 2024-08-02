@@ -20,12 +20,12 @@
       IMP.request_pay({
         pg: "uplus",
         pay_method: "card",
-        merchant_uid: "iamporttest_15", // 주문 '고유' 번호 // "order_" + new Date().getTime()
-        name: "Musical",
-        amount: 100,
-        buyer_email: "modify@sample.com",
-        buyer_name: "Charlie",
-        notice_url: "http://localhost:3000/payments" // Webhook 수신 URL 설정
+        merchant_uid: "ticket:3:" + new Date().getTime(), // 주문 '고유' 번호 // "iamporttest_17"
+        name: "Musical", // show.title
+        amount: 23000, // show.price
+        buyer_email: "modify@sample.com", // user.email
+        buyer_name: "Charlie", // user.nickname
+        notice_url: "http://localhost:3000/payments/webhook" // Webhook 수신 URL 설정
       }, async function (response) { // 결제 후 호출되는 callback 로직
         console.log(response);
         if (response.success) { // 결제 성공
@@ -34,7 +34,7 @@
           // 결제 결과 처리
           try {
             // 고객사 서버에서 /payment/complete 엔드포인트를 구현해야 함
-            const notified = await fetch('/payments/complete', { // 'http://localhost:3000/payment/complete'
+            const notified = await fetch('http://localhost:3000/payments/complete', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

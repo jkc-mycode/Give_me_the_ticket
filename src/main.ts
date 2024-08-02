@@ -19,6 +19,8 @@ async function bootstrap() {
     })
   );
 
+  app.enableCors({ origin: '*' }); // front 구현 완료 후 삭제 예정
+
   const config = new DocumentBuilder()
     .setTitle('티켓 예매 및 중고 거래 서비스')
     .setVersion('1.0')
