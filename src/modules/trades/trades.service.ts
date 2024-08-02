@@ -1,5 +1,6 @@
 //others
 
+//dfs
 import { addHours, startOfDay, subDays, subHours } from 'date-fns';
 
 //Dto
@@ -8,7 +9,6 @@ import { UpdateTradeDto } from './dto/update-trade.dto';
 
 //error Type
 import {
-  Injectable,
   Catch,
   ArgumentsHost,
   HttpException,
@@ -19,7 +19,7 @@ import {
 } from '@nestjs/common';
 
 //DIP
-import { Inject } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Repository } from 'typeorm';
@@ -227,9 +227,9 @@ export class TradesService {
 
     //1-1 티켓이 존재하는지 검증
     const ticket = await this.TicketRepository.findOne({ where: { id: ticketId } });
-    const { date, time } = ticket;
     if (!ticket) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TICKET);
 
+    const { date, time } = ticket;
     const showId = ticket.showId;
 
     //1-2 해당 공연이 존재하는지 검증
@@ -265,7 +265,7 @@ export class TradesService {
 
     //본인의 티켓인지 검증
     if (ticket.userId !== sellerId) {
-      return new BadRequestException(MESSAGES.TRADES.NOT_EXISTS.AUTHORITY);
+      throw new BadRequestException(MESSAGES.TRADES.NOT_HAVE.TICKET);
     }
 
     //검증 타일 END==================================================
@@ -275,7 +275,11 @@ export class TradesService {
 
     try {
       //정책에 따라 티켓의 가격을 중고거래 게시된 시점의 가격으로 고정
-      await queryRunner.manager.update(Ticket, { id: ticketId }, { price: price });
+      await queryRunner.manager.update(
+        Ticket,
+        { id: ticketId },
+        { price: price, status: TicketStatus.TRADING }
+      );
 
       const closedAt = await this.returnCloseTime(ticket.id);
       const trade = await queryRunner.manager.save(Trade, {
@@ -297,15 +301,7 @@ export class TradesService {
     } finally {
       queryRunner.release();
     }
-
-    // const closedAt = await this.returnCloseTime(ticket.id);
-    // return await this.TradeRepository.save({ sellerId, ticketId, showId, price, closedAt });
-
-    // //정책에 따라 티켓의 가격을 중고거래 게시된 시점의 가격으로 고정
-    // await this.TicketRepository.update({ id: ticketId }, { price: price });
-    // const closedAt = await this.returnCloseTime(ticket.id);
-
-    // return { sellerId, ticketId, showId, price, closedAt };
+    return { message: MESSAGES.TRADES.SUCCESSFULLY_CREATE.TRADE };
   }
 
   //<4> 중고 거래 수정 메서드 //완료(검증 대부분 완료)  //테스트 완료
@@ -348,7 +344,7 @@ export class TradesService {
 
     //해당 티켓 존재 확인
 
-    let ticket = await this.TicketRepository.findOne({ where: { id: trade.ticketId } });
+    const ticket = await this.TicketRepository.findOne({ where: { id: trade.ticketId } });
     if (!ticket) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TICKET);
 
     //구매자와 판매자의 유저 정보 가져오기
@@ -357,6 +353,10 @@ export class TradesService {
     if (!seller) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.SELLER);
     const buyer = await this.UserRepository.findOne({ where: { id: buyerId } });
     if (!buyer) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.BUYER);
+
+    //구매자와 판매자가 동일한 경우
+    if (seller.id === buyer.id)
+      throw new BadRequestException(MESSAGES.TRADES.EQUAL.BUYER_AND_SELLER);
 
     //현재 가장 높은 ticketId보다 1 높은 값 (새로 재발급 하기 위해서)
     let query = await this.TicketRepository.query('SELECT MAX(id) AS maxId FROM tickets');
@@ -368,30 +368,56 @@ export class TradesService {
     await queryRunner.startTransaction();
 
     try {
-      //새로운 티켓 id를 레디스에 저장
-      this.addRedisTicket(String(newId), trade.closedAt);
-
+      let testCon = 0;
       //검증 타일===================
+      //구매자의 보유 포인트가 적다면 구매 불가 (현재 회사에 돈이 들어가는 로직은 구현되어 있지 않음!)
       if (buyer.point < ticket.price)
         throw new BadRequestException(MESSAGES.TRADES.NOT_ENOUGH.MONEY);
       buyer.point -= ticket.price;
+      seller.point += ticket.price - Math.floor(ticket.price * 0.05);
+
+      //결제 로직
       await queryRunner.manager.save(User, buyer);
+      await queryRunner.manager.save(User, seller);
 
       //tradeLog데이타베이스에도 저장
       const log = { tradeId: tradeId, buyerId, sellerId: seller.id };
-      await queryRunner.manager.save(TradeLog);
+      await queryRunner.manager.save(TradeLog, log);
+
+      //티켓 변경 로직 START========================
 
       //구매자에게 전할 새로운 티켓을 생성하고 새로운 티켓을 데이터베이스에 저장
-      const newTicket = ticket;
-      newTicket.userId = buyerId;
+      const newTicket = { ...ticket };
+
+      //티켓의 상태를 바꾼 뒤에 저장
+      ticket.status = TicketStatus.SOLD;
+      await queryRunner.manager.save(Ticket, ticket);
+
+      //티켓의 상태를 바꾼 뒤에 구매자에게 저장
+      delete newTicket.id;
+      newTicket.userId = buyer.id;
+      newTicket.status = TicketStatus.USEABLE;
       newTicket.nickname = buyer.nickname;
 
       await queryRunner.manager.save(Ticket, newTicket);
 
+      //새로운 티켓 id를 레디스에 저장
+      this.addRedisTicket(String(newId), trade.closedAt);
+
+      //티켓 변경 로직 END========================
+
+      //거래 삭제
+      await queryRunner.manager.update(
+        Ticket,
+        { id: trade.ticketId },
+        { status: TicketStatus.USEABLE }
+      );
+      await queryRunner.manager.delete(Trade, tradeId);
+
       await queryRunner.commitTransaction();
     } catch (err) {
       await queryRunner.rollbackTransaction();
-      return { message: MESSAGES.TRADES.FAILED.PURCHASE };
+      return { message: `${MESSAGES.TRADES.FAILED.PURCHASE} 사유:${err}` };
     } finally {
       await queryRunner.release();
     }
@@ -401,10 +427,10 @@ export class TradesService {
     // //기존에 존재하는 id를 레디스에서 제거
     this.deleteRedisTicket(String(trade.ticketId));
 
-    return { newId };
+    return { message: '성공적으로 티켓을 구매하였습니다.' };
   }
 
-  //중고 거래 로그 조회
+  //<7>중고 거래 로그 조회
   async getLogs(userId: number) {
     const buyLogs = await this.TradeLogRepository.find({
       where: { buyerId: userId },
@@ -424,8 +450,8 @@ export class TradesService {
   }
 
   //=======================테스트 함수 START====================
-  async hello(a: number) {
-    return { message: 'hello' };
+  async hello(userId: number) {
+    return await this.UserRepository.findOne({ where: { id: userId } });
   }
 
   async test() {

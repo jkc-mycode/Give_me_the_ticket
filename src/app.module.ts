@@ -16,6 +16,7 @@ import { SearchModule } from './modules/shows/search/search.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ViewsController } from './views/index.view.controller';
 import { AuthViewsController } from './views/auth/auth.view.controller';
+import { ShowsViewsController } from './views/shows/shows.view.controller';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -44,7 +45,7 @@ import { AuthViewsController } from './views/auth/auth.view.controller';
     SearchModule,
     PaymentsModule,
   ],
-  controllers: [AppController, ViewsController, AuthViewsController],
+  controllers: [AppController, ViewsController, AuthViewsController, ShowsViewsController],
   providers: [AppService],
 })
 export class AppModule {}

@@ -54,19 +54,19 @@ h1 {
   cursor: pointer;
 }
 
-.sign-form {
+.schedule-form {
   width: 100%;
   max-width: 680px;
   margin: 40px auto 10px;
 }
 
-.sign-form .input__block {
+.schedule-form .input__block {
   margin: 20px auto;
   display: block;
   position: relative;
 }
 
-.sign-form .input__block.first-input__block::before {
+.schedule-form .input__block.first-input__block::before {
   content: '';
   position: absolute;
   top: -15px;
@@ -81,22 +81,7 @@ h1 {
   transition: 0.2s linear;
 }
 
-.sign-form .input__block.signup-input__block::before {
-  content: '';
-  position: absolute;
-  top: -15px;
-  left: 150px;
-  display: block;
-  width: 0;
-  height: 0;
-  background: transparent;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-bottom: 15px solid rgba(15, 19, 42, 0.1);
-  transition: 0.2s linear;
-}
-
-.sign-form .input__block>input {
+.schedule-form .input__block > input {
   display: block;
   width: 90%;
   max-width: 680px;
@@ -111,61 +96,31 @@ h1 {
   font-family: 'Montserrat', sans-serif;
 }
 
-.sign-form .input__block input:focus,
-.sign-form .input__block input:active {
+.schedule-form .input__block input:focus,
+.schedule-form .input__block input:active {
   outline: none;
   border: none;
   color: rgba(15, 19, 42, 1);
 }
 
-.sign-form .input__block input.repeat__password {
-  opacity: 0;
-  display: none;
-  transition: 0.2s linear;
-}
-
-.sign-form .signin__btn {
+.schedule-form .booking__btn {
   background: #e91e63;
   color: white;
   display: block;
-  width: 90%;
+  width: 92.5%;
   max-width: 680px;
   height: 50px;
   border-radius: 8px;
   margin: 0 auto;
   border: none;
   cursor: pointer;
-  font-size: 17px;
-  font-weight: bold;
+  font-size: 14px;
   font-family: 'Montserrat', sans-serif;
   box-shadow: 0 15px 30px rgba(233, 30, 99, 0.36);
   transition: 0.2s linear;
 }
 
-.sign-form .signin__btn:hover {
-  box-shadow: 0 0 0 rgba(233, 30, 99, 0);
-}
-
-.sign-form .signup__btn {
-  background: #e91e63;
-  color: white;
-  width: 90%;
-  max-width: 680px;
-  height: 50px;
-  opacity: 0;
-  display: none;
-  border-radius: 8px;
-  margin: 0 auto;
-  border: none;
-  cursor: pointer;
-  font-size: 17px;
-  font-weight: bold;
-  font-family: 'Montserrat', sans-serif;
-  box-shadow: 0 15px 30px rgba(233, 30, 99, 0.36);
-  transition: 0.2s linear;
-}
-
-.sign-form .signup__btn:hover {
+.schedule-form .booking__btn:hover {
   box-shadow: 0 0 0 rgba(233, 30, 99, 0);
 }
 
@@ -202,33 +157,49 @@ h1 {
   width: 45%;
 }
 
-.kakao__btn {
+.back__btn {
   display: block;
   width: 90%;
   max-width: 680px;
-  margin: 10px auto;
+  margin: 20px auto;
   height: 50px;
   cursor: pointer;
-  font-size: 17px;
+  font-size: 14px;
   font-family: 'Montserrat', sans-serif;
   border-radius: 8px;
   border: none;
   line-height: 40px;
 }
 
-.kakao__btn.kakao__btn {
-  background: #FEE500;
-  color: black;
-  box-shadow: 0 15px 30px rgba(240, 230, 91, 0.527);
+.back__btn.back__btn {
+  background: #5b90f0;
+  color: white;
+  box-shadow: 0 15px 30px rgba(91, 144, 240, 0.36);
   transition: 0.2s linear;
-  font-weight: bold;
 }
 
-.kakao__btn.kakao__btn .fa {
+.back__btn.back__btn .fa {
   font-size: 20px;
   padding: 0 5px 0 0;
 }
 
-.kakao__btn.kakao__btn:hover {
+.back__btn.back__btn:hover {
   box-shadow: 0 0 0 rgba(91, 144, 240, 0);
+}
+
+.back__btn.back__btn {
+  background: #25282d;
+  color: white;
+  box-shadow: 0 15px 30px rgba(37, 40, 45, 0.36);
+  transition: 0.2s linear;
+}
+
+.back__btn.back__btn,
+.back__btn.back__btn .fa {
+  font-size: 20px;
+  padding: 0 5px 0 0;
+}
+
+.back__btn.back__btn:hover {
+  box-shadow: 0 0 0 rgba(37, 40, 45, 0);
 }
