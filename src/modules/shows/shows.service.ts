@@ -361,11 +361,18 @@ export class ShowsService {
   /* 티켓 예매 동시성 처리, 큐에 작업 추가 */
 
   async addTicketQueue(showId: number, createTicketDto: CreateTicketDto, user: User) {
-    const job = await this.ticketQueue.add(QUEUES.ADD_TICKET_QUEUE, {
-      showId,
-      user,
-      createTicketDto,
-    });
+    const job = await this.ticketQueue.add(
+      QUEUES.ADD_TICKET_QUEUE,
+      {
+        showId,
+        user,
+        createTicketDto,
+      },
+      {
+        removeOnComplete: true,
+        removeOnFail: true,
+      }
+    );
 
     // 작업 완료 대기 및 결과 반환
     const result = await job.waitUntilFinished(this.ticketQueueEvents.queueEvents);
