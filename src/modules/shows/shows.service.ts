@@ -361,11 +361,18 @@ export class ShowsService {
   /* 티켓 예매 동시성 처리, 큐에 작업 추가 */
 
   async addTicketQueue(showId: number, createTicketDto: CreateTicketDto, user: User) {
-    const job = await this.ticketQueue.add(QUEUES.ADD_TICKET_QUEUE, {
-      showId,
-      user,
-      createTicketDto,
-    });
+    const job = await this.ticketQueue.add(
+      QUEUES.ADD_TICKET_QUEUE,
+      {
+        showId,
+        user,
+        createTicketDto,
+      },
+      {
+        removeOnComplete: true,
+        removeOnFail: true,
+      }
+    );
 
     // 작업 완료 대기 및 결과 반환
     const result = await job.waitUntilFinished(this.ticketQueueEvents.queueEvents);
@@ -430,7 +437,7 @@ export class ShowsService {
       }
 
       if (user.point < show.price) {
-        throw new ForbiddenException(SHOW_TICKET_MESSAGES.COMMON.POINT.NOT_ENOUGH);
+        throw new BadRequestException(SHOW_TICKET_MESSAGES.COMMON.POINT.NOT_ENOUGH);
       }
 
       // 사용자의 포인트 차감
@@ -549,7 +556,7 @@ export class ShowsService {
       await queryRunner.manager.save(Ticket, ticket);
 
       user.point += refundPoint;
-      console.log(refundPoint);
+
       await queryRunner.manager.save(User, user);
 
       // 잔여 좌석을 증가시키기 위해 티켓 안에 있는 스케줄 id랑 같은 스케줄 id를 찾습니다.

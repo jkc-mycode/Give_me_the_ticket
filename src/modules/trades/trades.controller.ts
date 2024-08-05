@@ -100,8 +100,7 @@ export class TradesController {
   })
   @ApiOkResponse({ description: '' })
   @ApiNoContentResponse({ description: '유저의 계정이 변경됩니다' })
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(Role.USER)
+  @UseGuards(AuthGuard('jwt'))
   async changeRole(@Req() req: { user: User }) {
     const user = req.user;
     return await this.tradesService.changeRole(user.id);
