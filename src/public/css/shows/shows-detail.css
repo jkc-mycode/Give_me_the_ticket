@@ -178,6 +178,20 @@ h1 {
   transition: 0.2s linear;
 }
 
+.delete__btn {
+  display: block;
+  width: 90%;
+  max-width: 680px;
+  margin: 20px auto;
+  height: 50px;
+  cursor: pointer;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+  border-radius: 8px;
+  border: none;
+  line-height: 40px;
+}
+
 .back__btn.back__btn .fa {
   font-size: 20px;
   padding: 0 5px 0 0;
