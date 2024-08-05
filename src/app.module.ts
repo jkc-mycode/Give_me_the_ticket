@@ -16,7 +16,8 @@ import { SearchModule } from './modules/shows/search/search.module';
 import { ViewsController } from './views/index.view.controller';
 import { AuthViewsController } from './views/auth/auth.view.controller';
 import { UsersViewsController } from './views/users/users.view.controller';
-import { ShowsViewsController } from './views/shows/shows.view.controller';
+import { ShowsViewsController } from './views/shows/shows-update.view.controller';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
