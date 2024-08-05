@@ -66,7 +66,7 @@ export class PaymentsService {
         throw new NotFoundException('결제 내역을 찾을 수 없습니다.');
       }
 
-      const [type, userId] = merchant_uid.split(':');
+      const [type, userId, timestamp] = merchant_uid.split(':');
 
       if (type !== 'point') {
         throw new BadRequestException('유효하지 않은 merchant_uid');
@@ -128,7 +128,7 @@ export class PaymentsService {
         throw new NotFoundException('결제 정보를 찾을 수 없습니다.');
       }
 
-      const [type, userId] = merchant_uid.split(':');
+      const [type, userId, timestamp] = merchant_uid.split(':');
 
       if (type !== 'point') {
         throw new BadRequestException('유효하지 않은 merchant_uid');
