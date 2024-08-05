@@ -6,13 +6,13 @@ export class ShowsViewsController {
   @Get()
   @Render('shows/shows-create.view.ejs')
 
-  //공연 수정 페이지
-  @Get('/edit')
-  //@Render('shows/shows-main.view.ejs')
+  //공연 목록 페이지
+  @Get('/list')
+  @Render('shows/shows-lits.view.ejs')
 
   //공연 검색 페이지
   @Get('/search')
-  //@Render('shows/shows-main.view.ejs')
+  @Render('shows/shows-lits.view.ejs')
 
   //티켓 예매 페이지
   @Get('/:showId/ticket')
