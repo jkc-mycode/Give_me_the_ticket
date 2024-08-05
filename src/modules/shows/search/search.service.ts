@@ -5,6 +5,7 @@ import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { Cron } from '@nestjs/schedule';
 import { Show } from 'src/entities/shows/show.entity';
 import { SHOW_MESSAGES } from 'src/commons/constants/shows/show-messages.constant';
+
 @Injectable()
 export class SearchService {
   private readonly indexName = 'shows';
@@ -23,9 +24,9 @@ export class SearchService {
   // Elasticsearch 인덱스 생성
   private async createIndex() {
     try {
-      const indexExists = await this.eService.indices.exists({ index: this.indexName });
+      const { body: indexExists } = await this.eService.indices.exists({ index: this.indexName });
 
-      if (!indexExists.body) {
+      if (!indexExists) {
         await this.eService.indices.create({
           index: this.indexName,
           body: {
@@ -57,6 +58,7 @@ export class SearchService {
                 },
                 category: { type: 'keyword' },
                 id: { type: 'integer' },
+                imageUrl: { type: 'text' },
               },
             },
           },
@@ -70,24 +72,26 @@ export class SearchService {
   // show 데이터 인덱싱
   private async indexShowData(show: Show) {
     try {
+      const showWithImages = await this.showRepository.findOne({
+        where: { id: show.id },
+        relations: ['images'],
+      });
+
+      const imageUrl =
+        showWithImages.images.length > 0
+          ? showWithImages.images.map(({ imageUrl }) => imageUrl)
+          : ['default-image-url.jpg'];
+
       await this.eService.index({
         index: this.indexName,
-        id: show.id.toString(),
+        id: showWithImages.id.toString(),
         body: {
-          id: show.id,
-          userId: show.userId,
-          title: show.title,
-          content: show.content,
-          category: show.category,
-          runtime: show.runtime,
-          location: show.location,
-          price: show.price,
-          totalSeat: show.totalSeat,
-          createdAt: show.createdAt,
-          updatedAt: show.updatedAt,
+          ...showWithImages,
+          imageUrl,
         },
       });
     } catch (error) {
+      console.error('인덱싱 오류:', error);
       throw new InternalServerErrorException(SHOW_MESSAGES.INDEX.FAIL);
     }
   }
@@ -97,19 +101,20 @@ export class SearchService {
     try {
       const [deletedShows, allShows] = await Promise.all([
         this.showRepository.find({ where: { deletedAt: MoreThan(new Date(0)) } }),
-        this.showRepository.find({ where: { deletedAt: null } }),
+        this.showRepository.find({ where: { deletedAt: null }, relations: ['images'] }),
       ]);
 
       await Promise.all([
-        ...deletedShows.map((show) => this.deleteShowIndex(show.id)),
-        ...allShows.map((show) => this.createShowIndex(show)),
+        ...deletedShows.map(({ id }) => this.deleteShowIndex(id)),
+        ...allShows.map((show) => this.indexShowData(show)),
       ]);
     } catch (error) {
+      console.error('동기화 오류:', error);
       throw new InternalServerErrorException(SHOW_MESSAGES.INDEX.FAIL);
     }
   }
 
-  @Cron('* * * * *') // 1분마다 동기화
+  @Cron('* * * * *') // 1분 마다 동기화
   async handleCron() {
     await this.syncAllShows();
   }
@@ -137,28 +142,23 @@ export class SearchService {
       });
     }
 
-    const queryBody: any = {
-      query: {
-        bool: {
-          must: mustQueries,
-        },
-      },
+    const queryBody = {
+      query: { bool: { must: mustQueries } },
       from: (page - 1) * limit,
       size: limit,
       sort: [{ id: { order: 'desc' } }],
     };
 
     try {
-      const result = await this.eService.search({
+      const { body: result } = await this.eService.search({
         index: this.indexName,
         body: queryBody,
       });
-      const hits = result.body.hits.hits;
+      const hits = result.hits.hits;
       const results = hits.map((item) => item._source);
       const totalHits =
-        typeof result.body.hits.total === 'number'
-          ? result.body.hits.total
-          : result.body.hits.total.value;
+        typeof result.hits.total === 'number' ? result.hits.total : result.hits.total.value;
+
       return { results, total: totalHits };
     } catch (error) {
       console.error('Search error:', error);
@@ -171,13 +171,7 @@ export class SearchService {
     try {
       await this.eService.deleteByQuery({
         index: this.indexName,
-        body: {
-          query: {
-            match: {
-              id: showId,
-            },
-          },
-        },
+        body: { query: { match: { id: showId } } },
       });
     } catch (error) {
       throw new InternalServerErrorException(SHOW_MESSAGES.DELETE.FAIL);

@@ -12,6 +12,11 @@ export class ShowsViewsController {
   @Render('shows/shows-list.view.ejs')
   searchShows() {}
 
+  //공연 상세조회 페이지
+  @Get('/:showId')
+  @Render('shows/shows-detail.view.ejs')
+  showsDetail() {}
+
   //티켓 예매 페이지
   @Get('/:showId/ticket')
   @Render('shows/shows-ticket.view.ejs')
@@ -21,11 +26,6 @@ export class ShowsViewsController {
   @Get('/:showId/ticket/:ticketId')
   @Render('shows/shows-refund.view.ejs')
   refundTicket() {}
-
-  //공연 상세조회 페이지
-  @Get('/:showId')
-  @Render('shows/shows-detail.view.ejs')
-  showsDetail() {}
 
   //공연 생성 페이지
   @Get()

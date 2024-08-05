@@ -29,7 +29,7 @@ export class GetShowListDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  page: number = 1;
+  page: number;
 
   /**
    * 페이지 당 항목 수
@@ -39,5 +39,5 @@ export class GetShowListDto {
   @IsInt()
   @Min(1)
   @Max(100)
-  limit: number = 10;
+  limit: number;
 }
