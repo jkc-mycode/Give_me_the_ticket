@@ -1,0 +1,9 @@
+#imagePreview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.position-relative {
+    position: relative;
+}

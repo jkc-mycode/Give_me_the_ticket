@@ -31,41 +31,42 @@
     <%- include('../common/header.view.ejs') %>
         <main>
             <div class="container">
-                <label for="inputShow1" class="form-label">Tittle</label>
-                <input type="text" id="inputShow1" class="form-control">
+                <label for="title" class="form-label">Tittle</label>
+                <input type="text" id="title" class="form-control">
 
-                <label for="inputShow2" class="form-label">Content</label>
-                <textarea rows="5" id="inputShow2" class="form-control"></textarea>
+                <label for="content" class="form-label">Content</label>
+                <textarea rows="5" id="content" class="form-control"></textarea>
 
-                <label for="inputShow3" class="form-label">Category</label>
-                <div class="dropdown" id="inputShow3">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        Dropdown button
+                <label for="categoryDropdown" class="form-label">Category</label>
+                <div class="dropdown" id="categoryDropdown">
+                    <button id="category" class="btn btn-secondary dropdown-toggle" type="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        카테고리 선택
                     </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Action</a></li>
-                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    <ul class="dropdown-menu" aria-labelledby="scheduleDropdown">
+                        <li><a class="dropdown-item" id="concert">Concert</a></li>
+                        <li><a class="dropdown-item" id="musical">Musical</a></li>
+                        <li><a class="dropdown-item" id="play">Play</a></li>
                     </ul>
                 </div>
 
-                <label for="inputShow4" class="form-label">Runtime</label>
-                <input type="text" id="inputShow4" class="form-control">
+                <label for="runtime" class="form-label">Runtime</label>
+                <input type="text" id="runtime" class="form-control">
 
-                <label for="inputShow5" class="form-label">Location</label>
-                <input type="text" id="inputShow5" class="form-control">
+                <label for="location" class="form-label">Location</label>
+                <input type="text" id="location" class="form-control">
 
-                <label for="inputShow6" class="form-label">Price</label>
-                <input type="text" id="inputShow6" class="form-control">
+                <label for="price" class="form-label">Price</label>
+                <input type="text" id="price" class="form-control">
 
                 <div class="mb-3" id="inputShow7">
                     <label for="formFileMultiple" class="form-label">Multiple files input example</label>
                     <input class="form-control" type="file" id="formFileMultiple" multiple>
                 </div>
+                <div id="imagePreview" class="d-flex flex-wrap"></div>
                 <br>
                 <!-- update button -->
-                <button class="update__btn btn btn-warning">Update</button>
+                <button id="updateShow" class="update__btn btn btn-warning">Update</button>
             </div>
         </main>
         <footer></footer>
