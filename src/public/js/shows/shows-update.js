@@ -133,10 +133,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       }
 
-      console.log(modifiedImageUrls);
-
-      console.log();
-
       // 공연 수정 DTO
       const updateShowDto = {
         title: titleInput.value,
@@ -147,8 +143,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         price: priceInput.value,
         imageUrl: modifiedImageUrls,
       };
-
-      console.log(updateShowDto);
 
       // 공연 수정 API 호출
       const response = await axios.patch(`/shows/${showId}`, updateShowDto, {
