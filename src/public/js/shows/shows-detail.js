@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const updateBtn = document.querySelector('.update__btn');
   const backBtn = document.querySelector('.back__btn');
   const bookmarkBtn = document.querySelector('.bookmark__btn');
+  const deleteBtn = document.querySelector('.delete__btn');
   const token = window.localStorage.getItem('accessToken');
   const scheduleDropdownMenu = document.querySelector('#scheduleDropdownMenu');
   const scheduleDropdown = document.querySelector('#scheduleDropdown');
@@ -11,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
   window.selectedScheduleId = null;
   let isBookmarked = false;
   let bookmarkId = null;
+
   //----------- getShowDetail 함수 ---------------------
   async function getShowDetail(showId) {
     try {
@@ -137,8 +139,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (bookmarkBtn) {
     bookmarkBtn.addEventListener('click', async function () {
-      console.log('Bookmark button clicked');
-
       try {
         const response = await axios({
           method: isBookmarked ? 'delete' : 'post',
@@ -168,4 +168,67 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   }
+  // admin에게만 삭제 버튼이 보이게 하는 로직
+  async function checkUserRoleAndDisplayDeleteButton() {
+    try {
+      if (token) {
+        const userResponse = await axios.get('/users/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const userRole = userResponse.data.role; // 사용자 역할 정보
+        console.log(userResponse.data);
+        if (userRole === userResponse.data.role.ADMIN) {
+          // 관리자일 경우 버튼 표시
+          deleteBtn.style.display = 'block';
+          updateBtn.style.display = 'block';
+        } else {
+          // 관리자 아닐 경우 버튼 숨기기
+          deleteBtn.style.display = 'none';
+          updateBtn.style.display = 'none';
+        }
+      } else {
+        // 토큰이 없는 경우 버튼 숨기기
+        deleteBtn.style.display = 'none';
+        updateBtn.style.display = 'none';
+      }
+    } catch (err) {
+      console.error('사용자 권한 확인 오류:', err);
+      // 권한 확인 오류 발생 시 버튼 숨기기
+      deleteBtn.style.display = 'none';
+    }
+  }
+
+  // 삭제 버튼 클릭 이벤트 핸들러
+  deleteBtn.addEventListener('click', async function () {
+    checkUserRoleAndDisplayDeleteButton();
+    try {
+      const response = await axios({
+        method: 'delete',
+        url: `/shows/${showId}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        alert('삭제에 성공했습니다.');
+        window.location.href = '/views';
+      } else {
+        alert('삭제에 실패하였습니다. 응답 상태 코드: ' + response.status);
+      }
+    } catch (err) {
+      if (err.response && err.response.data) {
+        console.log(err.response.data);
+        alert(err.response.data.message);
+      } else {
+        console.error('Error:', err);
+        alert('서버와의 통신 중 오류가 발생하였습니다.');
+      }
+    }
+  });
+
+  // 사용자 권한 확인 함수 호출
 });
