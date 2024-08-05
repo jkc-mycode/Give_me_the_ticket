@@ -15,47 +15,87 @@
     const IMP = window.IMP;
     IMP.init("imp72580830");
 
-    function doPayment() {
-      // 결제창 호출
-      IMP.request_pay({
-        pg: "uplus",
-        pay_method: "card",
-        merchant_uid: "ticket:3:" + new Date().getTime(), // 주문 '고유' 번호 // "iamporttest_17"
-        name: "Musical", // show.title
-        amount: 23000, // show.price
-        buyer_email: "modify@sample.com", // user.email
-        buyer_name: "Charlie", // user.nickname
-        notice_url: "http://localhost:3000/payments/webhook" // Webhook 수신 URL 설정
-      }, async function (response) { // 결제 후 호출되는 callback 로직
-        console.log(response);
-        if (response.success) { // 결제 성공
-          alert('결제 성공 : ' + response.paid_amount);
-
-          // 결제 결과 처리
-          try {
-            // 고객사 서버에서 /payment/complete 엔드포인트를 구현해야 함
-            const notified = await fetch('http://localhost:3000/payments/complete', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              // imp_uid와 merchant_uid, 주문 정보를 서버에 전달
-              body: JSON.stringify({
-                imp_uid: response.imp_uid, // portone 결제 id
-                merchant_uid: response.merchant_uid, // 고객사 주문 '고유' 번호
-                // 주문 정보 ...
-              }),
-            });
-
-            const data = await notified.json();
-            alert(data.message);
-          } catch (err) {
-            alert('결제 검증 실패 : ' + err.message);
-          }
-        } else { // 결제 실패
-          alert('결제 실패 : ' + response.error_msg);
+    async function getUser() {
+      // 백엔드 사용자 정보 조회 API 호출
+      // const token = window.localStorage.getItem('accessToken');
+      const response = await fetch('http://localhost:3000/users/me', {
+        method: 'GET',
+        credentials: "include", // 쿠기 포함 요청
+        headers: {
+          'Authorization': `Bearer ${token}`
         }
       });
+
+      const data = await response.json();
+
+      console.log('User data: ', data);
+
+      if (response.ok) {
+        return data.getUserProfile;
+      } else {
+        throw new Error('user 정보 fetch 실패');
+      }
+    }
+
+    async function doPayment() {
+      try {
+        // 사용자 정보 가져오기
+        const user = await getUser();
+
+        if (!user) {
+          alert('사용자 정보를 가져오는 데 실패했습니다.');
+          return;
+        }
+
+        // 포인트 충전 설정
+        const merchantUid = "charge:" + new Date().getTime(); // 주문 '고유' 번호 (충전)
+        const chargeAmount = user.point;
+        const userEmail = user.email;
+        const userName = user.nickname;
+
+        // 결제창 호출
+        IMP.request_pay({
+          pg: "uplus",
+          pay_method: "card",
+          merchant_uid: merchantUid,
+          name: "Point Charge",
+          amount: chargeAmount,
+          buyer_email: userEmail,
+          buyer_name: userName,
+          notice_url: "http://localhost:3000/payments/webhook" // Webhook 수신 URL 설정
+        }, async function (response) { // 결제 후 호출되는 callback 로직
+          console.log(response);
+          if (response.success) { // 결제 성공
+            alert('결제 성공 : ' + response.paid_amount);
+
+            // 결제 결과 처리
+            try {
+              // 고객사 서버에서 /payment/complete 엔드포인트를 구현해야 함
+              const notified = await fetch('http://localhost:3000/payments/complete', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                // imp_uid와 merchant_uid, 주문 정보를 서버에 전달
+                body: JSON.stringify({
+                  imp_uid: response.imp_uid, // portone 결제 id
+                  merchant_uid: response.merchant_uid, // 고객사 주문 '고유' 번호
+                  // 주문 정보 ...
+                }),
+              });
+
+              const data = await notified.json();
+              alert(data.message);
+            } catch (err) {
+              alert('결제 검증 실패 : ' + err.message);
+            }
+          } else { // 결제 실패
+            alert('결제 실패 : ' + response.error_msg);
+          }
+        });
+      } catch (err) {
+        alert('사용자 정보를 가져오는 데 실패했습니다: ' + err.message);
+      }
     }
   </script>
 </head>

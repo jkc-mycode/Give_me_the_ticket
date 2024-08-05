@@ -12,8 +12,6 @@ import { lastValueFrom } from 'rxjs';
 
 import { User } from 'src/entities/users/user.entity';
 import { PointLog } from 'src/entities/users/point-log.entity';
-import { Ticket } from 'src/entities/shows/ticket.entity';
-import { TicketStatus } from 'src/commons/types/shows/ticket.type';
 import { PointType } from 'src/commons/types/users/point.type';
 
 @Injectable()
@@ -25,9 +23,7 @@ export class PaymentsService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(PointLog)
-    private readonly pointLogRepository: Repository<PointLog>,
-    @InjectRepository(Ticket)
-    private readonly ticketRepository: Repository<Ticket>
+    private readonly pointLogRepository: Repository<PointLog>
   ) {}
 
   // portone API access_token 발급
@@ -70,20 +66,13 @@ export class PaymentsService {
         throw new NotFoundException('결제 내역을 찾을 수 없습니다.');
       }
 
-      const [type, id] = merchant_uid.split(':');
+      const [type, userId] = merchant_uid.split(':');
 
-      if (type !== 'ticket') {
+      if (type !== 'point') {
         throw new BadRequestException('유효하지 않은 merchant_uid');
       }
 
-      // 티켓 & 결제 금액 검증
-      const ticket = await this.ticketRepository.findOne({ where: { id: +id } });
-
-      if (!ticket) {
-        throw new NotFoundException('티켓 내역을 찾을 수 없습니다.');
-      }
-
-      const user = await this.userRepository.findOne({ where: { id: ticket.userId } });
+      const user = await this.userRepository.findOne({ where: { id: +userId } });
 
       if (!user) {
         throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
@@ -91,31 +80,26 @@ export class PaymentsService {
 
       console.log(`결제 검증 - imp_uid: ${imp_uid}, merchant_uid: ${merchant_uid}`);
       console.log('결제 데이터 : ', payment);
-      console.log('티켓 : ', ticket);
+      console.log('사용자 : ', user);
 
-      if (ticket.price !== payment.amount) {
-        throw new InternalServerErrorException('결제 금액 불일치');
+      if (payment.amount <= 0) {
+        throw new InternalServerErrorException('유효하지 않은 결제 금액');
       }
 
       switch (payment.status) {
         case 'paid':
-          // 결제 완료 처리
-          // // 티켓 상태 업데이트
-          // ticket.status = TicketStatus.USEABLE; // 티켓 상태 - 판매(거래) 완료 로 바꾸기 !!
-          // await this.ticketRepository.save(ticket);
-
           // 포인트 로그 기록
           const pointLog = this.pointLogRepository.create({
             userId: user.id,
             price: payment.amount,
-            description: `${ticket.title} 티켓 결제`,
-            type: PointType.WITHDRAW,
+            description: '포인트 충전',
+            type: PointType.DEPOSIT,
           });
           await this.pointLogRepository.save(pointLog);
 
-          // // 사용자 포인트 업데이트
-          // user.point -= payment.amount;
-          // await this.userRepository.save(user);
+          // 사용자 포인트 업데이트
+          user.point += payment.amount;
+          await this.userRepository.save(user);
 
           break;
         default:
@@ -144,14 +128,13 @@ export class PaymentsService {
         throw new NotFoundException('결제 정보를 찾을 수 없습니다.');
       }
 
-      // DB에서 결제되어야 하는 금액 조회
-      const ticket = await this.ticketRepository.findOne({ where: { id: +merchant_uid } });
+      const [type, userId] = merchant_uid.split(':');
 
-      if (!ticket) {
-        throw new NotFoundException('티켓 정보를 찾을 수 없습니다.');
+      if (type !== 'point') {
+        throw new BadRequestException('유효하지 않은 merchant_uid');
       }
 
-      const user = await this.userRepository.findOne({ where: { id: ticket.userId } });
+      const user = await this.userRepository.findOne({ where: { id: +userId } });
 
       if (!user) {
         throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
@@ -160,31 +143,33 @@ export class PaymentsService {
       console.log(`웹훅 처리 - imp_uid: ${imp_uid}, merchant_uid: ${merchant_uid}`);
       console.log('결제 데이터 : ', paymentData);
 
-      const amountToBePaid = ticket.price;
-      const { amount, status } = paymentData;
+      const amountToBePaid = paymentData.amount;
 
-      // 결제 금액 불일치 시 예외 처리
-      if (amount !== amountToBePaid) {
-        throw new InternalServerErrorException('위조된 결제 시도');
+      if (amountToBePaid <= 0) {
+        throw new InternalServerErrorException('유효하지 않은 결제 금액');
       }
 
-      switch (status) {
+      switch (paymentData.status) {
         case 'paid':
-          // 결제 완료
           // 포인트 로그 기록
           const pointLog = this.pointLogRepository.create({
             userId: user.id,
-            price: amount,
-            description: `${ticket.title} 티켓 결제`,
-            type: PointType.WITHDRAW,
+            price: amountToBePaid,
+            description: '포인트 충전',
+            type: PointType.DEPOSIT,
           });
           await this.pointLogRepository.save(pointLog);
+
+          // 사용자 포인트 업데이트
+          user.point += amountToBePaid;
+          await this.userRepository.save(user);
 
           break;
         default:
           throw new InternalServerErrorException('결제 상태 불일치');
       }
     } catch (err) {
+      console.log(err);
       throw new InternalServerErrorException('웹훅 처리 중 오류 발생');
     }
   }
