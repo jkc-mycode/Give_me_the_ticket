@@ -83,19 +83,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('formFileMultiple').addEventListener('change', (e) => {
     const images = e.target.files;
     imagePreview.innerHTML = ''; // 기존 미리보기를 초기화
-    modifiedImageUrls = [...imageUrl]; // 수정된 이미지 배열 초기화
+    // modifiedImageUrls = [...imageUrl]; // 수정된 이미지 배열 초기화
 
     // 기존 이미지 미리보기 생성
-    imageUrl.forEach((url) => {
+    modifiedImageUrls.forEach((url) => {
       imagePreview.appendChild(createImagePreview(url));
     });
 
     Array.from(images).forEach((image) => {
       const reader = new FileReader();
       reader.onload = async (e) => {
-        console.log(e.target);
         imagePreview.appendChild(createImagePreview(e.target.result));
-        modifiedImageUrls.push(e.target.result);
+        // modifiedImageUrls.push(e.target.result);
       };
 
       // 파일을 Data URL로 읽기
@@ -110,6 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 선택한 이미지 파일을 formData에 추가
     const fileInput = document.getElementById('formFileMultiple');
     const files = fileInput.files;
+
     for (let i = 0; i < files.length; i++) {
       formData.append('image', files[i]); // 'image'는 백엔드에서 기대하는 필드 이름입니다.
     }
@@ -124,8 +124,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           Authorization: `Bearer ${token}`,
         },
       });
-
+      console.log(modifiedImageUrls);
       console.log(response);
+      response.data.forEach((item) => {
+        modifiedImageUrls.push(item.imageUrl);
+      });
+      console.log(modifiedImageUrls);
     } catch (err) {
       console.log(err);
       // alert(err.response.data.message);
