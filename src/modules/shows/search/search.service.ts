@@ -159,7 +159,6 @@ export class SearchService {
         typeof result.body.hits.total === 'number'
           ? result.body.hits.total
           : result.body.hits.total.value;
-
       return { results, total: totalHits };
     } catch (error) {
       console.error('Search error:', error);

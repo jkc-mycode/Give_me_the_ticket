@@ -57,6 +57,7 @@ export class ShowsController {
    * */
   @Get()
   async getShowList(@Query() getShowListDto: GetShowListDto) {
+    console.log('Received getShowListDto:', getShowListDto);
     const result = await this.showsService.getShowList(getShowListDto);
     return {
       status: HttpStatus.OK,

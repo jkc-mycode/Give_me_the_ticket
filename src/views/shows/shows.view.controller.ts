@@ -1,18 +1,16 @@
-import { Controller, Get, Patch, Post, Render } from '@nestjs/common';
+import { Controller, Get, Render } from '@nestjs/common';
 
 @Controller('views/shows')
 export class ShowsViewsController {
-  //공연 생성 페이지
-  @Get()
-  @Render('shows/shows-create.view.ejs')
-
   //공연 목록 페이지
   @Get('/list')
-  @Render('shows/shows-lits.view.ejs')
+  @Render('shows/shows-list.view.ejs')
+  showList() {}
 
   //공연 검색 페이지
   @Get('/search')
-  @Render('shows/shows-lits.view.ejs')
+  @Render('shows/shows-list.view.ejs')
+  searchShows() {}
 
   //티켓 예매 페이지
   @Get('/:showId/ticket')
@@ -28,4 +26,9 @@ export class ShowsViewsController {
   @Get('/:showId')
   @Render('shows/shows-detail.view.ejs')
   showsDetail() {}
+
+  //공연 생성 페이지
+  @Get()
+  @Render('shows/shows-create.view.ejs')
+  createShow() {}
 }

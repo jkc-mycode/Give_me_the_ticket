@@ -23,7 +23,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 @ApiTags('사용자')
 @ApiBearerAuth()
 @UseGuards(RolesGuard)
-@Roles(Role.USER)
+@Roles(Role.USER, Role.ADMIN)
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}

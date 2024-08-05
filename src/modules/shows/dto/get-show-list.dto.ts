@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Min, MinLength } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, Max, Min, MinLength } from 'class-validator';
 import { SHOW_MESSAGES } from 'src/commons/constants/shows/show-messages.constant';
 import { MIN_SHOW_SEARCH_LENGTH } from 'src/commons/constants/shows/shows.constant';
 import { ShowCategory } from 'src/commons/types/shows/show-category.type';
@@ -29,7 +29,7 @@ export class GetShowListDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  page: number;
+  page: number = 1;
 
   /**
    * 페이지 당 항목 수
@@ -38,5 +38,6 @@ export class GetShowListDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  limit: number;
+  @Max(100)
+  limit: number = 10;
 }
