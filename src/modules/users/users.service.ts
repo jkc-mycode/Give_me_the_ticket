@@ -19,6 +19,7 @@ import { USER_BOOKMARK_MESSAGES } from 'src/commons/constants/users/user-bookmar
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
+import { format } from 'date-fns';
 
 @Injectable()
 export class UsersService {
@@ -45,7 +46,21 @@ export class UsersService {
     try {
       const pointLog = await this.pointLogRepository.find({ where: { userId: id } });
 
-      return pointLog;
+      // 날짜 형식 변환
+      const dateFormatPointLog = pointLog.map((log) => {
+        // KST로 변환 (+9시간)
+        const kstDate = new Date(log.createdAt);
+        kstDate.setHours(kstDate.getHours() + 9);
+
+        const dateFormat = format(kstDate, 'yyyy-MM-dd HH:mm:ss');
+
+        return {
+          ...log,
+          createdAt: dateFormat,
+        };
+      });
+
+      return dateFormatPointLog;
     } catch (err) {
       throw new InternalServerErrorException(USER_MESSAGES.USER.POINT.GET_LOG.FAILURE);
     }
@@ -103,6 +118,18 @@ export class UsersService {
       return trade;
     } catch (err) {
       throw new InternalServerErrorException(USER_MESSAGES.USER.TRADE.GET_LOG.FAILURE.FAIL);
+    }
+  }
+
+  // 사용자 프로필 조회
+  async getUserProfile(user: User) {
+    try {
+      const { email, nickname, profileImg, point } = user;
+      const profile = { email, nickname, profileImg, point };
+
+      return profile;
+    } catch (err) {
+      throw new InternalServerErrorException(USER_MESSAGES.USER.USERINFO.GET_PROFILE.FAILURE);
     }
   }
 
