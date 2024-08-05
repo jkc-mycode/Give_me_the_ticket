@@ -18,9 +18,11 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       const response = await axios.get(`/shows/${showId}`);
 
-      if (response.status === 200 && response.data && response.data.date) {
-        const data = response.data.date;
+      console.log('API 응답:', response); // 응답 데이터 확인
 
+      if (response.status === 200 && response.data && response.data.data) {
+        const data = response.data.data;
+        console.log(data);
         const showsContainer = document.querySelector('#shows');
         showsContainer.innerHTML = `
           <p><img src="${data.imageUrl}" alt="${data.title}" style="max-width: 100%; height: auto;" /></p>
@@ -32,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
           <p>위치: ${data.location}</p>
           <p>총 좌석: ${data.totalSeat}석</p>
         `;
-
+        console.log(showsContainer.innerHTML);
         if (data.schedules && data.schedules.length > 0) {
           scheduleDropdownMenu.innerHTML = data.schedules
             .map(
@@ -94,9 +96,12 @@ document.addEventListener('DOMContentLoaded', function () {
     window.location.href = `/views/shows/${showId}/ticket?selectedScheduleId=${window.selectedScheduleId}`;
   });
 
-  updateBtn.addEventListener('click', function (e) {
+  updateBtn.addEventListener('click', async function (e) {
     e.preventDefault();
-    window.location.href = `/views`;
+    const response = await axios.get(`/shows/${showId}`);
+    console.log(response.data);
+    window.sessionStorage.setItem('show', JSON.stringify(response.data.date));
+    window.location.href = `/views/shows/${showId}/edit`;
   });
 
   backBtn.addEventListener('click', function (e) {
@@ -229,6 +234,4 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
   });
-
-  // 사용자 권한 확인 함수 호출
 });
