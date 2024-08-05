@@ -46,7 +46,7 @@
             },
           });
 
-          console.log('User data: ', response.data);
+          console.log('User data: ', response.data.getUserProfile);
 
           if (response.status === 200) {
             return response.data.getUserProfile;
@@ -69,6 +69,8 @@
             return;
           }
 
+          console.log('User: ', user);
+
           const chargeAmount = document.getElementById('chargeAmount').value;
 
           if (!chargeAmount || chargeAmount <= 0) {
@@ -77,8 +79,9 @@
           }
 
           // 포인트 충전 설정
-          const merchantUid = "charge:" + user.id + ":" + new Date().getTime(); // 주문 '고유' 번호 (충전)
-          // const chargeAmount = user.point;
+          const merchantUid = `point:${new Date().getTime()}`; // 주문 '고유' 번호 (충전)
+          console.log(('Merchant UID: ', merchantUid));
+
           const userEmail = user.email;
           const userName = user.nickname;
 

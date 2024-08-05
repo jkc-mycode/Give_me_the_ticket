@@ -66,15 +66,18 @@ export class PaymentsService {
         throw new NotFoundException('결제 내역을 찾을 수 없습니다.');
       }
 
-      const [type, userId, timestamp] = merchant_uid.split(':');
+      const [type, id] = merchant_uid.split(':');
 
       if (type !== 'point') {
         throw new BadRequestException('유효하지 않은 merchant_uid');
       }
 
-      const user = await this.userRepository.findOne({ where: { id: +userId } });
+      console.log('ID: ', id);
+
+      const user = await this.userRepository.findOne({ where: { id: +id } });
 
       if (!user) {
+        console.log('조회된 사용자 없음. ID: ', id);
         throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
       }
 
