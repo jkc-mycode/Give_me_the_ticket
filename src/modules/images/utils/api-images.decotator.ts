@@ -17,6 +17,11 @@ export const ApiImages = (fieldName: string = 'image') => {
               format: 'binary',
             },
           },
+          maxImageLength: {
+            type: 'integer',
+            description: '최대 업로드 가능 이미지 수',
+            example: 5,
+          },
         },
       },
     })
