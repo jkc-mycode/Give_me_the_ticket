@@ -159,10 +159,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       console.log(response);
       alert(response.data.message);
+      window.location.href = `/views/shows/${showId}`;
     } catch (err) {
       console.log(err);
-      // alert(err.response.data.message);
-      // window.location.href = '/views';
+      alert(err.response.data.message);
+      window.location.href = '/views';
     }
   });
 });
