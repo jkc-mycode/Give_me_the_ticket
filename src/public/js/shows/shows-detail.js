@@ -94,9 +94,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   updateBtn.addEventListener('click', async function (e) {
     e.preventDefault();
-    const response = await axios.get(`/shows/${showId}`);
-    console.log(response.data);
-    window.sessionStorage.setItem('show', JSON.stringify(response.data.date));
     window.location.href = `/views/shows/${showId}/edit`;
   });
 
