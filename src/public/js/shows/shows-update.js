@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     // 공연 ID로 공연 데이터 가져오기
     const response = await axios.get(`/shows/${showId}`);
-    show = response.data.date;
+    show = response.data.data;
     console.log(show);
   } catch (err) {
     console.log(err);
@@ -118,18 +118,47 @@ document.addEventListener('DOMContentLoaded', async () => {
     formData.append('maxImageLength', 5);
 
     try {
-      const response = await axios.post('/images', formData, {
+      if (files.length > 0) {
+        // S3로 이미지 업로드해서 URL 받아오기
+        const newImageUrls = await axios.post('/images', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // 새로운 URL 추가
+        newImageUrls.data.forEach((item) => {
+          modifiedImageUrls.push(item.imageUrl);
+        });
+      }
+
+      console.log(modifiedImageUrls);
+
+      console.log();
+
+      // 공연 수정 DTO
+      const updateShowDto = {
+        title: titleInput.value,
+        content: contentInput.value,
+        category: categoryInput.innerHTML,
+        runtime: runtimeInput.value,
+        location: locationInput.value,
+        price: priceInput.value,
+        imageUrl: modifiedImageUrls,
+      };
+
+      console.log(updateShowDto);
+
+      // 공연 수정 API 호출
+      const response = await axios.patch(`/shows/${showId}`, updateShowDto, {
         headers: {
-          'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(modifiedImageUrls);
+
       console.log(response);
-      response.data.forEach((item) => {
-        modifiedImageUrls.push(item.imageUrl);
-      });
-      console.log(modifiedImageUrls);
+      alert(response.data.message);
     } catch (err) {
       console.log(err);
       // alert(err.response.data.message);
