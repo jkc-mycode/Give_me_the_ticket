@@ -47,7 +47,7 @@ export class ShowsController {
     return {
       status: HttpStatus.CREATED,
       message: SHOW_MESSAGES.CREATE.SUCCEED,
-      date: show,
+      data: show,
     };
   }
 
@@ -61,7 +61,7 @@ export class ShowsController {
     return {
       status: HttpStatus.OK,
       message: SHOW_MESSAGES.GET_LIST.SUCCEED,
-      date: result.results,
+      data: result.results,
       total: result.total,
       page: result.page,
       totalPages: result.totalPages,
@@ -79,7 +79,7 @@ export class ShowsController {
     return {
       status: HttpStatus.OK,
       message: SHOW_MESSAGES.GET.SUCCEED,
-      date: show,
+      data: show,
     };
   }
 
