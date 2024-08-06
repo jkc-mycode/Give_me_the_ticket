@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   try {
     // 공연 ID로 공연 데이터 가져오기
     const response = await axios.get(`/shows/${showId}`);
-    show = response.data.date;
+    show = response.data.data;
     console.log(show);
   } catch (err) {
     console.log(err);
@@ -83,19 +83,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('formFileMultiple').addEventListener('change', (e) => {
     const images = e.target.files;
     imagePreview.innerHTML = ''; // 기존 미리보기를 초기화
-    modifiedImageUrls = [...imageUrl]; // 수정된 이미지 배열 초기화
+    // modifiedImageUrls = [...imageUrl]; // 수정된 이미지 배열 초기화
 
     // 기존 이미지 미리보기 생성
-    imageUrl.forEach((url) => {
+    modifiedImageUrls.forEach((url) => {
       imagePreview.appendChild(createImagePreview(url));
     });
 
     Array.from(images).forEach((image) => {
       const reader = new FileReader();
       reader.onload = async (e) => {
-        console.log(e.target);
         imagePreview.appendChild(createImagePreview(e.target.result));
-        modifiedImageUrls.push(e.target.result);
+        // modifiedImageUrls.push(e.target.result);
       };
 
       // 파일을 Data URL로 읽기
@@ -110,6 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 선택한 이미지 파일을 formData에 추가
     const fileInput = document.getElementById('formFileMultiple');
     const files = fileInput.files;
+
     for (let i = 0; i < files.length; i++) {
       formData.append('image', files[i]); // 'image'는 백엔드에서 기대하는 필드 이름입니다.
     }
@@ -118,18 +118,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     formData.append('maxImageLength', 5);
 
     try {
-      const response = await axios.post('/images', formData, {
+      if (files.length > 0) {
+        // S3로 이미지 업로드해서 URL 받아오기
+        const newImageUrls = await axios.post('/images', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // 새로운 URL 추가
+        newImageUrls.data.forEach((item) => {
+          modifiedImageUrls.push(item.imageUrl);
+        });
+      }
+
+      // 공연 수정 DTO
+      const updateShowDto = {
+        title: titleInput.value,
+        content: contentInput.value,
+        category: categoryInput.innerHTML,
+        runtime: runtimeInput.value,
+        location: locationInput.value,
+        price: priceInput.value,
+        imageUrl: modifiedImageUrls,
+      };
+
+      // 공연 수정 API 호출
+      const response = await axios.patch(`/shows/${showId}`, updateShowDto, {
         headers: {
-          'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
       });
 
       console.log(response);
+      alert(response.data.message);
+      window.location.href = `/views/shows/${showId}`;
     } catch (err) {
       console.log(err);
-      // alert(err.response.data.message);
-      // window.location.href = '/views';
+      alert(err.response.data.message);
+      window.location.href = '/views';
     }
   });
 });

@@ -18,11 +18,9 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       const response = await axios.get(`/shows/${showId}`);
 
-      console.log('API 응답:', response); // 응답 데이터 확인
-
       if (response.status === 200 && response.data && response.data.data) {
         const data = response.data.data;
-        console.log(data);
+
         const showsContainer = document.querySelector('#shows');
         showsContainer.innerHTML = `
           <p><img src="${data.imageUrl}" alt="${data.title}" style="max-width: 100%; height: auto;" /></p>
@@ -34,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
           <p>위치: ${data.location}</p>
           <p>총 좌석: ${data.totalSeat}석</p>
         `;
-        console.log(showsContainer.innerHTML);
+
         if (data.schedules && data.schedules.length > 0) {
           scheduleDropdownMenu.innerHTML = data.schedules
             .map(
@@ -181,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         const userRole = userResponse.data.role; // 사용자 역할 정보
-        console.log(userResponse.data);
+
         if (userRole === userResponse.data.role.ADMIN) {
           // 관리자일 경우 버튼 표시
           deleteBtn.style.display = 'block';
@@ -223,7 +221,6 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     } catch (err) {
       if (err.response && err.response.data) {
-        console.log(err.response.data);
         alert(err.response.data.message);
       } else {
         console.error('Error:', err);
