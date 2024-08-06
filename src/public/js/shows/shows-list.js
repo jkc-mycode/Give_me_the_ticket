@@ -9,15 +9,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       const { data } = await axios.get(`/shows?page=${page}&limit=${limit}`);
       return data;
     } catch (error) {
-      console.error('Failed to fetch shows:', error);
-      alert('Failed to fetch shows.');
+      console.error('공연 data 가져오기 오류:', error);
+      alert('공연 data 가져오기 실패');
       return null;
     }
   }
 
   function renderShows(shows) {
     if (!shows || shows.length === 0) {
-      showListContainer.innerHTML = '<p>No shows available.</p>';
+      showListContainer.innerHTML = '<p>공연 목록 없음</p>';
       return;
     }
 
@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <img src="${imageUrl}" class="card-img-top" alt="${show.title}">
             <div class="card-body">
               <h5 class="card-title">${show.title}</h5>
-              <p class="card-text">Location: ${show.location}</p>
+              <p class="card-text">위치: ${show.location}</p>
               <a href="/views/shows/${show.id}" class="btn btn-primary">View Details</a>
             </div>
           </div>
