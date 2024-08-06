@@ -1,4 +1,8 @@
-import { Body, Controller, HttpStatus, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { RolesGuard } from 'src/modules/auth/utils/roles.guard';
+import { Roles } from 'src/modules/auth/utils/roles.decorator';
+import { Role } from 'src/commons/types/users/user-role.type';
+
 import { PaymentsService } from './payments.service';
 import { CompletePaymentDto } from './dto/complete-payment.dto';
 
@@ -11,12 +15,16 @@ export class PaymentsController {
    * @param completePaymentDto
    * @returns
    */
+  @UseGuards(RolesGuard)
+  @Roles(Role.USER)
   @Post('/complete')
-  async completePayment(@Body() completePaymentDto: CompletePaymentDto) {
+  async completePayment(@Req() req: any, @Body() completePaymentDto: CompletePaymentDto) {
     console.log('결제 결과 검증 : ', completePaymentDto);
     const completePayment = await this.paymentsService.verifyPayment(
+      req.user,
       completePaymentDto.imp_uid,
-      completePaymentDto.merchant_uid
+      completePaymentDto.merchant_uid,
+      completePaymentDto.amount
     );
 
     return {

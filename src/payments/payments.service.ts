@@ -48,10 +48,10 @@ export class PaymentsService {
   }
 
   // portone 결제 내역 검증
-  async verifyPayment(imp_uid: string, merchant_uid: string) {
+  async verifyPayment(user: User, imp_uid: string, merchant_uid: string, amount: number) {
     try {
       const token = await this.getToken();
-      console.log(token);
+      console.log('portone token: ', token);
 
       // portone 서버에서 결제 정보 가져오기
       const response = await lastValueFrom(
@@ -61,29 +61,23 @@ export class PaymentsService {
       );
 
       const payment = response.data.response;
+      console.log('portone 결제 정보: ', payment);
 
       if (!payment) {
         throw new NotFoundException('결제 내역을 찾을 수 없습니다.');
       }
 
-      const [type, id] = merchant_uid.split(':');
+      const [type, id] = merchant_uid.split('-');
 
-      if (type !== 'point') {
+      if (type !== 'charge') {
         throw new BadRequestException('유효하지 않은 merchant_uid');
       }
 
-      console.log('ID: ', id);
-
-      const user = await this.userRepository.findOne({ where: { id: +id } });
-
-      if (!user) {
-        console.log('조회된 사용자 없음. ID: ', id);
-        throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
-      }
-
       console.log(`결제 검증 - imp_uid: ${imp_uid}, merchant_uid: ${merchant_uid}`);
-      console.log('결제 데이터 : ', payment);
-      console.log('사용자 : ', user);
+
+      if (payment.amount !== amount) {
+        throw new InternalServerErrorException('결제 금액 불일치');
+      }
 
       if (payment.amount <= 0) {
         throw new InternalServerErrorException('유효하지 않은 결제 금액');
@@ -109,7 +103,7 @@ export class PaymentsService {
           throw new InternalServerErrorException('결제 상태 불일치');
       }
     } catch (err) {
-      console.log(err);
+      console.log('결제 검증 실패 에러: ', err);
       throw new InternalServerErrorException('결제 결과 검증 실패');
     }
   }
@@ -131,13 +125,13 @@ export class PaymentsService {
         throw new NotFoundException('결제 정보를 찾을 수 없습니다.');
       }
 
-      const [type, userId, timestamp] = merchant_uid.split(':');
+      const [type, id] = merchant_uid.split('-');
 
-      if (type !== 'point') {
+      if (type !== 'charge') {
         throw new BadRequestException('유효하지 않은 merchant_uid');
       }
 
-      const user = await this.userRepository.findOne({ where: { id: +userId } });
+      const user = await this.userRepository.findOne({ where: { id: +id } });
 
       if (!user) {
         throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');

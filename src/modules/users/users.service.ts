@@ -182,6 +182,15 @@ export class UsersService {
   async chargePoint(id: number, chargePointDto: ChargePointDto) {
     const { amount } = chargePointDto;
 
+    // // 중복 요청 방지
+    // const existedCharge = await this.dataSource
+    //   .getRepository(PointLog)
+    //   .findOne({ where: { userId: id, price: amount, createdAt: new Date() } });
+
+    // if (existedCharge) {
+    //   throw new ConflictException('포인트 충전이 이미 완료되었습니다.');
+    // }
+
     // transaction 시작
     const queryRunner = this.dataSource.createQueryRunner();
 
