@@ -113,7 +113,10 @@ export class UsersService {
 
       // 거래 ID 추출하여 거래 데이터 가져오기
       const tradeId = tradeLog.map((log) => log.tradeId);
-      const trade = await this.tradeRepository.find({ where: { id: In(tradeId) } });
+      const trade = await this.tradeRepository.find({
+        where: { id: In(tradeId) },
+        relations: { ticket: true },
+      });
 
       return trade;
     } catch (err) {
