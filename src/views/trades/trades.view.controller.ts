@@ -13,4 +13,8 @@ export class TradeViewsController {
   @Get('/:tradeid')
   @Render('trades/detail.view.ejs')
   getTradeDetail() {}
+
+  @Get('/:tradeId/edit')
+  @Render('trades/trade-update.view.ejs')
+  updateTrade() {}
 }
