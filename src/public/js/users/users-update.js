@@ -10,10 +10,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const nickname = document.getElementById('nickname').value;
     const profileImg = document.getElementById('profileImg').files[0];
 
-    console.log('Current Password: ', currentPassword);
-    console.log('Nickname: ', nickname);
-    console.log('Profile Image: ', profileImg);
-
     // 현재 비밀번호 확인
     if (!currentPassword) {
       alert('현재 비밀번호를 입력해 주세요.');
@@ -27,6 +23,9 @@ document.addEventListener('DOMContentLoaded', function () {
       const formData = new FormData();
       formData.append('image', profileImg);
 
+      // 최대 이미지 수를 추가 (필요에 따라 수정)
+      formData.append('maxImageLength', 1);
+
       try {
         // S3로 이미지 업로드해서 URL 받아오기
         const response = await axios.post('/images', formData, {
@@ -36,7 +35,7 @@ document.addEventListener('DOMContentLoaded', function () {
           },
         });
 
-        profileImgUrl = response.data.imageUrl;
+        profileImgUrl = response.data[0].imageUrl;
       } catch (err) {
         console.log('이미지 업로드 실패: ', err.response.data);
         alert('이미지 업로드에 실패했습니다.');
@@ -59,7 +58,6 @@ document.addEventListener('DOMContentLoaded', function () {
         },
       });
 
-      console.log('Response data: ', response.data);
       alert('회원 정보 수정이 완료되었습니다.');
 
       // 수정 후 마이 페이지로 이동
