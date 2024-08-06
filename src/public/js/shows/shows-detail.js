@@ -22,8 +22,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const data = response.data.data;
 
         const showsContainer = document.querySelector('#shows');
+
+        const imageHtml = data.imageUrl
+          .map(
+            (imageUrl) => `
+  <p><img src="${imageUrl}" alt="${data.title}" style="max-width: 100%; height: auto;" /></p>
+`
+          )
+          .join('');
+
         showsContainer.innerHTML = `
-          <p><img src="${data.imageUrl}" alt="${data.title}" style="max-width: 100%; height: auto;" /></p>
+          ${imageHtml}
           <h2>${data.title}</h2>
           <p>카테고리: ${data.category}</p>
           <p>가격: ${data.price}원</p>
