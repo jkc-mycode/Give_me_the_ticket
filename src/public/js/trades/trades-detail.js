@@ -1,5 +1,4 @@
-document.addEventListener('DOMContentLoaded', function () {
-  const tradeBtn = document.querySelector();
+document.addEventListener('DOMContentLoaded', async () => {
   const backBtn = document.querySelector('.back__btn');
   const token = window.localStorage.getItem('accessToken');
 
@@ -14,5 +13,4 @@ document.addEventListener('DOMContentLoaded', function () {
     e.preventDefault();
     window.location.href = `/views`;
   });
-  const tradeList = axios.get(`trades/`);
 });
