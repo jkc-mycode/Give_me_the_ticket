@@ -11,6 +11,7 @@ export const MESSAGES = {
       TRADE: '존재하지 않는 거래입니다.',
       SHOW: '존재하지 않는 공연입니다.',
       TICKET: '존재하지 않는 티켓입니다.',
+      IMAGES: `이미지가 존재하지 않습니다`,
       SCHEDULE: '존재하지 않는 공연 일정입니다.',
       BUYER: '구매자가 존재하지 않습니다',
       SELLER: '판매자가 존재하지 않습니다',

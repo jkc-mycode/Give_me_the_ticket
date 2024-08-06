@@ -34,9 +34,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tradeListContainer = document.getElementById('tradeList');
     tradeListContainer.innerHTML = '';
     trades.forEach((trade) => {
-      const tradItemHTML = `<div class="col">
+      const tradItemHTML = `<a href="${trade.id}"><div class="col">
           <div class="card h-100">
-            <img src="..." class="card-img-top" alt="..." />
+            <img src=${trade.imageurl} class="card-img-top" alt="이미지 존재하지 않음" />
             <div class="card-body">
               <h5 class="card-title">${trade.title}</h5>
               <p class="card-text">
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               <small class="text-body-secondary">만료기한:${trade.closedAt}</small>
             </div>
           </div>
-        </div>`;
+        </div></a>`;
       tradeListContainer.innerHTML += tradItemHTML;
     });
   }
