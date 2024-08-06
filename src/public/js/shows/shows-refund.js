@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return pathSegments[pathSegments.length - 1]; // Adjust if needed
   }
 
-  // Initialize global variables
+  // 전역 변수 설정
   const showId = getShowIdFromPath();
   const ticketId = getTicketIdFromPath();
 
@@ -37,8 +37,6 @@ document.addEventListener('DOMContentLoaded', function () {
       if (response.status === 200) {
         alert('환불이 완료되었습니다');
         window.location.href = '/views';
-      } else {
-        alert('예매에 실패하였습니다. 응답 상태 코드: ' + response.status);
       }
     } catch (err) {
       if (err.response && err.response.data) {
