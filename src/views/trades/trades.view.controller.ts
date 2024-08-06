@@ -9,4 +9,8 @@ export class TradeViewsController {
   @Get('/list')
   @Render('trades/list.view.ejs')
   getTradeList() {}
+
+  @Get()
+  @Render('trades/trade-create.view.ejs')
+  createTrade() {}
 }
