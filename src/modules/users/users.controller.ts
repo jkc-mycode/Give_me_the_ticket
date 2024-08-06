@@ -22,8 +22,6 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('사용자')
 @ApiBearerAuth()
-@UseGuards(RolesGuard)
-@Roles(Role.USER, Role.ADMIN)
 @Controller('users')
 export class UsersController {
   constructor(private readonly userService: UsersService) {}
@@ -33,6 +31,8 @@ export class UsersController {
    * @param req
    * @returns
    */
+  @UseGuards(RolesGuard)
+  @Roles(Role.USER)
   @Get('/me/point')
   async getPointLog(@Req() req: any) {
     const getPointLog = await this.userService.getPointLog(req.user.id);
@@ -49,6 +49,8 @@ export class UsersController {
    * @param req
    * @returns
    */
+  @UseGuards(RolesGuard)
+  @Roles(Role.USER)
   @Get('/me/ticket')
   async getTicketList(@Req() req: any) {
     const getTicketList = await this.userService.getTicketList(req.user.id);
@@ -65,6 +67,8 @@ export class UsersController {
    * @param req
    * @returns
    */
+  @UseGuards(RolesGuard)
+  @Roles(Role.USER)
   @Get('/me/bookmark')
   async getBookmarkList(@Req() req: any) {
     const getBookmarkList = await this.userService.getBookmarkList(req.user.id);
@@ -81,6 +85,8 @@ export class UsersController {
    * @param req
    * @returns
    */
+  @UseGuards(RolesGuard)
+  @Roles(Role.USER)
   @Get('/me/trade')
   async getTradeLog(@Req() req: any) {
     const getTradeLog = await this.userService.getTradeLog(req.user.id);
@@ -97,6 +103,8 @@ export class UsersController {
    * @param req
    * @returns
    */
+  @UseGuards(RolesGuard)
+  @Roles(Role.USER, Role.ADMIN)
   @Get('/me')
   async getUserProfile(@Req() req: any) {
     const getUserProfile = await this.userService.getUserProfile(req.user);
@@ -114,6 +122,8 @@ export class UsersController {
    * @param userUpdateDto
    * @returns
    */
+  @UseGuards(RolesGuard)
+  @Roles(Role.USER)
   @Patch('/me')
   async updateUser(@Req() req: any, @Body() userUpdateDto: UserUpdateDto) {
     const updateUser = await this.userService.updateUser(req.user.id, userUpdateDto);
@@ -131,6 +141,8 @@ export class UsersController {
    * @param chargePointDto
    * @returns
    */
+  @UseGuards(RolesGuard)
+  @Roles(Role.USER)
   @Post('/me/point')
   async chargePoint(@Req() req: any, @Body() chargePointDto: ChargePointDto) {
     const updateUserPoint = await this.userService.chargePoint(req.user.id, chargePointDto);
@@ -147,6 +159,8 @@ export class UsersController {
    * @param req
    * @returns
    */
+  @UseGuards(RolesGuard)
+  @Roles(Role.USER)
   @Delete('/me')
   async deleteUser(@Req() req: any) {
     const deleteUser = await this.userService.deleteUser(req.user.id);
