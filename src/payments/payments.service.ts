@@ -109,65 +109,65 @@ export class PaymentsService {
   }
 
   // 웹훅 요청 검증
-  async webhook(imp_uid: string, merchant_uid: string) {
-    try {
-      const token = await this.getToken();
+  // async webhook(imp_uid: string, merchant_uid: string) {
+  //   try {
+  //     const token = await this.getToken();
 
-      const response = await lastValueFrom(
-        this.httpService.get(`https://api.iamport.kr/payments/${imp_uid}`, {
-          headers: { Authorization: token },
-        })
-      );
+  //     const response = await lastValueFrom(
+  //       this.httpService.get(`https://api.iamport.kr/payments/${imp_uid}`, {
+  //         headers: { Authorization: token },
+  //       })
+  //     );
 
-      const paymentData = response.data.response;
+  //     const paymentData = response.data.response;
 
-      if (!paymentData) {
-        throw new NotFoundException('결제 정보를 찾을 수 없습니다.');
-      }
+  //     if (!paymentData) {
+  //       throw new NotFoundException('결제 정보를 찾을 수 없습니다.');
+  //     }
 
-      const [type, id] = merchant_uid.split('-');
+  //     const [type, id] = merchant_uid.split('-');
 
-      if (type !== 'charge') {
-        throw new BadRequestException('유효하지 않은 merchant_uid');
-      }
+  //     if (type !== 'charge') {
+  //       throw new BadRequestException('유효하지 않은 merchant_uid');
+  //     }
 
-      const user = await this.userRepository.findOne({ where: { id: +id } });
+  //     const user = await this.userRepository.findOne({ where: { id: +id } });
 
-      if (!user) {
-        throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
-      }
+  //     if (!user) {
+  //       throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
+  //     }
 
-      console.log(`웹훅 처리 - imp_uid: ${imp_uid}, merchant_uid: ${merchant_uid}`);
-      console.log('결제 데이터 : ', paymentData);
+  //     console.log(`웹훅 처리 - imp_uid: ${imp_uid}, merchant_uid: ${merchant_uid}`);
+  //     console.log('결제 데이터 : ', paymentData);
 
-      const amountToBePaid = paymentData.amount;
+  //     const amountToBePaid = paymentData.amount;
 
-      if (amountToBePaid <= 0) {
-        throw new InternalServerErrorException('유효하지 않은 결제 금액');
-      }
+  //     if (amountToBePaid <= 0) {
+  //       throw new InternalServerErrorException('유효하지 않은 결제 금액');
+  //     }
 
-      switch (paymentData.status) {
-        case 'paid':
-          // 포인트 로그 기록
-          const pointLog = this.pointLogRepository.create({
-            userId: user.id,
-            price: amountToBePaid,
-            description: '포인트 충전',
-            type: PointType.DEPOSIT,
-          });
-          await this.pointLogRepository.save(pointLog);
+  //     switch (paymentData.status) {
+  //       case 'paid':
+  //         // 포인트 로그 기록
+  //         const pointLog = this.pointLogRepository.create({
+  //           userId: user.id,
+  //           price: amountToBePaid,
+  //           description: '포인트 충전',
+  //           type: PointType.DEPOSIT,
+  //         });
+  //         await this.pointLogRepository.save(pointLog);
 
-          // 사용자 포인트 업데이트
-          user.point += amountToBePaid;
-          await this.userRepository.save(user);
+  //         // 사용자 포인트 업데이트
+  //         user.point += amountToBePaid;
+  //         await this.userRepository.save(user);
 
-          break;
-        default:
-          throw new InternalServerErrorException('결제 상태 불일치');
-      }
-    } catch (err) {
-      console.log(err);
-      throw new InternalServerErrorException('웹훅 처리 중 오류 발생');
-    }
-  }
+  //         break;
+  //       default:
+  //         throw new InternalServerErrorException('결제 상태 불일치');
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //     throw new InternalServerErrorException('웹훅 처리 중 오류 발생');
+  //   }
+  // }
 }

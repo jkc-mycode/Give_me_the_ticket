@@ -34,22 +34,22 @@ export class PaymentsController {
     };
   }
 
-  /**
-   * 웹훅 요청 검증
-   * @param req
-   * @param res
-   */
-  @Post('/webhook')
-  async webhook(@Req() req: any, @Res() res: any) {
-    try {
-      const { imp_uid, merchant_uid } = req.body;
-      console.log('웹훅 요청 : ', req.body);
+  // /**
+  //  * 웹훅 요청 검증
+  //  * @param req
+  //  * @param res
+  //  */
+  // @Post('/webhook')
+  // async webhook(@Req() req: any, @Res() res: any) {
+  //   try {
+  //     const { imp_uid, merchant_uid } = req.body;
+  //     console.log('웹훅 요청 : ', req.body);
 
-      await this.paymentsService.webhook(imp_uid, merchant_uid);
+  //     await this.paymentsService.webhook(imp_uid, merchant_uid);
 
-      res.status(HttpStatus.OK).send({ message: '웹훅 처리 완료' });
-    } catch (err) {
-      res.status(HttpStatus.BAD_REQUEST).send(err);
-    }
-  }
+  //     res.status(HttpStatus.OK).send({ message: '웹훅 처리 완료' });
+  //   } catch (err) {
+  //     res.status(HttpStatus.BAD_REQUEST).send(err);
+  //   }
+  // }
 }
