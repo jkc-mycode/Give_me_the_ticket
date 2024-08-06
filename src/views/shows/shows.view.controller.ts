@@ -22,6 +22,11 @@ export class ShowsViewsController {
   @Render('shows/shows-ticket.view.ejs')
   createTicket() {}
 
+  // 공연 수정 페이지
+  @Get('/:showId/edit')
+  @Render('shows/show-update.view.ejs')
+  updateShow() {}
+
   //티켓 환불 페이지
   @Get('/:showId/ticket/:ticketId')
   @Render('shows/shows-refund.view.ejs')
