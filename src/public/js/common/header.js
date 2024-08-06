@@ -55,6 +55,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+// 검색 버튼 클릭 이벤트 핸들러
+headerSearchButton.addEventListener('click', () => {
+  const search = headerSearchInput.value;
+  window.location.href = `/views/shows/list?search=${search}`;
+});
+
+// 엔터 키 이벤트 핸들러
+headerSearchForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const search = headerSearchInput.value;
+  window.location.href = `/views/shows/list?search=${search}`;
+});
+
 // 브라우저 닫을 때 토큰 초기화
 document.addEventListener('unload', () => {
   window.localStorage.clear();

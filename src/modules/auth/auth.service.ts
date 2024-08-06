@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  HttpStatus,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -12,6 +13,8 @@ import { Repository } from 'typeorm';
 import { compare, hash } from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import _ from 'lodash';
+import { AUTH_MESSAGE } from 'src/commons/constants/auth/auth-message.constant';
+import { HASH_SALT, REFRESH_TOKEN } from 'src/commons/constants/auth/auth.constant';
 
 @Injectable()
 export class AuthService {
@@ -26,7 +29,7 @@ export class AuthService {
 
     // 비밀번호와 비밀번호 확인 일치 체크
     if (password !== passwordCheck) {
-      throw new BadRequestException('비밀번호와 비밀번호 확인이 일치하지 않습니다.');
+      throw new BadRequestException(AUTH_MESSAGE.SIGN_UP.PASSWORD_CHECK);
     }
 
     // 이메일 중복 체크
@@ -34,7 +37,7 @@ export class AuthService {
       where: { email },
     });
     if (existedUser) {
-      throw new ConflictException('중복된 이메일입니다.');
+      throw new ConflictException(AUTH_MESSAGE.SIGN_UP.EMAIL);
     }
 
     // 닉네임 중복 체크
@@ -42,11 +45,11 @@ export class AuthService {
       where: { nickname },
     });
     if (existedUser) {
-      throw new ConflictException('중복된 닉네임입니다.');
+      throw new ConflictException(AUTH_MESSAGE.SIGN_UP.NICKNAME);
     }
 
     // 비밀번호 암호화
-    const hashedPassword = await hash(password, 10);
+    const hashedPassword = await hash(password, HASH_SALT);
 
     const user = await this.usersRepository.save({
       email,
@@ -75,13 +78,13 @@ export class AuthService {
     });
 
     if (!user || user.deletedAt) {
-      throw new NotFoundException('일치하는 사용자가 없습니다.');
+      throw new NotFoundException(AUTH_MESSAGE.VALIDATE_USER.NOT_FOUND);
     }
 
     // 암호화된 비밀번호 검사
     const isComparePassword = await compare(password, user.password);
     if (!isComparePassword) {
-      throw new UnauthorizedException('인증된 사용자가 아닙니다.');
+      throw new UnauthorizedException(AUTH_MESSAGE.VALIDATE_USER.UNAUTHORIZED);
     }
 
     return user;
@@ -93,7 +96,7 @@ export class AuthService {
     const accessToken = this.jwtService.sign({ id: user.id });
     const refreshToken = this.jwtService.sign(
       { id: user.id },
-      { secret: process.env.REFRESH_SECRET_KEY, expiresIn: '7d' }
+      { secret: process.env.REFRESH_SECRET_KEY, expiresIn: REFRESH_TOKEN.EXPIRES_IN }
     );
 
     // 리프레시 토큰 저장
@@ -113,14 +116,14 @@ export class AuthService {
     const user = await this.usersRepository.findOne({ where: { id: userId } });
 
     if (user.refreshToken === '') {
-      throw new BadRequestException('이미 로그아웃 되었습니다.');
+      throw new BadRequestException(AUTH_MESSAGE.SIGN_OUT.NO_TOKEN);
     }
 
     // 로그아웃 (토큰 삭제)
     user.refreshToken = null;
     await this.usersRepository.save(user);
 
-    return { status: 201, message: '로그아웃에 성공했습니다.' };
+    return { status: HttpStatus.CREATED, message: AUTH_MESSAGE.SIGN_OUT.SUCCEED };
   }
 
   // 토큰 재발급

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Page</title>
+
+  <!-- jQuery -->
+  <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+  <!-- iamport.payment.js -->
+  <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
+
+  <!-- axios -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+  <!-- 부트스트랩 CSS CDN-->
+  <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous"> -->
+
+  <!-- 부트스트랩 JS CDN -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+    integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
+    integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
+    crossorigin="anonymous"></script> -->
+
+  <!-- 결제 검증 페이지에 필요한 CSS 및 JS -->
+  <!-- <link rel="stylesheet" href="/css/payments/payments.css">
+  <script type="module" src="/js/payments/payments.js"></script> -->
+
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function () {
+      // 고객사 식별 (SDK 초기화)
+      const IMP = window.IMP;
+      IMP.init("imp72580830");
+
+      async function getUser() {
+        try {
+          // 백엔드 사용자 정보 조회 API 호출
+          const token = window.localStorage.getItem('accessToken');
+          console.log('accessToken: ', token);
+
+          const response = await axios.get('/users/me', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          console.log('User data: ', response.data.getUserProfile);
+
+          if (response.status === 200) {
+            return response.data.getUserProfile;
+          } else {
+            throw new Error('user 정보 fetch 실패');
+          }
+        } catch (err) {
+          console.log(err);
+          alert('사용자 정보를 가져오는 데 실패했습니다.');
+        }
+      }
+
+      async function doPayment() {
+        try {
+          // 사용자 정보 가져오기
+          const user = await getUser();
+
+          if (!user) {
+            alert('사용자 정보를 가져오는 데 실패했습니다.');
+            return;
+          }
+
+          console.log('User: ', user);
+
+          const chargeAmount = Number(document.getElementById('chargeAmount').value);
+
+          if (!chargeAmount || chargeAmount <= 0) {
+            alert('충전할 금액을 입력해 주세요.');
+            return;
+          }
+
+          // 포인트 충전 설정
+          const merchantUid = `charge-${new Date().getTime()}`; // 주문 '고유' 번호 (충전)
+          console.log('merchant_uid: ', merchantUid);
+
+          const userEmail = user.email;
+          const userName = user.nickname;
+
+          // 결제창 호출
+          IMP.request_pay({
+            pg: "uplus",
+            pay_method: "card",
+            merchant_uid: merchantUid,
+            name: "Point Charge",
+            amount: chargeAmount,
+            buyer_email: userEmail,
+            buyer_name: userName,
+            // notice_url: "http://localhost:3000/payments/webhook" // Webhook 수신 URL 설정
+          }, async function (response) { // 결제 후 호출되는 callback 로직
+            console.log('결제 응답: ', response);
+            if (response.success) { // 결제 성공
+              alert('결제 성공 : ' + response.paid_amount);
+
+              // 결제 결과 처리
+              try {
+                const token = window.localStorage.getItem('accessToken');
+
+                if (!token) {
+                  throw new Error('토큰을 가져올 수 없습니다.');
+                }
+
+                // 결제 검증
+                // 고객사 서버에서 /payment/complete 엔드포인트를 구현해야 함
+                const notified = await axios.post('/payments/complete', {
+                  imp_uid: response.imp_uid, // portone 결제 id
+                  merchant_uid: response.merchant_uid, // 고객사 주문 '고유' 번호
+                  amount: response.paid_amount
+                }, {
+                  headers: {
+                    Authorization: `Bearer ${token}`
+                  },
+                });
+
+                console.log('결제 검증 response: ', notified.data);
+
+                if (notified.data.statusCode === 200) {
+                  alert('결제 결과 검증 완료');
+                } else {
+                  throw new Error(notified.data.message || '결제 검증 중 오류 발생')
+                }
+              } catch (err) {
+                console.log('오류 발생: ', err);
+                alert('오류 발생 : ' + err.message);
+              }
+            } else { // 결제 실패
+              alert('결제 실패 : ' + response.error_msg);
+            }
+          });
+        } catch (err) {
+          console.log('사용자 정보를 가져오는 데 실패했습니다: ', err);
+          alert('사용자 정보를 가져오는 데 실패했습니다 : ' + err.message);
+        }
+      }
+
+      document.querySelector('button').addEventListener('click', doPayment);
+    });
+  </script>
+</head>
+
+<body>
+  <div>
+    <label for="chargeAmount">충전할 포인트 금액 : </label>
+    <input type="number" id="chargeAmount" min="1" required>
+  </div>
+  <!-- 결제하기 버튼 -->
+  <button>결제하기</button>
+</body>
+
+</html>

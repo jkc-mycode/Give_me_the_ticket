@@ -77,17 +77,21 @@ export class SearchService {
         relations: ['images'],
       });
 
-      const imageUrl =
-        showWithImages.images.length > 0
-          ? showWithImages.images.map(({ imageUrl }) => imageUrl)
-          : ['default-image-url.jpg'];
-
       await this.eService.index({
         index: this.indexName,
         id: showWithImages.id.toString(),
         body: {
-          ...showWithImages,
-          imageUrl,
+          id: showWithImages.id,
+          userId: showWithImages.userId,
+          title: showWithImages.title,
+          content: showWithImages.content,
+          category: showWithImages.category,
+          runtime: showWithImages.runtime,
+          location: showWithImages.location,
+          price: showWithImages.price,
+          totalSeat: showWithImages.totalSeat,
+          createdAt: showWithImages.createdAt,
+          updatedAt: showWithImages.updatedAt,
         },
       });
     } catch (error) {
