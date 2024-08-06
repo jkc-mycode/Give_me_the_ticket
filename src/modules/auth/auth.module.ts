@@ -11,19 +11,20 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/users/user.entity';
 import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 import { KakaoStrategy } from './strategies/kakao.strategy';
+import { ACCESS_TOKEN, AUTH_ENV, AUTH_STRATEGY } from 'src/commons/constants/auth/auth.constant';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
     PassportModule.register({
-      defaultStrategy: 'jwt',
+      defaultStrategy: AUTH_STRATEGY.DEFAULT_STRATEGY,
       session: false,
     }),
 
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET_KEY'),
-        signOptions: { expiresIn: '12h' },
+        secret: config.get<string>(AUTH_ENV.JWT_SECRET_KEY),
+        signOptions: { expiresIn: ACCESS_TOKEN.EXPIRES_IN },
       }),
       inject: [ConfigService],
     }),

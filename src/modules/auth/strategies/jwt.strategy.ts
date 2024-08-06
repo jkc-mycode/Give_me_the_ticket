@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { AUTH_MESSAGE } from 'src/commons/constants/auth/auth-message.constant';
+import { AUTH_ENV } from 'src/commons/constants/auth/auth.constant';
 import { User } from 'src/entities/users/user.entity';
 import { Repository } from 'typeorm';
 
@@ -14,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get('JWT_SECRET_KEY'),
+      secretOrKey: configService.get(AUTH_ENV.JWT_SECRET_KEY),
     });
   }
 
@@ -24,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
 
     if (!user) {
-      throw new NotFoundException('일치하는 사용자가 없습니다.');
+      throw new NotFoundException(AUTH_MESSAGE.VALIDATE_USER.NOT_FOUND);
     }
 
     return user;
