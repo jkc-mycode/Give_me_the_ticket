@@ -124,8 +124,8 @@ export class UsersService {
   // 사용자 프로필 조회
   async getUserProfile(user: User) {
     try {
-      const { email, nickname, profileImg, point } = user;
-      const profile = { email, nickname, profileImg, point };
+      const { email, nickname, profileImg, point, role } = user;
+      const profile = { email, nickname, profileImg, point, role };
 
       return profile;
     } catch (err) {
