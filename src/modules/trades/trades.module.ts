@@ -14,6 +14,7 @@ import { Schedule } from 'src/entities/shows/schedule.entity';
 import { Ticket } from 'src/entities/shows/ticket.entity';
 import { User } from 'src/entities/users/user.entity';
 import { TicketProcessor } from './ticket.process';
+import { Image } from 'src/entities/images/image.entity';
 
 @Module({
   imports: [
@@ -21,7 +22,7 @@ import { TicketProcessor } from './ticket.process';
     BullModule.registerQueue({
       name: 'tradeQueue',
     }),
-    TypeOrmModule.forFeature([Trade, TradeLog, Show, Schedule, Ticket, User, TradeLog]),
+    TypeOrmModule.forFeature([Trade, TradeLog, Show, Schedule, Ticket, User, TradeLog, Image]),
   ],
   controllers: [TradesController],
   providers: [TradesService, TicketProcessor],
