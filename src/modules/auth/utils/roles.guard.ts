@@ -1,6 +1,7 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+import { AUTH_MESSAGE } from 'src/commons/constants/auth/auth-message.constant';
 import { Role } from 'src/commons/types/users/user-role.type';
 
 /**
@@ -34,7 +35,7 @@ export class RolesGuard extends AuthGuard('jwt') implements CanActivate {
 
     // 사용자의 역할이 requireRoles 배열에 해닿하는지 확인
     if (!requireRoles.some((role) => user.role === role)) {
-      throw new ForbiddenException('접근할 권한이 없습니다.');
+      throw new ForbiddenException(AUTH_MESSAGE.COMMON.FORBIDDEN);
     }
 
     return true;

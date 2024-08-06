@@ -2,6 +2,8 @@ import { PutObjectCommand, S3 } from '@aws-sdk/client-s3';
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import path from 'path';
+import { IMAGE_MESSAGE } from 'src/commons/constants/images/images-message.constant';
+import { ALLOWED_EXTENSIONS, AWS_ENV } from 'src/commons/constants/images/images.constant';
 
 @Injectable()
 export class ImagesService {
@@ -10,10 +12,10 @@ export class ImagesService {
   // S3 설정
   constructor(private readonly configService: ConfigService) {
     this.s3 = new S3({
-      region: this.configService.get('AWS_S3_REGION'),
+      region: this.configService.get(AWS_ENV.AWS_S3_REGION),
       credentials: {
-        accessKeyId: this.configService.get('AWS_S3_ACCESS_KEY'),
-        secretAccessKey: this.configService.get('AWS_S3_SECRET_KEY'),
+        accessKeyId: this.configService.get(AWS_ENV.AWS_S3_ACCESS_KEY),
+        secretAccessKey: this.configService.get(AWS_ENV.AWS_S3_SECRET_KEY),
       },
     });
   }
@@ -28,7 +30,7 @@ export class ImagesService {
       // AWS S3에 이미지 업로드 명령을 생성
       // 파일 이름, 파일 버퍼, 파일 접근 권한, 파일 타입 등을 설정
       const command = new PutObjectCommand({
-        Bucket: this.configService.get('AWS_BUCKET'), // S3 버킷 이름
+        Bucket: this.configService.get(AWS_ENV.AWS_BUCKET), // S3 버킷 이름
         Key: fileName, // 업로드될 파일의 이름
         Body: file.buffer, // 업로드할 파일
         ACL: 'public-read', // 파일 접근 권한
@@ -41,23 +43,19 @@ export class ImagesService {
       return `https://s3.${process.env.AWS_S3_REGION}.amazonaws.com/${process.env.AWS_BUCKET}/${fileName}`;
     } catch (err) {
       console.error(err);
-      throw new InternalServerErrorException(
-        '파일 업로드가 실패했습니다. 관리자에게 문의해 주세요.'
-      );
+      throw new InternalServerErrorException(IMAGE_MESSAGE.UPLOAD_TO_S3.INTERNAL_SERVER_ERROR);
     }
   }
 
   // 사용자가 입력한 이미지 데이터를 받아서 S3에 전달 (이미지 업로드)
   async uploadImage(files: Express.Multer.File[], maxFilesLength: number) {
     if (files.length === 0) {
-      throw new BadRequestException('이미지를 입력해 주세요.');
+      throw new BadRequestException(IMAGE_MESSAGE.UPLOAD_IMAGE.NO_IMAGE);
     }
 
     if (files.length > maxFilesLength) {
-      throw new BadRequestException(`${maxFilesLength}장 이하로 업로드 가능합니다.`);
+      throw new BadRequestException(`${maxFilesLength}${IMAGE_MESSAGE.UPLOAD_IMAGE.OVER_IMAGE}`);
     }
-
-    const allowedExtensions = ['.png', '.jpg', '.jpeg', '.bmp', '.gif'];
 
     // 오늘 날짜 구하기
     const today = new Date();
@@ -78,10 +76,8 @@ export class ImagesService {
 
         // 확장자 검사
         const extension = path.extname(file.originalname).toLowerCase();
-        if (!allowedExtensions.includes(extension)) {
-          throw new BadRequestException(
-            '허용된 확장자가 아닙니다. (.png, .jpg, .jpeg, .bmp, .gif)'
-          );
+        if (!ALLOWED_EXTENSIONS.includes(extension)) {
+          throw new BadRequestException(IMAGE_MESSAGE.UPLOAD_IMAGE.NOT_ALLOWED_EXTENSIONS);
         }
 
         const imageName = `ticketing/${date}_${randomNumber}`;
@@ -119,7 +115,7 @@ export class ImagesService {
   async deleteImage(key: string) {
     try {
       const params = {
-        Bucket: this.configService.get('AWS_BUCKET'),
+        Bucket: this.configService.get(AWS_ENV.AWS_BUCKET),
         Key: key,
       };
 
@@ -127,7 +123,7 @@ export class ImagesService {
       await this.s3.deleteObject(params);
     } catch (err) {
       console.log(err);
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException(IMAGE_MESSAGE.DELETE_IMAGE.INTERNAL_SERVER_ERROR);
     }
   }
 }
