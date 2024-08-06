@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return pathSegments[pathSegments.length - 1]; // Adjust if needed
   }
 
-  // Initialize global variables
+  // 전역 변수 설정
   const showId = getShowIdFromPath();
   const ticketId = getTicketIdFromPath();
 
