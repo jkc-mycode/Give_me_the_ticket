@@ -206,25 +206,40 @@ export class TradesService {
 
   //<2> 중고 거래 상세 보기 //수정 필요 리스트가 아님 (검증 대부분 완료) //테스트 완료
   async getTradeDetail(tradeId: number) {
-    const trade = await this.tradeRepository.findOne({ where: { id: tradeId } });
-    if (!trade) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE);
-    const show = await this.showRepository.findOne({ where: { id: trade.showId } });
-    if (!show) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.SHOW);
-    const ticket = await this.ticketRepository.findOne({ where: { id: trade.ticketId } });
-    if (!ticket) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TICKET);
-    const image = await this.imageRepository.findOne({ where: { showId: show.id } });
-    if (!image) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.IMAGES);
+    // const trade = await this.tradeRepository.findOne({ where: { id: tradeId } });
+    // if (!trade) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE);
+    // const show = await this.showRepository.findOne({ where: { id: trade.showId } });
+    // if (!show) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.SHOW);
+    // const ticket = await this.ticketRepository.findOne({ where: { id: trade.ticketId } });
+    // if (!ticket) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TICKET);
+    // const image = await this.imageRepository.findOne({ where: { showId: show.id } });
+    // if (!image) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.IMAGES);
 
-    trade['content'] = show.content;
-    trade['imageurl'] = image.imageUrl;
-    trade['title'] = show.title;
-    trade['origin_price'] = show.price;
-    trade['location'] = ticket.location;
-    trade['date'] = ticket.date;
-    trade['time'] = ticket.time;
-    delete trade.ticketId;
-    delete trade.flag;
-    delete trade.showId;
+    // trade['content'] = show.content;
+    // trade['imageurl'] = image.imageUrl;
+    // trade['title'] = show.title;
+    // trade['origin_price'] = show.price;
+    // trade['location'] = ticket.location;
+    // trade['date'] = ticket.date;
+    // trade['time'] = ticket.time;
+    // delete trade.ticketId;
+    // delete trade.flag;
+    // delete trade.showId;
+
+    const trade = await this.tradeRepository.findOne({
+      where: { id: tradeId },
+      relations: { ticket: true },
+    });
+
+    if (!trade) {
+      throw new NotFoundException('해당하는 중고 거래가 없습니다.');
+    }
+
+    const imageUrl = await this.imageRepository.find({
+      where: { showId: trade.showId },
+    });
+
+    trade['imageUrl'] = imageUrl;
 
     return trade;
   }
@@ -322,6 +337,13 @@ export class TradesService {
 
     const trade = await this.tradeRepository.findOne({ where: { id: tradeId } });
     if (!trade) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE);
+
+    //가격이 기존의 티켓 가격보다 같거나 낮은지 검증
+    if (trade.price < price) {
+      throw new BadRequestException(
+        `${MESSAGES.TRADES.CAN_NOT_UPDATE.TICKET_PRICE} 현재가격: ${trade.price}`
+      );
+    }
 
     if (trade.sellerId !== userId)
       throw new BadRequestException(MESSAGES.TRADES.NOT_EXISTS.AUTHORITY);
