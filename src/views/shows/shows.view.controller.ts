@@ -7,11 +7,6 @@ export class ShowsViewsController {
   @Render('shows/shows-list.view.ejs')
   showList() {}
 
-  //공연 검색 페이지
-  @Get('/search')
-  @Render('shows/shows-list.view.ejs')
-  searchShows() {}
-
   //공연 상세조회 페이지
   @Get('/:showId')
   @Render('shows/shows-detail.view.ejs')

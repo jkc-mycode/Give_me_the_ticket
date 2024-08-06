@@ -6,7 +6,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const page = parseInt(params.get('page') || '1');
   const limit = parseInt(params.get('limit') || '6');
-  let currentCategory = '';
+  const searchQuery = params.get('search') || ''; // 검색어 쿼리 가져오기
+  const categoryQuery = params.get('category') || ''; // 카테고리 쿼리 가져오기
+  let currentCategory = categoryQuery;
+
+  // 검색어를 입력 필드에 설정
+  if (searchInput) {
+    searchInput.value = searchQuery;
+  }
 
   // 서버에서 데이터 가져오기
   async function fetchShows(page, limit, search = '', category = '') {
@@ -28,10 +35,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       showListContainer.innerHTML = '<p>공연 목록 없음</p>';
       return;
     }
+    console.log(shows);
 
     showListContainer.innerHTML = shows
       .map((show) => {
-        //show배열에서 이미지 가져오기
         const imageUrl =
           show.images && show.images.length > 0 ? show.images[0].imageUrl : 'default-image-url.jpg';
         return `
@@ -100,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // 공연 목록 렌더링
-  const result = await fetchShows(page, limit);
+  const result = await fetchShows(page, limit, searchQuery, categoryQuery);
   if (result && result.data) {
     renderShows(result.data);
     renderPagination(result.totalPages, page);

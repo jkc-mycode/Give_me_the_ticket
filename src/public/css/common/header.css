@@ -1,22 +1,27 @@
 header {
-    height: 80px;
+  background-color: #e3f2fd;
+  padding-left: 10%;
+  padding-right: 10%;
+  padding-bottom: 20px; /* 여백 추가 */
 }
 
 .navbar-expand-lg {
-    height: 100%;
-    background-color: #e3f2fd;
-    padding-left: 10%;
-    padding-right: 10%;
+  height: 80px;
+  background-color: #e3f2fd;
+}
+
+.justify-content-center {
+  width: 60%;
 }
 
 .justify-content-end {
-    width: 200px;
+  width: 200px;
 }
 
-.nav-item>a {
-    color: gray;
+.nav-item > a {
+  color: gray;
 }
 
 .nav {
-    --bs-nav-link-hover-color: var(--bs-navbar-hover-color)
+  --bs-nav-link-hover-color: var(--bs-navbar-hover-color);
 }

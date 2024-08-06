@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GIVE ME THE TICKE</title>
+    <title>GIVE ME THE TICKET</title>
     <link
       rel="shortcut icon"
       type="image/x-icon"
@@ -30,12 +30,21 @@
       integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
       crossorigin="anonymous"
     ></script>
+
+    <!--필요한 CSS 및 JS -->
+    <link rel="stylesheet" href="/css/index.css" />
+    <script type="module" src="/js/index-category.js"></script>
   </head>
 
   <body>
     <!-- include 안에는 상대 경로 작성 -->
     <%- include('./common/header.view.ejs') %>
     <main>
+      <div class="category-container">
+        <button class="btn btn-link category-btn" data-category="Musical">뮤지컬</button>
+        <button class="btn btn-link category-btn" data-category="Concert">콘서트</button>
+        <button class="btn btn-link category-btn" data-category="Play">연극</button>
+      </div>
       <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="true">
         <div class="carousel-indicators">
           <button
