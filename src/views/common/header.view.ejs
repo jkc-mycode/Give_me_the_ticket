@@ -5,7 +5,7 @@
 <header>
   <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
-      <a class="navbar-brand" href="/views"><b>Navbar</b></a>
+      <a class="navbar-brand" href="/views"><b>HOME</b></a>
       <button
         class="navbar-toggler"
         type="button"
@@ -20,9 +20,6 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="#">Home</a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link" href="/views/shows/list">공연 전체 보기</a>
           </li>
           <li class="nav-item dropdown">
@@ -33,21 +30,24 @@
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-              Admin Tap
+              관리자 탭
             </a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="/views/shows">공연 생성</a></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
-              <li>
-                <hr class="dropdown-divider" />
-              </li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
             </ul>
           </li>
         </ul>
-        <form class="d-flex" role="search">
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-          <button type="button" class="btn btn-outline-secondary">Search</button>
+        <form class="d-flex justify-content-center" role="search" id="headerSearchForm">
+          <input
+            class="form-control me-2 search-input"
+            type="search"
+            placeholder="Search"
+            aria-label="Search"
+            id="headerSearchInput"
+          />
+          <button type="button" class="btn btn-outline-secondary" id="headerSearchButton">
+            Search
+          </button>
         </form>
         <ul class="nav justify-content-end" id="sign-in-before">
           <li class="nav-item">

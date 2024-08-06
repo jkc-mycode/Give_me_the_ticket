@@ -1,8 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
   const createShowForm = document.querySelector('#createShowForm');
-  const imageInputsContainer = document.querySelector('#imageInputsContainer');
-  const addImageUrlBtn = document.querySelector('#addImageUrlBtn');
-  const removeImageUrlBtn = document.querySelector('#removeImageUrlBtn');
   const imagePreview = document.querySelector('#imagePreview');
   const schedulesContainer = document.querySelector('#schedulesContainer');
   const addScheduleBtn = document.querySelector('#addScheduleBtn');
@@ -46,52 +43,46 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    // 이미지 URL 입력 시 미리보기 업데이트
-    imageInputsContainer.addEventListener('input', function (event) {
-      if (event.target.name === 'imageUrl') {
-        updateImagePreview();
-      }
+    // 이미지 미리보기 생성
+    const createImagePreview = (url) => {
+      const imageDiv = document.createElement('div');
+      imageDiv.className = 'position-relative me-2';
+
+      const img = document.createElement('img');
+      img.src = url; //기존 이미지 URL 또는 새 이미지 URL
+      img.className = 'preview-img';
+      img.style.width = '120px';
+
+      // 삭제 버튼
+      const deleteImageBtn = document.createElement('button');
+      deleteImageBtn.className = 'btn btn-danger position-absolute top-0 end-0';
+      deleteImageBtn.innerText = 'X';
+      deleteImageBtn.onclick = () => {
+        // 미리보기 삭제
+        imagePreview.removeChild(imageDiv);
+      };
+
+      // 미리보기 이미지와 삭제 버튼 imageDiv에 추가
+      imageDiv.appendChild(img);
+      imageDiv.appendChild(deleteImageBtn);
+      return imageDiv;
+    };
+
+    // 파일 업로더에 변화가 있으면 이벤트 추가
+    document.getElementById('formFileMultiple').addEventListener('change', (e) => {
+      const images = e.target.files;
+      imagePreview.innerHTML = ''; // 기존 미리보기를 초기화
+
+      Array.from(images).forEach((image) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          imagePreview.appendChild(createImagePreview(e.target.result));
+        };
+
+        // 파일을 Data URL로 읽기
+        reader.readAsDataURL(image);
+      });
     });
-
-    // 이미지 추가 버튼 클릭 이벤트
-    addImageUrlBtn.addEventListener('click', function () {
-      const imageUrlInputs = imageInputsContainer.querySelectorAll('input[name="imageUrl"]');
-      if (imageUrlInputs.length >= 5) {
-        alert('최대 5개의 이미지만 추가할 수 있습니다.');
-        return;
-      }
-
-      const imageInput = document.createElement('input');
-      imageInput.type = 'text';
-      imageInput.classList.add('form-control', 'mb-2');
-      imageInput.name = 'imageUrl';
-      imageInputsContainer.appendChild(imageInput);
-    });
-
-    // 이미지 삭제 버튼 클릭 이벤트
-    removeImageUrlBtn.addEventListener('click', function () {
-      const imageUrlInputs = imageInputsContainer.querySelectorAll('input[name="imageUrl"]');
-      if (imageUrlInputs.length > 1) {
-        imageInputsContainer.removeChild(imageUrlInputs[imageUrlInputs.length - 1]);
-        updateImagePreview();
-      } else {
-        alert('최소 하나의 이미지 URL 입력칸이 필요합니다.');
-      }
-    });
-
-    // 이미지 URL 입력 시 미리보기 업데이트
-    function updateImagePreview() {
-      const imageUrlInputs = imageInputsContainer.querySelectorAll('input[name="imageUrl"]');
-      const urls = Array.from(imageUrlInputs)
-        .map((input) => input.value.trim())
-        .filter((url) => url);
-      imagePreview.innerHTML = urls
-        .map(
-          (url) =>
-            `<img src="${url}" alt="이미지 미리보기" style="max-width: 100px; margin-right: 10px;">`
-        )
-        .join('');
-    }
 
     // 스케줄 추가 버튼 클릭 이벤트
     addScheduleBtn.addEventListener('click', function () {
@@ -126,33 +117,52 @@ document.addEventListener('DOMContentLoaded', function () {
         schedules.push({ date, time });
       });
 
-      const imageUrls = Array.from(imageInputsContainer.querySelectorAll('input[name="imageUrl"]'))
-        .map((input) => input.value.trim())
-        .filter((url) => url);
+      const images = document.getElementById('formFileMultiple').files;
 
-      const createShowDto = {
-        title: formData.get('title'),
-        content: formData.get('content'),
-        category: formData.get('category'),
-        runtime: Number(formData.get('runtime')),
-        location: formData.get('location'),
-        price: Number(formData.get('price')),
-        totalSeat: Number(formData.get('totalSeat')),
-        imageUrl: imageUrls,
-        schedules: schedules,
-      };
+      // 이미지 파일 개수 제한
+      if (images.length > 5) {
+        alert('이미지는 최대 5장까지 업로드 가능합니다.');
+        return;
+      }
 
-      // 요청 데이터 디버깅
-      console.log('createShowDto:', createShowDto);
+      // FormData에 이미지 파일 추가
+      const imageFormData = new FormData();
+      for (let i = 0; i < images.length; i++) {
+        imageFormData.append('image', images[i]);
+      }
+      imageFormData.append('maxImageLength', 5);
 
       try {
-        const response = await axios.post('/shows', createShowDto, {
+        // 이미지 업로드 API 호출
+        const imageResponse = await axios.post('/images', imageFormData, {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
           },
         });
 
-        console.log('Response:', response);
+        const imageUrls = imageResponse.data.map((item) => item.imageUrl);
+
+        // 공연 생성 DTO 준비
+        const createShowDto = {
+          title: formData.get('title'),
+          content: formData.get('content'),
+          category: formData.get('category'),
+          runtime: Number(formData.get('runtime')),
+          location: formData.get('location'),
+          price: Number(formData.get('price')),
+          totalSeat: Number(formData.get('totalSeat')),
+          imageUrl: imageUrls,
+          schedules: schedules,
+        };
+
+        // 공연 생성 API 호출
+        const response = await axios.post('/shows', createShowDto, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
 
         if (response.status === 201) {
           alert('공연이 성공적으로 생성되었습니다.');
@@ -163,9 +173,6 @@ document.addEventListener('DOMContentLoaded', function () {
               <input type="date" class="form-control mb-2" name="scheduleDate" required>
               <input type="time" class="form-control mb-2" name="scheduleTime" required>
             </div>
-          `;
-          imageInputsContainer.innerHTML = `
-            <input type="text" class="form-control mb-2" name="imageUrl" required>
           `;
         } else {
           alert('공연 생성에 실패했습니다.');

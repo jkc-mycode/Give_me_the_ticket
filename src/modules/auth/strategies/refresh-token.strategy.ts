@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { AUTH_MESSAGE } from 'src/commons/constants/auth/auth-message.constant';
+import { AUTH_ENV } from 'src/commons/constants/auth/auth.constant';
 import { User } from 'src/entities/users/user.entity';
 import { Repository } from 'typeorm';
 
@@ -14,7 +16,7 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'refreshTok
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get('REFRESH_SECRET_KEY'),
+      secretOrKey: configService.get(AUTH_ENV.REFRESH_SECRET_KEY),
       passReqToCallback: true,
     });
   }
@@ -25,13 +27,13 @@ export class RefreshTokenStrategy extends PassportStrategy(Strategy, 'refreshTok
     });
 
     if (!user) {
-      throw new NotFoundException('일치하는 사용자가 없습니다.');
+      throw new NotFoundException(AUTH_MESSAGE.VALIDATE_USER.NOT_FOUND);
     }
 
     const [type, token] = req.headers.authorization.split(' ');
 
     if (token !== user.refreshToken) {
-      throw new UnauthorizedException('이미 만료된 토큰입니다.');
+      throw new UnauthorizedException(AUTH_MESSAGE.COMMON.TOKEN.UNAUTHORIZED);
     }
 
     return user;

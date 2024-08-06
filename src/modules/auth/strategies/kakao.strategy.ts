@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Strategy } from 'passport-kakao';
+import { AUTH_ENV, AUTH_STRATEGY } from 'src/commons/constants/auth/auth.constant';
 import { User } from 'src/entities/users/user.entity';
 import { Repository } from 'typeorm';
 
@@ -16,15 +17,15 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     @InjectRepository(User) private readonly usersRepository: Repository<User>
   ) {
     super({
-      clientID: configService.get('KAKAO_CLIENT_ID'),
-      clientSecret: configService.get('KAKAO_CLIENT_SECRET'),
-      callbackURL: configService.get('KAKAO_CALLBACK_URL'),
+      clientID: configService.get(AUTH_ENV.KAKAO_CLIENT_ID),
+      clientSecret: configService.get(AUTH_ENV.KAKAO_CLIENT_SECRET),
+      callbackURL: configService.get(AUTH_ENV.KAKAO_CALLBACK_URL),
     });
   }
 
   async validate(accessToken: string, refreshToken: string, profile: any) {
     const email = profile._json.kakao_account.email;
-    const nickname = new Date().getTime().toString(36); // 랜덤 닉네임 생성
+    const nickname = new Date().getTime().toString(AUTH_STRATEGY.KAKAO.RANDOM_NICKNAME.NUMBER); // 랜덤 닉네임 생성
 
     // 기존에 가입한 사용자인지 확인
     let user = await this.usersRepository.findOne({ where: { email } });

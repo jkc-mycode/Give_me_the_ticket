@@ -7,11 +7,6 @@ export class ShowsViewsController {
   @Render('shows/shows-list.view.ejs')
   showList() {}
 
-  //공연 검색 페이지
-  @Get('/search')
-  @Render('shows/shows-list.view.ejs')
-  searchShows() {}
-
   //공연 상세조회 페이지
   @Get('/:showId')
   @Render('shows/shows-detail.view.ejs')
@@ -21,6 +16,11 @@ export class ShowsViewsController {
   @Get('/:showId/ticket')
   @Render('shows/shows-ticket.view.ejs')
   createTicket() {}
+
+  // 공연 수정 페이지
+  @Get('/:showId/edit')
+  @Render('shows/show-update.view.ejs')
+  updateShow() {}
 
   //티켓 환불 페이지
   @Get('/:showId/ticket/:ticketId')

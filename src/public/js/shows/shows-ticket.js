@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     } catch (err) {
       if (err.response && err.response.data) {
-        console.error('Error response data:', err.response.data);
         alert(err.response.data.message);
       } else {
         console.error('Error:', err);
