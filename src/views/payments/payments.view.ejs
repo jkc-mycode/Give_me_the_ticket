@@ -129,22 +129,6 @@
                 } else {
                   throw new Error(notified.data.message || '결제 검증 중 오류 발생')
                 }
-
-                // const chargePoint = await axios.post('/users/me/point', {
-                //   amount: response.paid_amount
-                // }, {
-                //   headers: {
-                //     Authorization: `Bearer ${token}`
-                //   }
-                // });
-
-                // console.log('포인트 충전 response: ', chargePoint.data);
-
-                // if (chargePoint.data.statusCode === 200) {
-                //   alert('포인트 충전 성공');
-                // } else {
-                //   alert('포인트 충전 실패: ' + chargePoint.data.message || '오류 발생');
-                // }
               } catch (err) {
                 console.log('오류 발생: ', err);
                 alert('오류 발생 : ' + err.message);
