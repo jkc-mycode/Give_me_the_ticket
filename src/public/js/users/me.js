@@ -218,6 +218,24 @@ document.addEventListener('DOMContentLoaded', function () {
         updatedAtElement.textContent = `Date : ${log.updatedAt}`;
         logElement.appendChild(updatedAtElement);
 
+        // 환불
+        const refundButton = document.createElement('button');
+        refundButton.textContent = '환불';
+        // 환불 버튼에 이벤트 추가
+        refundButton.addEventListener('click', function () {
+          window.location.href = `/views/shows/${log.showId}/ticket/${log.id}`;
+        });
+        logElement.appendChild(refundButton);
+
+        // 중고 판매
+        const resaleButton = document.createElement('button');
+        resaleButton.textContent = '중고 판매';
+        resaleButton.addEventListener('click', function () {
+          window.sessionStorage.setItem('ticket', JSON.stringify(log));
+          window.location.href = '/views/trades';
+        });
+        logElement.appendChild(resaleButton);
+
         ticketListContainer.appendChild(logElement);
 
         if (index < ticketList.length - 1) {
