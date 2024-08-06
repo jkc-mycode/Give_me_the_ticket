@@ -137,37 +137,34 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  if (bookmarkBtn) {
-    bookmarkBtn.addEventListener('click', async function () {
-      try {
-        const response = await axios({
-          method: isBookmarked ? 'delete' : 'post',
-          url: isBookmarked
-            ? `/shows/${showId}/bookmark/${bookmarkId}`
-            : `/shows/${showId}/bookmark`,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  bookmarkBtn.addEventListener('click', async function () {
+    try {
+      const response = await axios({
+        method: isBookmarked ? 'delete' : 'post',
+        url: isBookmarked ? `/shows/${showId}/bookmark/${bookmarkId}` : `/shows/${showId}/bookmark`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        if (response.status === 200 || response.status === 201) {
-          isBookmarked = !isBookmarked;
-          if (isBookmarked) {
-            bookmarkId = response.data.bookmarkId; // 찜하기 성공 시 서버에서 bookmarkId를 반환한다고 가정합니다.
-          } else {
-            bookmarkId = null; // 찜하기 취소 시 bookmarkId를 초기화합니다.
-          }
-          updateBookmarkButton();
-          alert(isBookmarked ? '찜하기가 완료되었습니다.' : '찜하기가 취소되었습니다.');
+      if (response.status === 200 || response.status === 201) {
+        isBookmarked = !isBookmarked;
+        if (isBookmarked) {
+          bookmarkId = response.data.bookmarkId; // 찜하기 성공 시 서버에서 bookmarkId를 반환한다고 가정합니다.
         } else {
-          alert('요청에 실패하였습니다. 응답 상태 코드: ' + response.status);
+          bookmarkId = null; // 찜하기 취소 시 bookmarkId를 초기화합니다.
         }
-      } catch (error) {
-        console.error('찜하기 오류:', error);
-        alert('요청에 실패하였습니다.');
+        updateBookmarkButton();
+        alert(isBookmarked ? '찜하기가 완료되었습니다.' : '찜하기가 취소되었습니다.');
+      } else {
+        alert('요청에 실패하였습니다. 응답 상태 코드: ' + response.status);
       }
-    });
-  }
+    } catch (error) {
+      console.error('찜하기 오류:', error);
+      alert('요청에 실패하였습니다.');
+    }
+  });
+
   // admin에게만 삭제 버튼이 보이게 하는 로직
   async function checkUserRoleAndDisplayDeleteButton() {
     try {
