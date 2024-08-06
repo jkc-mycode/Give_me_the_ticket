@@ -18,8 +18,8 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       const response = await axios.get(`/shows/${showId}`);
 
-      if (response.status === 200 && response.data && response.data.date) {
-        const data = response.data.date;
+      if (response.status === 200 && response.data && response.data.data) {
+        const data = response.data.data;
 
         const showsContainer = document.querySelector('#shows');
         showsContainer.innerHTML = `
@@ -94,9 +94,9 @@ document.addEventListener('DOMContentLoaded', function () {
     window.location.href = `/views/shows/${showId}/ticket?selectedScheduleId=${window.selectedScheduleId}`;
   });
 
-  updateBtn.addEventListener('click', function (e) {
+  updateBtn.addEventListener('click', async function (e) {
     e.preventDefault();
-    window.location.href = `/views`;
+    window.location.href = `/views/shows/${showId}/edit`;
   });
 
   backBtn.addEventListener('click', function (e) {
@@ -137,37 +137,34 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  if (bookmarkBtn) {
-    bookmarkBtn.addEventListener('click', async function () {
-      try {
-        const response = await axios({
-          method: isBookmarked ? 'delete' : 'post',
-          url: isBookmarked
-            ? `/shows/${showId}/bookmark/${bookmarkId}`
-            : `/shows/${showId}/bookmark`,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+  bookmarkBtn.addEventListener('click', async function () {
+    try {
+      const response = await axios({
+        method: isBookmarked ? 'delete' : 'post',
+        url: isBookmarked ? `/shows/${showId}/bookmark/${bookmarkId}` : `/shows/${showId}/bookmark`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        if (response.status === 200 || response.status === 201) {
-          isBookmarked = !isBookmarked;
-          if (isBookmarked) {
-            bookmarkId = response.data.bookmarkId; // 찜하기 성공 시 서버에서 bookmarkId를 반환한다고 가정합니다.
-          } else {
-            bookmarkId = null; // 찜하기 취소 시 bookmarkId를 초기화합니다.
-          }
-          updateBookmarkButton();
-          alert(isBookmarked ? '찜하기가 완료되었습니다.' : '찜하기가 취소되었습니다.');
+      if (response.status === 200 || response.status === 201) {
+        isBookmarked = !isBookmarked;
+        if (isBookmarked) {
+          bookmarkId = response.data.bookmarkId; // 찜하기 성공 시 서버에서 bookmarkId를 반환한다고 가정합니다.
         } else {
-          alert('요청에 실패하였습니다. 응답 상태 코드: ' + response.status);
+          bookmarkId = null; // 찜하기 취소 시 bookmarkId를 초기화합니다.
         }
-      } catch (error) {
-        console.error('찜하기 오류:', error);
-        alert('요청에 실패하였습니다.');
+        updateBookmarkButton();
+        alert(isBookmarked ? '찜하기가 완료되었습니다.' : '찜하기가 취소되었습니다.');
+      } else {
+        alert('요청에 실패하였습니다. 응답 상태 코드: ' + response.status);
       }
-    });
-  }
+    } catch (error) {
+      console.error('찜하기 오류:', error);
+      alert('요청에 실패하였습니다.');
+    }
+  });
+
   // admin에게만 삭제 버튼이 보이게 하는 로직
   async function checkUserRoleAndDisplayDeleteButton() {
     try {
@@ -179,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         const userRole = userResponse.data.role; // 사용자 역할 정보
-        console.log(userResponse.data);
+
         if (userRole === userResponse.data.role.ADMIN) {
           // 관리자일 경우 버튼 표시
           deleteBtn.style.display = 'block';
@@ -221,7 +218,6 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     } catch (err) {
       if (err.response && err.response.data) {
-        console.log(err.response.data);
         alert(err.response.data.message);
       } else {
         console.error('Error:', err);
@@ -229,6 +225,4 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
   });
-
-  // 사용자 권한 확인 함수 호출
 });
