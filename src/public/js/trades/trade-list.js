@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
   const tradeBtn = document.querySelector();
-  const backBtn = documet.querySelector();
+  const backBtn = document.querySelector('.back__btn');
   const token = window.localStorage.getItem('accessToken');
 
   if (!token) {
@@ -9,5 +9,10 @@ document.addEventListener('DOMContentLoaded', function () {
     return;
   }
 
-  tradeBtn.addEventListener();
+  //돌아가기 버튼
+  backBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    window.location.href = `/views`;
+  });
+  const tradeList = axios.get(`trades/`);
 });
