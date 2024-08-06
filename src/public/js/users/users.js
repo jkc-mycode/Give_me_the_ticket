@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const tradeLogContent = document.querySelector('#tradeLogContent');
   const tradeLogContainer = document.getElementById('tradeLogContainer');
 
+  const chargeBtn = document.querySelector('#chargeBtn');
   const updateBtn = document.querySelector('#updateBtn');
   const deleteBtn = document.querySelector('#deleteBtn');
 
@@ -26,6 +27,9 @@ document.addEventListener('DOMContentLoaded', function () {
   function showContent(content) {
     profileContent.style.display = 'none';
     pointLogContent.style.display = 'none';
+    ticketListContent.style.display = 'none';
+    bookmarkListContent.style.display = 'none';
+    tradeLogContent.style.display = 'none';
 
     content.style.display = 'block';
   }
@@ -91,6 +95,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
   async function getPointLog() {
     try {
+      // 보유 포인트 조회를 위한 백엔드 사용자 프로필 조회 API 호출
+      const response = await axios.get('/users/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log('Point response data: ', response.data);
+
+      const user = response.data.getUserProfile;
+      console.log('User Point data: ', user);
+
+      document.getElementById('userPoint').textContent = user.point;
+    } catch (err) {
+      console.log(err.response.data);
+      const errorMessage = err.response.data.message;
+      alert(errorMessage);
+    }
+
+    try {
       // 백엔드 사용자 포인트 내역 조회 API 호출
       const response = await axios.get('/users/me/point', {
         headers: {
@@ -146,6 +170,11 @@ document.addEventListener('DOMContentLoaded', function () {
       alert(errorMessage);
     }
   }
+
+  chargeBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    window.location.href = '/views/users/me/payments'; // 포인트 충전 페이지로 이동
+  });
 
   //----------- my ticket ---------------------
   myTicket.addEventListener('click', function (e) {
