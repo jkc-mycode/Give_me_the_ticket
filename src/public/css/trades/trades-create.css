@@ -1,0 +1,11 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+    background: white;
+}
+
+.container {
+    display: block;
+    max-width: 680px;
+    width: 80%;
+    margin: 50px auto;
+}

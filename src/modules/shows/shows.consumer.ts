@@ -13,7 +13,8 @@ export class ShowsConsumer extends WorkerHost {
     return await this.showsService.createTicket(
       job.data.showId,
       job.data.createTicketDto,
-      job.data.user
+      job.data.user,
+      job.data.pointlog
     );
   }
 }

@@ -6,6 +6,7 @@ import { Roles } from '../auth/utils/roles.decorator';
 import { Role } from 'src/commons/types/users/user-role.type';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiImages } from './utils/api-images.decotator';
+import { IMAGE_COMMON } from 'src/commons/constants/images/images.constant';
 
 @ApiTags('이미지')
 @Controller('images')
@@ -16,12 +17,12 @@ export class ImagesController {
   @ApiBearerAuth()
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN, Role.USER)
-  @UseInterceptors(FilesInterceptor('image'))
-  @ApiImages('image') // 업로드할 이미지 형식을 설정하기 위한 커스텀 데코레이터
+  @UseInterceptors(FilesInterceptor(IMAGE_COMMON.IMAGE))
+  @ApiImages(IMAGE_COMMON.IMAGE) // 업로드할 이미지 형식을 설정하기 위한 커스텀 데코레이터
   @Post()
   async uploadImage(
     @UploadedFiles() files: Express.Multer.File[],
-    @Body('maxImageLength') maxImageLength: number
+    @Body(IMAGE_COMMON.MAX_IMAGE_LENGTH) maxImageLength: number
   ) {
     // 필요한 최대 이미지 수를 정해서 imagesService에서 가져다 사용
     // 만약 사용자 프로필 사진이면 1로 수정

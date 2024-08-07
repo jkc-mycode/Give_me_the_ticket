@@ -13,12 +13,12 @@ import { ImagesModule } from './modules/images/images.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { BullModule } from '@nestjs/bullmq';
 import { SearchModule } from './modules/shows/search/search.module';
-import { PaymentsModule } from './payments/payments.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 import { ViewsController } from './views/index.view.controller';
 import { AuthViewsController } from './views/auth/auth.view.controller';
 import { UsersViewsController } from './views/users/users.view.controller';
 import { ShowsViewsController } from './views/shows/shows.view.controller';
-import { PaymentsViewsController } from './views/payments/payments.view.controller';
+import { TradeViewsController } from './views/trades/trades.view.controller';
 
 @Module({
   imports: [
@@ -54,7 +54,7 @@ import { PaymentsViewsController } from './views/payments/payments.view.controll
     AuthViewsController,
     UsersViewsController,
     ShowsViewsController,
-    PaymentsViewsController,
+    TradeViewsController,
   ],
   providers: [AppService],
 })

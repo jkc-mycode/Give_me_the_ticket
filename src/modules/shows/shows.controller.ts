@@ -26,6 +26,7 @@ import { DeleteBookmarkDto } from './dto/delete-bookmark.dto';
 import { USER_BOOKMARK_MESSAGES } from 'src/commons/constants/users/user-bookmark-messages.constant';
 import { SHOW_TICKET_MESSAGES } from 'src/commons/constants/shows/show-ticket-messages.constant';
 import { SHOW_MESSAGES } from 'src/commons/constants/shows/show-messages.constant';
+import { PointLog } from 'src/entities/users/point-log.entity';
 
 @ApiTags('공연')
 @Controller('shows')
@@ -171,9 +172,15 @@ export class ShowsController {
   async createTicket(
     @Param('showId') showId: number,
     @Body() createTicketDto: CreateTicketDto,
-    @Req() req: any
+    @Req() req: any,
+    pointlog: PointLog
   ) {
-    const ticket = await this.showsService.addTicketQueue(showId, createTicketDto, req.user);
+    const ticket = await this.showsService.addTicketQueue(
+      showId,
+      createTicketDto,
+      req.user,
+      pointlog
+    );
     return {
       status: HttpStatus.CREATED,
       message: SHOW_TICKET_MESSAGES.COMMON.TICKET.SUCCESS,
@@ -195,9 +202,10 @@ export class ShowsController {
   async refundTicket(
     @Param('showId') showId: number,
     @Param('ticketId') ticketId: number,
-    @Req() req: any
+    @Req() req: any,
+    pointlog: PointLog
   ) {
-    await this.showsService.refundTicket(showId, ticketId, req.user);
+    await this.showsService.refundTicket(showId, ticketId, req.user, pointlog);
     return {
       status: HttpStatus.OK,
       message: SHOW_TICKET_MESSAGES.COMMON.REFUND.SUCCESS,
