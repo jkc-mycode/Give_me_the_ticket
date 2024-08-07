@@ -308,6 +308,7 @@ document.addEventListener('DOMContentLoaded', function () {
       bookmarkList.forEach((log, index) => {
         const logElement = document.createElement('div');
         logElement.classList.add('bookmark-list');
+        logElement.dataset.showId = log.showId;
 
         const showTitleElement = document.createElement('p');
         showTitleElement.textContent = `공연 제목 : ${log.showTitle}`;
@@ -322,6 +323,10 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.appendChild(createdAtElement);
 
         bookmarkListContainer.appendChild(logElement);
+
+        logElement.addEventListener('click', () => {
+          window.location.href = `/views/shows/${log.showId}`;
+        });
 
         if (index < bookmarkList.length - 1) {
           const separator = document.createElement('hr');
