@@ -1,15 +1,6 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const categoryButtons = document.querySelectorAll('.category-btn');
   const showListContainer = document.getElementById('showList');
   let shows; // 최신 등록된 공연 데이터들
-
-  // 카테고리 버튼 클릭 이벤트 핸들러
-  categoryButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      const category = button.dataset.category;
-      window.location.href = `/views/shows/list?category=${category}`;
-    });
-  });
 
   // 최신 등록된 공연 5개 데이터 가져오기
   try {

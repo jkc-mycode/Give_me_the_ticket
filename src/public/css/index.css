@@ -6,24 +6,6 @@
   height: 335px;
 }
 
-.category-container {
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
-  height: 80%;
-}
-
-.category-btn {
-  color: black;
-  font-size: 16px;
-  margin: 0 10px;
-}
-
-.category-btn:hover {
-  color: gray;
-  text-decoration: underline;
-}
-
 #mainShowListTitle {
   width: 100%;
   text-align: center;
