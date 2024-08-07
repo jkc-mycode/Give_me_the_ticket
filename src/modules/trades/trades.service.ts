@@ -237,9 +237,10 @@ export class TradesService {
 
     const imageUrl = await this.imageRepository.find({
       where: { showId: trade.showId },
+      select: { imageUrl: true },
     });
-
-    trade['imageUrl'] = imageUrl;
+    const image = imageUrl[0].imageUrl;
+    trade['imageUrl'] = image;
 
     return trade;
   }
@@ -247,8 +248,6 @@ export class TradesService {
   //<3> 중고거래 생성 함수 //완료(검증 대부분 완료) 테스트 완료
   async createTrade(createTradeDto: CreateTradeDto, sellerId: number) {
     const { ticketId, price } = createTradeDto;
-
-    //검증 타일 START==================================================
 
     //1.데이터 베이스 검증
 
@@ -293,6 +292,10 @@ export class TradesService {
     //본인의 티켓인지 검증
     if (ticket.userId !== sellerId) {
       throw new BadRequestException(MESSAGES.TRADES.NOT_HAVE.TICKET);
+    }
+
+    if (ticket.status !== TicketStatus.USEABLE) {
+      throw new BadRequestException('해당 티켓은 사용할 수 없습니다!');
     }
 
     //검증 타일 END==================================================
