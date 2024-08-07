@@ -1,4 +1,4 @@
-import { Controller, Get, Render } from '@nestjs/common';
+import { Controller, Get, Post, Render } from '@nestjs/common';
 
 @Controller('views/trades')
 export class TradeViewsController {
@@ -13,4 +13,8 @@ export class TradeViewsController {
   @Get('/:tradeid')
   @Render('trades/detail.view.ejs')
   getTradeDetail() {}
+
+  @Get('/purchase/:tradeid')
+  @Render(`trades/trade-purchase.view.ejs`)
+  purchaseTrade() {}
 }

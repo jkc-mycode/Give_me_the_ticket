@@ -233,8 +233,6 @@ export class TradesService {
   async createTrade(createTradeDto: CreateTradeDto, sellerId: number) {
     const { ticketId, price } = createTradeDto;
 
-    //검증 타일 START==================================================
-
     //1.데이터 베이스 검증
 
     //1-1 티켓이 존재하는지 검증
