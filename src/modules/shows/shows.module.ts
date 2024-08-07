@@ -15,13 +15,14 @@ import { BullModule } from '@nestjs/bullmq';
 import { ShowsConsumer } from './shows.consumer';
 import { QUEUES } from 'src/commons/constants/queue.constant';
 import { TicketQueueEvents } from 'src/queue-events/ticket.queue-event';
+import { PointLog } from 'src/entities/users/point-log.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     BullModule.registerQueue({
       name: QUEUES.TICKET_QUEUE,
     }),
-    TypeOrmModule.forFeature([Show, User, Ticket, Bookmark, Schedule, Image]),
+    TypeOrmModule.forFeature([Show, User, Ticket, Bookmark, Schedule, Image, PointLog]),
     SearchModule,
   ],
   controllers: [ShowsController],

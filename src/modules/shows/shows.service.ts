@@ -32,6 +32,8 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { QUEUES } from 'src/commons/constants/queue.constant';
 import { TicketQueueEvents } from 'src/queue-events/ticket.queue-event';
+import { PointLog } from 'src/entities/users/point-log.entity';
+import { PointType } from 'src/commons/types/users/point.type';
 @Injectable()
 export class ShowsService {
   constructor(
@@ -39,6 +41,7 @@ export class ShowsService {
     @InjectRepository(Bookmark) private bookmarkRepository: Repository<Bookmark>,
     @InjectRepository(Ticket) private ticketRepository: Repository<Ticket>,
     @InjectRepository(Image) private imagesRepository: Repository<Image>,
+    @InjectRepository(PointLog) private pointLogRepository: Repository<PointLog>,
     @InjectQueue(QUEUES.TICKET_QUEUE) private ticketQueue: Queue,
     private readonly ticketQueueEvents: TicketQueueEvents,
     private dataSource: DataSource,
@@ -129,7 +132,17 @@ export class ShowsService {
   /*공연 목록 조회 */
   async getShowList(getShowListDto: GetShowListDto) {
     const { category, search, page, limit } = getShowListDto;
-    const { results, total } = await this.searchService.searchShows(category, search, page, limit);
+    const { ids, total } = await this.searchService.searchShows(category, search, page, limit);
+
+    if (!ids || ids.length === 0) {
+      return { results: [], total, page, totalPages: 0 };
+    }
+
+    const results = await this.showRepository.find({
+      where: { id: In(ids) },
+      relations: ['images'],
+      order: { id: 'DESC' },
+    });
 
     return {
       results,
@@ -245,8 +258,8 @@ export class ShowsService {
       // 트랜잭션 커밋
       await queryRunner.commitTransaction();
 
-      //Elasticsearch 인덱싱
-      await this.searchService.createShowIndex(show);
+      // Elasticsearch 인덱스 업데이트 (업데이트)
+      await this.searchService.indexShowData(show);
 
       return {};
     } catch (error) {
@@ -360,13 +373,19 @@ export class ShowsService {
 
   /* 티켓 예매 동시성 처리, 큐에 작업 추가 */
 
-  async addTicketQueue(showId: number, createTicketDto: CreateTicketDto, user: User) {
+  async addTicketQueue(
+    showId: number,
+    createTicketDto: CreateTicketDto,
+    user: User,
+    pointlog: PointLog
+  ) {
     const job = await this.ticketQueue.add(
       QUEUES.ADD_TICKET_QUEUE,
       {
         showId,
         user,
         createTicketDto,
+        pointlog,
       },
       {
         removeOnComplete: true,
@@ -383,7 +402,12 @@ export class ShowsService {
   }
 
   /* 티켓 예매 */
-  async createTicket(showId: number, createTicketDto: CreateTicketDto, user: User) {
+  async createTicket(
+    showId: number,
+    createTicketDto: CreateTicketDto,
+    user: User,
+    pointlog: PointLog
+  ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -444,6 +468,16 @@ export class ShowsService {
       user.point -= show.price;
       await queryRunner.manager.save(User, user);
 
+      //사용자의 포인트로그 기록 생성
+      const pointLog = queryRunner.manager.create(PointLog, {
+        userId: user.id,
+        type: PointType.WITHDRAW,
+        description: `${show.title}티켓 결제`,
+        price: show.price,
+      });
+
+      await queryRunner.manager.save(PointLog, pointLog);
+
       const ticket = queryRunner.manager.create(Ticket, {
         userId: user.id,
         scheduleId: schedule.id,
@@ -475,7 +509,7 @@ export class ShowsService {
   }
 
   /*티켓 환불 */
-  async refundTicket(showId: number, ticketId: number, user: User) {
+  async refundTicket(showId: number, ticketId: number, user: User, pointlog: PointLog) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -554,6 +588,17 @@ export class ShowsService {
       ticket.status = TicketStatus.REFUNDED;
 
       await queryRunner.manager.save(Ticket, ticket);
+
+      //사용자의 포인트로그 기록 생성 및 조회를 입금으로 변경합니다
+
+      const pointLog = queryRunner.manager.create(PointLog, {
+        userId: user.id,
+        price: refundPoint,
+        description: `${ticket.title}티켓 환불`,
+        type: PointType.DEPOSIT,
+      });
+
+      await queryRunner.manager.save(PointLog, pointLog);
 
       user.point += refundPoint;
 

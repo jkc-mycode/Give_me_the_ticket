@@ -22,8 +22,17 @@ document.addEventListener('DOMContentLoaded', function () {
         const data = response.data.data;
 
         const showsContainer = document.querySelector('#shows');
+
+        const imageHtml = data.imageUrl
+          .map(
+            (imageUrl) => `
+  <p><img src="${imageUrl}" alt="${data.title}" style="max-width: 100%; height: auto;" /></p>
+`
+          )
+          .join('');
+
         showsContainer.innerHTML = `
-          <p><img src="${data.imageUrl}" alt="${data.title}" style="max-width: 100%; height: auto;" /></p>
+          ${imageHtml}
           <h2>${data.title}</h2>
           <p>카테고리: ${data.category}</p>
           <p>가격: ${data.price}원</p>
@@ -165,7 +174,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // admin에게만 삭제 버튼이 보이게 하는 로직
   async function checkUserRoleAndDisplayDeleteButton() {
     try {
       if (token) {
@@ -175,9 +183,9 @@ document.addEventListener('DOMContentLoaded', function () {
           },
         });
 
-        const userRole = userResponse.data.role; // 사용자 역할 정보
+        const userRole = userResponse.data.getUserProfile.role; // 사용자 역할 정보
 
-        if (userRole === userResponse.data.role.ADMIN) {
+        if (userRole === 'ADMIN') {
           // 관리자일 경우 버튼 표시
           deleteBtn.style.display = 'block';
           updateBtn.style.display = 'block';
@@ -195,12 +203,13 @@ document.addEventListener('DOMContentLoaded', function () {
       console.error('사용자 권한 확인 오류:', err);
       // 권한 확인 오류 발생 시 버튼 숨기기
       deleteBtn.style.display = 'none';
+      updateBtn.style.display = 'none';
     }
   }
 
+  checkUserRoleAndDisplayDeleteButton();
   // 삭제 버튼 클릭 이벤트 핸들러
   deleteBtn.addEventListener('click', async function () {
-    checkUserRoleAndDisplayDeleteButton();
     try {
       const response = await axios({
         method: 'delete',

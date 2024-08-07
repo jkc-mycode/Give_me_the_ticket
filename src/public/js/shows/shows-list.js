@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const { data } = await axios.get(`/shows`, {
         params: { page, limit, search: search || undefined, category: category || undefined },
       });
+      console.log(data);
       return data;
     } catch (error) {
       console.error(error);
@@ -35,12 +36,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       showListContainer.innerHTML = '<p>공연 목록 없음</p>';
       return;
     }
-    console.log(shows);
+    //console.log(shows);
 
     showListContainer.innerHTML = shows
       .map((show) => {
-        const imageUrl =
-          show.images && show.images.length > 0 ? show.images[0].imageUrl : 'default-image-url.jpg';
+        const images = Array.isArray(show.images) ? show.images : [];
+        const imageUrl = images.length > 0 ? images[0].imageUrl : 'default-image-url.jpg';
         return `
         <div class="col-md-4 mb-3">
           <div class="card">

@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const tradeLogContent = document.querySelector('#tradeLogContent');
   const tradeLogContainer = document.getElementById('tradeLogContainer');
 
+  const chargeBtn = document.querySelector('#chargeBtn');
   const updateBtn = document.querySelector('#updateBtn');
   const deleteBtn = document.querySelector('#deleteBtn');
 
@@ -26,6 +27,9 @@ document.addEventListener('DOMContentLoaded', function () {
   function showContent(content) {
     profileContent.style.display = 'none';
     pointLogContent.style.display = 'none';
+    ticketListContent.style.display = 'none';
+    bookmarkListContent.style.display = 'none';
+    tradeLogContent.style.display = 'none';
 
     content.style.display = 'block';
   }
@@ -91,6 +95,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
   async function getPointLog() {
     try {
+      // 보유 포인트 조회를 위한 백엔드 사용자 프로필 조회 API 호출
+      const response = await axios.get('/users/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log('Point response data: ', response.data);
+
+      const user = response.data.getUserProfile;
+      console.log('User Point data: ', user);
+
+      document.getElementById('userPoint').textContent = user.point;
+    } catch (err) {
+      console.log(err.response.data);
+      const errorMessage = err.response.data.message;
+      alert(errorMessage);
+    }
+
+    try {
       // 백엔드 사용자 포인트 내역 조회 API 호출
       const response = await axios.get('/users/me/point', {
         headers: {
@@ -146,6 +170,11 @@ document.addEventListener('DOMContentLoaded', function () {
       alert(errorMessage);
     }
   }
+
+  chargeBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    window.location.href = '/views/users/me/payments'; // 포인트 충전 페이지로 이동
+  });
 
   //----------- my ticket ---------------------
   myTicket.addEventListener('click', function (e) {
@@ -222,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const refundButton = document.createElement('button');
         refundButton.textContent = '환불';
         // 환불 버튼에 이벤트 추가
-        refundButton.addEventListener('click', function () {
+        refundButton.addEventListener('click', () => {
           window.location.href = `/views/shows/${log.showId}/ticket/${log.id}`;
         });
         logElement.appendChild(refundButton);
@@ -230,7 +259,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // 중고 판매
         const resaleButton = document.createElement('button');
         resaleButton.textContent = '중고 판매';
-        resaleButton.addEventListener('click', function () {
+        // 중고 판매 버튼 이벤트 추가
+        resaleButton.addEventListener('click', () => {
           window.sessionStorage.setItem('ticket', JSON.stringify(log));
           window.location.href = '/views/trades';
         });
@@ -365,6 +395,26 @@ document.addEventListener('DOMContentLoaded', function () {
         const createdAtElement = document.createElement('p');
         createdAtElement.textContent = `Trade date : ${log.createdAt}`;
         logElement.appendChild(createdAtElement);
+
+        // 수정
+        const updateTradeBtn = document.createElement('button');
+        updateTradeBtn.textContent = '수정';
+        // 수정 버튼에 이벤트 추가
+        console.log(log);
+        updateTradeBtn.addEventListener('click', () => {
+          window.sessionStorage.setItem('trade', JSON.stringify(log));
+          window.location.href = `/views/trades/${log.id}/edit`;
+        });
+        logElement.appendChild(updateTradeBtn);
+
+        // 삭제
+        const deleteTradeBtn = document.createElement('button');
+        deleteTradeBtn.textContent = '삭제';
+        // 삭제 버튼 이벤트 추가
+        deleteTradeBtn.addEventListener('click', () => {
+          alert('삭제 버튼');
+        });
+        logElement.appendChild(deleteTradeBtn);
 
         tradeLogContainer.appendChild(logElement);
 

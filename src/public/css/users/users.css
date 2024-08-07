@@ -93,6 +93,10 @@ h1 {
   font-weight: bold;
 }
 
+.content #userPoint {
+  font-weight: bold;
+}
+
 .content .point-log {
   border: 1px solid #ccc;
   padding: 10px;
@@ -128,6 +132,28 @@ hr.separator::before {
 
 hr.separator::after {
   background-color: transparent;
+}
+
+.content .charge__btn {
+  background: #1e87e9;
+  color: white;
+  display: block;
+  width: 90%;
+  max-width: 680px;
+  height: 50px;
+  border-radius: 8px;
+  margin: 0 auto;
+  border: none;
+  cursor: pointer;
+  font-size: 17px;
+  font-weight: bold;
+  font-family: 'Montserrat', sans-serif;
+  box-shadow: 0 15px 30px rgba(30, 84, 233, 0.36);
+  transition: 0.2s linear;
+}
+
+.content .charge__btn:hover {
+  box-shadow: 0 0 0 rgba(30, 84, 233, 0);
 }
 
 .content .update__btn {

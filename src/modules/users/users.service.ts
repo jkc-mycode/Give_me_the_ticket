@@ -113,7 +113,10 @@ export class UsersService {
 
       // 거래 ID 추출하여 거래 데이터 가져오기
       const tradeId = tradeLog.map((log) => log.tradeId);
-      const trade = await this.tradeRepository.find({ where: { id: In(tradeId) } });
+      const trade = await this.tradeRepository.find({
+        where: { id: In(tradeId) },
+        relations: { ticket: true },
+      });
 
       return trade;
     } catch (err) {
@@ -124,8 +127,8 @@ export class UsersService {
   // 사용자 프로필 조회
   async getUserProfile(user: User) {
     try {
-      const { email, nickname, profileImg, point } = user;
-      const profile = { email, nickname, profileImg, point };
+      const { email, nickname, profileImg, point, role } = user;
+      const profile = { email, nickname, profileImg, point, role };
 
       return profile;
     } catch (err) {

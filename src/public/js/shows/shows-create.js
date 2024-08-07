@@ -6,12 +6,14 @@ document.addEventListener('DOMContentLoaded', function () {
   const removeScheduleBtn = document.querySelector('#removeScheduleBtn');
   const token = window.localStorage.getItem('accessToken');
 
+  // 로그인하지 않은 사용자는 로그인 페이지로 이동
   if (!token) {
     alert('로그인이 필요합니다');
     window.location.href = '/views/auth/sign';
     return;
   }
 
+  //사용자 정보 가져오기
   async function getUserInfo() {
     try {
       const response = await axios.get('/users/me', {
@@ -31,7 +33,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     try {
       const userInfo = await getUserInfo();
-      if (!userInfo) {
+
+      if (userInfo === null) {
+        throw new Error('사용자 정보를 가져오는 데 실패했습니다.');
+      }
+
+      // 올바른 사용자 역할 정보 접근
+      const userRole = userInfo.getUserProfile.role;
+      if (userRole !== 'ADMIN') {
         alert('접근 권한이 없습니다.');
         window.location.href = '/views'; // 메인 페이지로 이동
         return;
@@ -39,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (error) {
       console.error('사용자 정보 가져오기 오류:', error);
       alert('사용자 정보를 가져오는 중 오류가 발생했습니다.');
-      window.location.href = '/views'; // 오류가 발생해도 메인 페이지로 이동
+      window.location.href = '/views'; // 메인 페이지로 이동
       return;
     }
 
@@ -49,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
       imageDiv.className = 'position-relative me-2';
 
       const img = document.createElement('img');
-      img.src = url; //기존 이미지 URL 또는 새 이미지 URL
+      img.src = url;
       img.className = 'preview-img';
       img.style.width = '120px';
 
@@ -119,12 +128,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const images = document.getElementById('formFileMultiple').files;
 
-      // 이미지 파일 개수 제한
-      if (images.length > 5) {
-        alert('이미지는 최대 5장까지 업로드 가능합니다.');
-        return;
-      }
-
       // FormData에 이미지 파일 추가
       const imageFormData = new FormData();
       for (let i = 0; i < images.length; i++) {
@@ -143,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const imageUrls = imageResponse.data.map((item) => item.imageUrl);
 
-        // 공연 생성 DTO 준비
+        // 공연 생성 DTO
         const createShowDto = {
           title: formData.get('title'),
           content: formData.get('content'),

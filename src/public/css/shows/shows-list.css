@@ -54,3 +54,8 @@ h1 {
   border: none;
   margin-top: auto;
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+}
