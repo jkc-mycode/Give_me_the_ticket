@@ -185,8 +185,16 @@ export class TradesService {
           where: { showId: ticket.showId },
         });
 
-        //show에서 장소와 이름을 추가,schedule에서 날짜와 시간을 추가
+        //시간이 맞지 않는 티켓이 있다면 삭제 (가장 최근에 추가한 로직)
+        if (
+          new Date().getTime() >=
+          this.combineDateAndTime(String(ticket.date), ticket.time).getTime() - 60 * 1000 * 60 * 2
+        ) {
+          await this.tradeRepository.delete(trade.id);
+        }
+
         if (ticket) {
+          //show에서 장소와 이름을 추가,schedule에서 날짜와 시간을 추가
           trade['imageurl'] = image.imageUrl;
           trade['title'] = ticket.title;
           trade['price'] = ticket.price;
@@ -351,6 +359,7 @@ export class TradesService {
     if (trade.sellerId !== userId) {
       throw new BadRequestException(MESSAGES.TRADES.NOT_EXISTS.AUTHORITY);
     }
+    await this.ticketRepository.update({ id: trade.ticketId }, { status: TicketStatus.USEABLE });
 
     //모든 검증이 끝난 뒤 삭제 로직
     return await this.tradeRepository.delete(tradeId);
@@ -364,12 +373,18 @@ export class TradesService {
     if (!trade) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE);
 
     //해당 티켓 존재 확인
-
     const ticket = await this.ticketRepository.findOne({ where: { id: trade.ticketId } });
     if (!ticket) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TICKET);
 
-    //구매자와 판매자의 유저 정보 가져오기
+    //해당 티켓의 소유 갯수 확인
+    const haveTicket = await this.ticketRepository.find({
+      where: { showId: ticket.showId, userId: ticket.userId },
+    });
+    if (!(haveTicket.length > 5)) {
+      throw new BadRequestException('동일시간의 동일공연은 5장만 소지할 수 있습니다!');
+    }
 
+    //구매자와 판매자의 유저 정보 가져오기
     const seller = await this.userRepository.findOne({ where: { id: ticket.userId } });
     if (!seller) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.SELLER);
     const buyer = await this.userRepository.findOne({ where: { id: buyerId } });

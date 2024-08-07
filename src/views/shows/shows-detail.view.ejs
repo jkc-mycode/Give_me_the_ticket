@@ -48,13 +48,19 @@
         <!-- Heading -->
         <h1>SHOW DETAIL</h1>
 
-        <button class="bookmark__btn btn btn-outline-danger">
+        <button
+          id="bookmarkBtn"
+          class="bookmark__btn btn btn-outline-danger"
+          data-bookmarked="false"
+          data-bookmark-id=""
+          data-show-id="${showId}"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="16"
             height="16"
             fill="currentColor"
-            class="bi bi-heart-fill"
+            class="bi bi-heart"
             viewBox="0 0 16 16"
           >
             <path

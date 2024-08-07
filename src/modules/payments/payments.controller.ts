@@ -19,7 +19,6 @@ export class PaymentsController {
   @Roles(Role.USER)
   @Post('/complete')
   async completePayment(@Req() req: any, @Body() completePaymentDto: CompletePaymentDto) {
-    console.log('결제 결과 검증 : ', completePaymentDto);
     const completePayment = await this.paymentsService.verifyPayment(
       req.user,
       completePaymentDto.imp_uid,

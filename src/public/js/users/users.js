@@ -56,10 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
       });
 
-      console.log('Response data: ', response.data);
-
       const user = response.data.getUserProfile;
-      console.log('User data: ', user);
 
       document.getElementById('nickname').textContent = user.nickname;
       document.getElementById('email').textContent = user.email;
@@ -102,16 +99,11 @@ document.addEventListener('DOMContentLoaded', function () {
         },
       });
 
-      console.log('Point response data: ', response.data);
-
       const user = response.data.getUserProfile;
-      console.log('User Point data: ', user);
 
       document.getElementById('userPoint').textContent = user.point;
     } catch (err) {
       console.log(err.response.data);
-      const errorMessage = err.response.data.message;
-      alert(errorMessage);
     }
 
     try {
@@ -122,14 +114,11 @@ document.addEventListener('DOMContentLoaded', function () {
         },
       });
 
-      console.log('Response data: ', response.data);
-
       const pointLog = response.data.getPointLog;
-      console.log('Point Log: ', pointLog);
 
       // 포인트 내역이 존재하지 않을 때
       if (pointLog.length === 0) {
-        alert('포인트 내역이 없습니다.');
+        pointLogContainer.innerHTML = '';
         return;
       }
 
@@ -140,19 +129,28 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.classList.add('point-log');
 
         const createdAtElement = document.createElement('p');
-        createdAtElement.textContent = `Date : ${log.createdAt}`;
+        createdAtElement.textContent = `포인트 충전 및 사용 일자 : ${log.createdAt}`;
         logElement.appendChild(createdAtElement);
 
         const priceElement = document.createElement('p');
-        priceElement.textContent = `Price : ${log.price}`;
+        priceElement.textContent = `포인트 금액 : ${log.price}`;
         logElement.appendChild(priceElement);
 
         const descriptionElement = document.createElement('p');
-        descriptionElement.textContent = `Description : ${log.description}`;
+        descriptionElement.textContent = `설명 : ${log.description}`;
         logElement.appendChild(descriptionElement);
 
         const typeElement = document.createElement('p');
-        typeElement.textContent = `Type : ${log.type}`;
+        let typeText = log.type;
+
+        // 타입에 따라 텍스트 변경
+        if (log.type === 'DEPOSIT') {
+          typeText = '입금';
+        } else if (log.type === 'WITHDRAW') {
+          typeText = '출금';
+        }
+
+        typeElement.textContent = `유형 : ${typeText}`;
         logElement.appendChild(typeElement);
 
         pointLogContainer.appendChild(logElement);
@@ -166,8 +164,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (err) {
       // 사용자 포인트 내역 조회 실패 시 에러 처리
       console.log(err.response.data);
-      const errorMessage = err.response.data.message;
-      alert(errorMessage);
     }
   }
 
@@ -198,14 +194,11 @@ document.addEventListener('DOMContentLoaded', function () {
         },
       });
 
-      console.log('Response data: ', response.data);
-
       const ticketList = response.data.getTicketList;
-      console.log('Ticket List: ', ticketList);
 
       // 예매 목록이 존재하지 않을 때
       if (ticketList.length === 0) {
-        alert('예매 목록이 없습니다.');
+        ticketListContainer.innerHTML = '';
         return;
       }
 
@@ -216,36 +209,36 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.classList.add('ticket-list');
 
         const titleElement = document.createElement('p');
-        titleElement.textContent = `Title : ${log.title}`;
+        titleElement.textContent = `공연 제목 : ${log.title}`;
         logElement.appendChild(titleElement);
 
         const timeElement = document.createElement('p');
-        timeElement.textContent = `Time : ${log.time}`;
+        timeElement.textContent = `공연 시간 : ${log.time}`;
         logElement.appendChild(timeElement);
 
         const runtimeElement = document.createElement('p');
-        runtimeElement.textContent = `Runtime : ${log.runtime}`;
+        runtimeElement.textContent = `공연 러닝타임 : ${log.runtime}`;
         logElement.appendChild(runtimeElement);
 
         const dateElement = document.createElement('p');
-        dateElement.textContent = `Show date : ${log.date}`;
+        dateElement.textContent = `공연 일자 : ${log.date}`;
         logElement.appendChild(dateElement);
 
         const locationElement = document.createElement('p');
-        locationElement.textContent = `Location : ${log.location}`;
+        locationElement.textContent = `공연 장소 : ${log.location}`;
         logElement.appendChild(locationElement);
 
         const priceElement = document.createElement('p');
-        priceElement.textContent = `Ticket price : ${log.price}`;
+        priceElement.textContent = `티켓 가격 : ${log.price}`;
         logElement.appendChild(priceElement);
 
         const statusElement = document.createElement('p');
-        statusElement.textContent = `Ticket status : ${log.status}`;
+        statusElement.textContent = `티켓 상태 : ${log.status}`;
         logElement.appendChild(statusElement);
 
-        const updatedAtElement = document.createElement('p');
-        updatedAtElement.textContent = `Date : ${log.updatedAt}`;
-        logElement.appendChild(updatedAtElement);
+        const createdAtElement = document.createElement('p');
+        createdAtElement.textContent = `티켓 구매 일자 : ${log.createdAt}`;
+        logElement.appendChild(createdAtElement);
 
         // 환불
         const refundButton = document.createElement('button');
@@ -277,8 +270,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (err) {
       // 사용자 예매 목록 조회 실패 시 에러 처리
       console.log(err.response.data);
-      const errorMessage = err.response.data.message;
-      alert(errorMessage);
     }
   }
 
@@ -304,14 +295,11 @@ document.addEventListener('DOMContentLoaded', function () {
         },
       });
 
-      console.log('Response data: ', response.data);
-
       const bookmarkList = response.data.getBookmarkList;
-      console.log('Bookmark List: ', bookmarkList);
 
       // 북마크 목록이 존재하지 않을 때
       if (bookmarkList.length === 0) {
-        alert('북마크 목록이 없습니다.');
+        bookmarkListContainer.innerHTML = '';
         return;
       }
 
@@ -320,16 +308,25 @@ document.addEventListener('DOMContentLoaded', function () {
       bookmarkList.forEach((log, index) => {
         const logElement = document.createElement('div');
         logElement.classList.add('bookmark-list');
+        logElement.dataset.showId = log.showId;
 
-        const showIdElement = document.createElement('p');
-        showIdElement.textContent = `Show ID : ${log.showId}`;
-        logElement.appendChild(showIdElement);
+        const showTitleElement = document.createElement('p');
+        showTitleElement.textContent = `공연 제목 : ${log.showTitle}`;
+        logElement.appendChild(showTitleElement);
+
+        const showContentElement = document.createElement('p');
+        showContentElement.textContent = `공연 설명 : ${log.showContent}`;
+        logElement.appendChild(showContentElement);
 
         const createdAtElement = document.createElement('p');
-        createdAtElement.textContent = `Bookmark date : ${log.createdAt}`;
+        createdAtElement.textContent = `찜 한 날짜 : ${log.createdAt}`;
         logElement.appendChild(createdAtElement);
 
         bookmarkListContainer.appendChild(logElement);
+
+        logElement.addEventListener('click', () => {
+          window.location.href = `/views/shows/${log.showId}`;
+        });
 
         if (index < bookmarkList.length - 1) {
           const separator = document.createElement('hr');
@@ -340,8 +337,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (err) {
       // 사용자 북마크 목록 조회 실패 시 에러 처리
       console.log(err.response.data);
-      const errorMessage = err.response.data.message;
-      alert(errorMessage);
     }
   }
 
@@ -367,14 +362,11 @@ document.addEventListener('DOMContentLoaded', function () {
         },
       });
 
-      console.log('Response data: ', response.data);
-
       const tradeLog = response.data.getTradeLog;
-      console.log('Trade Log: ', tradeLog);
 
       // 거래 내역이 존재하지 않을 때
       if (tradeLog.length === 0) {
-        alert('거래 내역이 없습니다.');
+        tradeLogContainer.innerHTML = '';
         return;
       }
 
@@ -384,17 +376,37 @@ document.addEventListener('DOMContentLoaded', function () {
         const logElement = document.createElement('div');
         logElement.classList.add('trade-log');
 
+        const showTitleElement = document.createElement('p');
+        showTitleElement.textContent = `공연 제목 : ${log.showTitle}`;
+        logElement.appendChild(showTitleElement);
+
+        const ticketPriceElement = document.createElement('p');
+        ticketPriceElement.textContent = `티켓 원가 : ${log.ticketPrice}`;
+        logElement.appendChild(ticketPriceElement);
+
+        const tradePriceElement = document.createElement('p');
+        tradePriceElement.textContent = `중고 거래 가격 : ${log.tradePrice}`;
+        logElement.appendChild(tradePriceElement);
+
+        const tradeCreatedAtElement = document.createElement('p');
+        tradeCreatedAtElement.textContent = `거래 생성 시간 : ${log.tradeCreatedAt}`;
+        logElement.appendChild(tradeCreatedAtElement);
+
+        const tradeStatusElement = document.createElement('p');
+        tradeStatusElement.textContent = `거래 상태 : ${log.tradeStatus}`;
+        logElement.appendChild(tradeStatusElement);
+
         const buyerIdElement = document.createElement('p');
-        buyerIdElement.textContent = `Buyer ID : ${log.buyerId}`;
+        buyerIdElement.textContent = `구매자 닉네임 : ${log.buyerNickname}`;
         logElement.appendChild(buyerIdElement);
 
         const sellerIdElement = document.createElement('p');
-        sellerIdElement.textContent = `Seller ID : ${log.sellerId}`;
+        sellerIdElement.textContent = `판매자 닉네임 : ${log.sellerNickname}`;
         logElement.appendChild(sellerIdElement);
 
-        const createdAtElement = document.createElement('p');
-        createdAtElement.textContent = `Trade date : ${log.createdAt}`;
-        logElement.appendChild(createdAtElement);
+        const tradeLogCreatedAtElement = document.createElement('p');
+        tradeLogCreatedAtElement.textContent = `거래 내역 생성 일자 : ${log.tradeLogCreatedAt}`;
+        logElement.appendChild(tradeLogCreatedAtElement);
 
         // 수정
         const updateTradeBtn = document.createElement('button');
@@ -427,8 +439,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (err) {
       // 사용자 거래 내역 조회 실패 시 에러 처리
       console.log(err.response.data);
-      const errorMessage = err.response.data.message;
-      alert(errorMessage);
     }
   }
 
