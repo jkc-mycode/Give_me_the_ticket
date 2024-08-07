@@ -294,6 +294,10 @@ export class TradesService {
       throw new BadRequestException(MESSAGES.TRADES.NOT_HAVE.TICKET);
     }
 
+    if (ticket.status !== TicketStatus.USEABLE) {
+      throw new BadRequestException('해당 티켓은 사용할 수 없습니다!');
+    }
+
     //검증 타일 END==================================================
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
