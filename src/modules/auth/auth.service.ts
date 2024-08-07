@@ -29,7 +29,7 @@ export class AuthService {
 
     // 비밀번호와 비밀번호 확인 일치 체크
     if (password !== passwordCheck) {
-      throw new BadRequestException(AUTH_MESSAGE.SIGN_UP.PASSWORD_CHECK);
+      throw new BadRequestException(AUTH_MESSAGE.SIGN_UP.PASSWORD_CHECK.NOT_MATCH);
     }
 
     // 이메일 중복 체크
@@ -37,7 +37,7 @@ export class AuthService {
       where: { email },
     });
     if (existedUser) {
-      throw new ConflictException(AUTH_MESSAGE.SIGN_UP.EMAIL);
+      throw new ConflictException(AUTH_MESSAGE.SIGN_UP.EMAIL.CONFLICT);
     }
 
     // 닉네임 중복 체크
@@ -45,7 +45,7 @@ export class AuthService {
       where: { nickname },
     });
     if (existedUser) {
-      throw new ConflictException(AUTH_MESSAGE.SIGN_UP.NICKNAME);
+      throw new ConflictException(AUTH_MESSAGE.SIGN_UP.NICKNAME.CONFLICT);
     }
 
     // 비밀번호 암호화

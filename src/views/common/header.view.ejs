@@ -5,31 +5,31 @@
 <header>
   <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
-      <a class="navbar-brand" href="/views"><b>HOME</b></a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
+      <a class="navbar-brand" href="/views"><img id="logo"
+          src="https://cdn-icons-png.flaticon.com/128/432/432312.png"></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link" href="/views/shows/list">공연 전체 보기</a>
+          <!-- <li class="nav-item">
+            <a class="nav-link" href="/views/shows/list"><b>공연 전체 보기</b></a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/views/shows/list"><b>공연 전체 보기</b></a>
+          </li> -->
           <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              href="#"
-              role="button"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
-            >
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              메뉴
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="nav-link" href="/views/shows/list"><b>공연 전체 보기</b></a></li>
+              <li><a class="nav-link" href="/views/trades/list"><b>중고 거래 목록 보기</b></a></li>
+            </ul>
+          </li>
+          <li id="adminTab" class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               관리자 탭
             </a>
             <ul class="dropdown-menu">
@@ -38,31 +38,23 @@
           </li>
         </ul>
         <form class="d-flex justify-content-center" role="search" id="headerSearchForm">
-          <input
-            class="form-control me-2 search-input"
-            type="search"
-            placeholder="Search"
-            aria-label="Search"
-            id="headerSearchInput"
-          />
+          <input class="form-control me-2 search-input" type="search" placeholder="Search" aria-label="Search"
+            id="headerSearchInput" />
           <button type="button" class="btn btn-outline-secondary" id="headerSearchButton">
-            Search
+            <b>Search</b>
           </button>
         </form>
         <ul class="nav justify-content-end" id="sign-in-before">
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="/views/auth/sign">로그인</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="/views/auth/sign">회원가입</a>
+            <a class="nav-link" aria-current="page" href="/views/auth/sign"><b>로그인</b></a>
           </li>
         </ul>
         <ul class="nav justify-content-end" id="sign-in-after" style="display: none">
           <li class="nav-item">
-            <a class="nav-link" href="/views/users/me">내 정보</a>
+            <a class="nav-link" href="/views/users/me"><b>내 정보</b></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="" id="sign-out-btn">로그아웃</a>
+            <a class="nav-link" href="" id="sign-out-btn"><b>로그아웃</b></a>
           </li>
         </ul>
       </div>
