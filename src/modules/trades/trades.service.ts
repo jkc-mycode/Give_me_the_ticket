@@ -237,9 +237,10 @@ export class TradesService {
 
     const imageUrl = await this.imageRepository.find({
       where: { showId: trade.showId },
+      select: { imageUrl: true },
     });
-
-    trade['imageUrl'] = imageUrl;
+    const image = imageUrl[0].imageUrl;
+    trade['imageUrl'] = image;
 
     return trade;
   }

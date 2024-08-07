@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   tradeContainer.innerHTML = '';
   tradeContainer.innerHTML += `<div class="tradeImage">
           <img
-            src="${result.imageurl}"
+            src="${result.imageUrl}"
             alt="이미지 파일 존재하지 않습니다"
           />
         </div>
@@ -60,8 +60,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="closedAt">만료 시한: ${result.closedAt}</div>
         <div class="createdAt">생성 시간:${result.createdAt}</div>
         <div class="updatedAt">마지막으로 수정한 시간:${result.updatedAt}</div>`;
-  PurchaseContainer.innerHTML = '';
-  PurchaseContainer.innerHTML = `<button style="  display: flex;
-  justify-content: center;
-  align-items: center;" type="button" class="btn btn-primary">Primary</button>`;
 });
