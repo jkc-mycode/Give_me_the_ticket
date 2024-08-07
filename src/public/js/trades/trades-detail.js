@@ -62,6 +62,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="updatedAt">마지막으로 수정한 시간:${result.updatedAt}</div>`;
   PurchaseBtn.addEventListener('click', async (e) => {
     e.preventDefault();
-    const end = await axios.post(`/trades/${tradeId}`);
+    try {
+      const data = await axios.post(
+        `/trades/${tradeId}`,
+        {}, // 서버로 보낼 데이터 (없다면 빈 객체)
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // 인증 헤더에 토큰 추가
+          },
+        }
+      );
+      alert('거래에 성공했습니다!');
+      window.location.href = '/views/trades/list';
+    } catch (err) {
+      console.error('중고 거래 구매에 실패했습니다.');
+      alert('중고 거래 구매에 실패했습니다.');
+    }
   });
 });
