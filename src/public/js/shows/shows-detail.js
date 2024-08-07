@@ -11,7 +11,31 @@ document.addEventListener('DOMContentLoaded', function () {
   // 전역 변수 설정
   window.selectedScheduleId = null;
   let isBookmarked = false;
-  let bookmarkId = null;
+  let bookmarkId;
+  //내가 찜한 목록을 가져오기 그리고 url상의 showId와 일치하는지 판단을 한다.
+  //찜목록에 있으면 취소 없으면 찜하기 버튼
+
+  async function getBookmarkedShows() {
+    try {
+      const response = await axios.get('/users/me/bookmark', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200 && response.data) {
+        return response.data.getBookmarkList || [];
+
+        // bookmarks가 없는 경우 빈 배열을 반환
+      } else {
+        console.error('찜 목록을 가져오는 데 실패했습니다.');
+        return [];
+      }
+    } catch (error) {
+      console.error('찜 목록 가져오기 오류:', error);
+      return [];
+    }
+  }
 
   //----------- getShowDetail 함수 ---------------------
   async function getShowDetail(showId) {
@@ -70,8 +94,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // 초기 상태 설정
-        isBookmarked = data.isBookmarked; // 서버로부터 초기 찜하기 상태를 가져온다고 가정합니다.
-        bookmarkId = data.bookmarkId; // 서버로부터 bookmarkId를 가져온다고 가정합니다.
+        const bookmarks = await getBookmarkedShows();
+        const isBookmarkedShow = bookmarks.some((bookmark) => bookmark.showId === +showId);
+        isBookmarked = isBookmarkedShow;
+        bookmarkId = isBookmarkedShow
+          ? bookmarks.find((bookmark) => bookmark.showId === +showId).id
+          : null;
+
         updateBookmarkButton();
       } else {
         console.error('서버에서 데이터를 가져오지 못했습니다.');
@@ -127,42 +156,45 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   function updateBookmarkButton() {
+    const bookmarkBtn = document.getElementById('bookmarkBtn');
     if (isBookmarked) {
       bookmarkBtn.classList.add('bookmarked');
       bookmarkBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
-          <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"></path>
-        </svg>
-        찜하기 취소
-      `;
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart-fill" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"></path>
+      </svg>
+      찜하기 취소
+    `;
+      bookmarkBtn.setAttribute('data-bookmarked', 'true');
     } else {
       bookmarkBtn.classList.remove('bookmarked');
       bookmarkBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
-          <path d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"></path>
-        </svg>
-        찜하기
-      `;
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+        <path d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"></path>
+      </svg>
+      찜하기
+    `;
+      bookmarkBtn.setAttribute('data-bookmarked', 'false');
     }
   }
-
-  bookmarkBtn.addEventListener('click', async function () {
+  document.getElementById('bookmarkBtn').addEventListener('click', async function () {
     try {
+      const method = isBookmarked ? 'delete' : 'post';
+      const url = isBookmarked
+        ? `/shows/${showId}/bookmark/${bookmarkId}`
+        : `/shows/${showId}/bookmark`;
+
       const response = await axios({
-        method: isBookmarked ? 'delete' : 'post',
-        url: isBookmarked ? `/shows/${showId}/bookmark/${bookmarkId}` : `/shows/${showId}/bookmark`,
+        method: method,
+        url: url,
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
+      console.log(bookmarkId);
       if (response.status === 200 || response.status === 201) {
         isBookmarked = !isBookmarked;
-        if (isBookmarked) {
-          bookmarkId = response.data.bookmarkId; // 찜하기 성공 시 서버에서 bookmarkId를 반환한다고 가정합니다.
-        } else {
-          bookmarkId = null; // 찜하기 취소 시 bookmarkId를 초기화합니다.
-        }
+        bookmarkId = isBookmarked ? response.data.bookmarkId : null; // 찜하기 성공 시 서버에서 bookmarkId를 반환한다고 가정합니다.
         updateBookmarkButton();
         alert(isBookmarked ? '찜하기가 완료되었습니다.' : '찜하기가 취소되었습니다.');
       } else {

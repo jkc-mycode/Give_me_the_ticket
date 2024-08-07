@@ -16,7 +16,7 @@ export const SHOW_TICKET_MESSAGES = {
       NOT_ENOUGH: '예약 가능한 좌석이 없습니다.',
     },
     TICKET: {
-      NOT_FOUND: '티켓을 찾을 수 없습니다.',
+      NOT_FOUND: '티켓을 찾을 수 없거나 티켓이 환불이 어려운 상태입니다.',
       SUCCESS: '티켓 구매에 성공했습니다.',
       MAXIMUM: '한 공연당 최대 5개의 티켓을 구매할 수 있습니다.',
     },

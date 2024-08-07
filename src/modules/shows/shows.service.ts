@@ -472,7 +472,7 @@ export class ShowsService {
       const pointLog = queryRunner.manager.create(PointLog, {
         userId: user.id,
         type: PointType.WITHDRAW,
-        description: `${show.title}티켓 결제`,
+        description: `${show.title} 티켓 결제`,
         price: show.price,
       });
 
@@ -515,10 +515,13 @@ export class ShowsService {
     await queryRunner.startTransaction();
     try {
       // 환불할 티켓이 있는지 확인합니다.
+      //사용 중이거나 거래중인 티켓만 환불하도록 제한을 걸었습니다.
+
       const ticket = await queryRunner.manager.findOne(Ticket, {
         where: {
           id: ticketId,
           showId,
+          status: In([TicketStatus.USEABLE, TicketStatus.TRADING]),
         },
       });
 
@@ -594,7 +597,7 @@ export class ShowsService {
       const pointLog = queryRunner.manager.create(PointLog, {
         userId: user.id,
         price: refundPoint,
-        description: `${ticket.title}티켓 환불`,
+        description: `${ticket.title} 티켓 환불`,
         type: PointType.DEPOSIT,
       });
 
