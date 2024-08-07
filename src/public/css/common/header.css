@@ -4,6 +4,10 @@ header {
   padding-right: 14%;
 }
 
+.dropdown-menu>li {
+  width: 180px
+}
+
 .navbar-expand-lg {
   height: 80px;
   background-color: #e3f2fd;
