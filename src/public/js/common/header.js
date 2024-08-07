@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 headerSearchButton.addEventListener('click', () => {
   const search = headerSearchInput.value;
   const currentUrl = new URL(window.location.href);
+  currentUrl.pathname = '/views/shows/list';
   currentUrl.searchParams.set('search', search);
   window.location.href = currentUrl.href;
 });
@@ -75,6 +76,7 @@ headerSearchForm.addEventListener('submit', (event) => {
   event.preventDefault();
   const search = headerSearchInput.value;
   const currentUrl = new URL(window.location.href);
+  currentUrl.pathname = '/views/shows/list';
   currentUrl.searchParams.set('search', search);
   window.location.href = currentUrl.href;
 });

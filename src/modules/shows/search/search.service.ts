@@ -62,6 +62,7 @@ export class SearchService {
         });
       }
     } catch (error) {
+      console.error('인덱스 생성 오류:', error);
       throw new InternalServerErrorException(SHOW_MESSAGES.INDEX.FAIL);
     }
   }
@@ -83,6 +84,23 @@ export class SearchService {
       throw new InternalServerErrorException(SHOW_MESSAGES.INDEX.FAIL);
     }
   }
+
+  //전체 show 동기화
+  // private async syncAllShows() {
+  //   try {
+  //     const allShows = await this.showRepository.find();
+
+  //     if (allShows.length > 0) {
+  //       await Promise.all(allShows.map((show) => this.indexShowData(show)));
+  //       console.log(`${allShows.length}개의 쇼 동기화 완료`);
+  //     } else {
+  //       console.log('동기화할 쇼 없음');
+  //     }
+  //   } catch (error) {
+  //     console.error('동기화 오류:', error);
+  //     throw new InternalServerErrorException(SHOW_MESSAGES.INDEX.FAIL);
+  //   }
+  // }
 
   // show 동기화 (스케줄링)
   private async syncAllShows() {
