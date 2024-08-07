@@ -34,8 +34,6 @@ export class SearchService {
                 tokenizer: {
                   ngram_tokenizer: {
                     type: 'ngram',
-                    min_gram: 1,
-                    max_gram: 20,
                     token_chars: ['letter', 'digit', 'whitespace'],
                   },
                 },
@@ -71,17 +69,13 @@ export class SearchService {
   // show 데이터 인덱싱
   public async indexShowData(show: Show) {
     try {
-      const shows = await this.showRepository.findOne({
-        where: { id: show.id },
-      });
-
       await this.eService.index({
         index: this.indexName,
-        id: shows.id.toString(),
+        id: show.id.toString(),
         body: {
-          id: shows.id,
-          title: shows.title,
-          category: shows.category,
+          id: show.id,
+          title: show.title,
+          category: show.category,
         },
       });
     } catch (error) {
@@ -132,6 +126,7 @@ export class SearchService {
           query: `*${search.replace(/ /g, '*')}*`,
           fields: ['title'],
           analyze_wildcard: true,
+          fuzziness: 'AUTO',
         },
       });
     }

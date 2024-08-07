@@ -4,7 +4,7 @@ export const SHOW_MESSAGES = {
   COMMON: {
     TITLE: {
       REQUIRED: '공연명을 입력해주세요.',
-      EXISTED: '이미 등록된 공연입니다.',
+      EXISTED: '중복된 공연명입니다. 공연명을 확인해주세요.',
     },
 
     CONTENT: {
