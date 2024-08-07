@@ -33,7 +33,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     try {
       const userInfo = await getUserInfo();
-      if (!userInfo) {
+
+      if (userInfo === null) {
+        throw new Error('사용자 정보를 가져오는 데 실패했습니다.');
+      }
+
+      // 올바른 사용자 역할 정보 접근
+      const userRole = userInfo.getUserProfile.role;
+      if (userRole !== 'ADMIN') {
         alert('접근 권한이 없습니다.');
         window.location.href = '/views'; // 메인 페이지로 이동
         return;

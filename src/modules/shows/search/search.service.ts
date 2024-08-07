@@ -74,7 +74,6 @@ export class SearchService {
       const shows = await this.showRepository.findOne({
         where: { id: show.id },
       });
-      console.log('Indexing show:', shows);
 
       await this.eService.index({
         index: this.indexName,
@@ -94,17 +93,13 @@ export class SearchService {
   // show 동기화 (스케줄링)
   private async syncAllShows() {
     try {
-      const indexTime = new Date(Date.now() - 5 * 60 * 1000); // 5분 전 시간 기록
-      console.log('Index Time:', indexTime);
+      const indexTime = new Date(Date.now() - 5 * 60 * 1000);
 
       const updatedShows = await this.showRepository.find({
-        where: { updatedAt: MoreThan(indexTime) }, // 5분 사이에 수정된 데이터 찾기
+        where: { updatedAt: MoreThan(indexTime) },
       });
 
-      console.log(`동기화할 쇼: ${updatedShows.length}개`);
-
       if (updatedShows.length > 0) {
-        //만약 수정된 데이터가 있으면 인덱싱
         await Promise.all(updatedShows.map((show) => this.indexShowData(show)));
       }
     } catch (error) {
@@ -115,7 +110,6 @@ export class SearchService {
 
   @Cron('*/5 * * * *') //5분마다 동기화
   async handleCron() {
-    console.log('Cron 동작');
     await this.syncAllShows();
   }
 
@@ -170,8 +164,6 @@ export class SearchService {
   // show 삭제 시 인덱스에서 삭제
   async deleteShowIndex(showId: number) {
     try {
-      console.log('Deleting show from index:', showId);
-
       await this.eService.delete({
         index: this.indexName,
         id: showId.toString(),
