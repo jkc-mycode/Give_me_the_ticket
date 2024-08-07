@@ -47,15 +47,15 @@ export class UsersService {
       const pointLog = await this.pointLogRepository.find({ where: { userId: id } });
 
       // 날짜 형식 변환
-      const dateFormatPointLog = pointLog.map((log) => {
+      const dateFormatPointLog = pointLog.map((point) => {
         // KST로 변환 (+9시간)
-        const kstDate = new Date(log.createdAt);
+        const kstDate = new Date(point.createdAt);
         kstDate.setHours(kstDate.getHours() + 9);
 
         const dateFormat = format(kstDate, 'yyyy-MM-dd HH:mm:ss');
 
         return {
-          ...log,
+          ...point,
           createdAt: dateFormat,
         };
       });
@@ -75,7 +75,21 @@ export class UsersService {
         throw new NotFoundException(USER_MESSAGES.USER.TICKET.GET_LIST.FAILURE.NOT_FOUND);
       }
 
-      return ticket;
+      // 날짜 형식 변환
+      const dateFormatTicket = ticket.map((ticket) => {
+        // KST로 변환 (+9시간)
+        const kstDate = new Date(ticket.createdAt);
+        kstDate.setHours(kstDate.getHours() + 9);
+
+        const dateFormat = format(kstDate, 'yyyy-MM-dd HH:mm:ss');
+
+        return {
+          ...ticket,
+          createdAt: dateFormat,
+        };
+      });
+
+      return dateFormatTicket;
     } catch (err) {
       throw new InternalServerErrorException(USER_MESSAGES.USER.TICKET.GET_LIST.FAILURE.FAIL);
     }
@@ -95,13 +109,25 @@ export class UsersService {
         );
       }
 
-      return bookmark.map((bookmark) => ({
-        id: bookmark.id,
-        userId: bookmark.userId,
-        showId: bookmark.showId,
-        title: bookmark.show.title,
-        createdAt: bookmark.createdAt,
-      }));
+      // 날짜 형식 변환
+      const dateFormatBookmark = bookmark.map((bookmark) => {
+        // KST로 변환 (+9시간)
+        const kstDate = new Date(bookmark.createdAt);
+        kstDate.setHours(kstDate.getHours() + 9);
+
+        const dateFormat = format(kstDate, 'yyyy-MM-dd HH:mm:ss');
+
+        return {
+          id: bookmark.id,
+          userId: bookmark.userId,
+          showId: bookmark.showId,
+          title: bookmark.show.title,
+          content: bookmark.show.content,
+          createdAt: dateFormat,
+        };
+      });
+
+      return dateFormatBookmark;
     } catch (err) {
       throw new InternalServerErrorException(
         USER_BOOKMARK_MESSAGES.COMMON.BOOKMARK.GET_LIST.FAILURE.FAIL
@@ -127,7 +153,21 @@ export class UsersService {
         relations: { ticket: true },
       });
 
-      return trade;
+      // 날짜 형식 변환
+      const dateFormatTradeLog = tradeLog.map((trade) => {
+        // KST로 변환 (+9시간)
+        const kstDate = new Date(trade.createdAt);
+        kstDate.setHours(kstDate.getHours() + 9);
+
+        const dateFormat = format(kstDate, 'yyyy-MM-dd HH:mm:ss');
+
+        return {
+          ...trade,
+          createdAt: dateFormat,
+        };
+      });
+
+      return dateFormatTradeLog;
     } catch (err) {
       throw new InternalServerErrorException(USER_MESSAGES.USER.TRADE.GET_LOG.FAILURE.FAIL);
     }
