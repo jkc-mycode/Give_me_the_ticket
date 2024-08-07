@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const token = window.localStorage.getItem('accessToken');
 
     // 포인트 조회를 통해서 토큰이 유효한지 확인
-    const response = await axios.get('/users/me/point', {
+    const response = await axios.get('/users/me', {
       headers: {
         Authorization: `Bearer ${token}`,
       },
