@@ -185,6 +185,8 @@ export class TradesService {
           where: { showId: ticket.showId },
         });
 
+        //시간이 맞지 않는 티켓이 있다면 삭제
+
         //show에서 장소와 이름을 추가,schedule에서 날짜와 시간을 추가
         if (ticket) {
           trade['imageurl'] = image.imageUrl;

@@ -34,8 +34,6 @@ export class SearchService {
                 tokenizer: {
                   ngram_tokenizer: {
                     type: 'ngram',
-                    min_gram: 1,
-                    max_gram: 20,
                     token_chars: ['letter', 'digit', 'whitespace'],
                   },
                 },
@@ -64,6 +62,7 @@ export class SearchService {
         });
       }
     } catch (error) {
+      console.error('인덱스 생성 오류:', error);
       throw new InternalServerErrorException(SHOW_MESSAGES.INDEX.FAIL);
     }
   }
@@ -71,17 +70,13 @@ export class SearchService {
   // show 데이터 인덱싱
   public async indexShowData(show: Show) {
     try {
-      const shows = await this.showRepository.findOne({
-        where: { id: show.id },
-      });
-
       await this.eService.index({
         index: this.indexName,
-        id: shows.id.toString(),
+        id: show.id.toString(),
         body: {
-          id: shows.id,
-          title: shows.title,
-          category: shows.category,
+          id: show.id,
+          title: show.title,
+          category: show.category,
         },
       });
     } catch (error) {
@@ -89,6 +84,23 @@ export class SearchService {
       throw new InternalServerErrorException(SHOW_MESSAGES.INDEX.FAIL);
     }
   }
+
+  //전체 show 동기화
+  // private async syncAllShows() {
+  //   try {
+  //     const allShows = await this.showRepository.find();
+
+  //     if (allShows.length > 0) {
+  //       await Promise.all(allShows.map((show) => this.indexShowData(show)));
+  //       console.log(`${allShows.length}개의 쇼 동기화 완료`);
+  //     } else {
+  //       console.log('동기화할 쇼 없음');
+  //     }
+  //   } catch (error) {
+  //     console.error('동기화 오류:', error);
+  //     throw new InternalServerErrorException(SHOW_MESSAGES.INDEX.FAIL);
+  //   }
+  // }
 
   // show 동기화 (스케줄링)
   private async syncAllShows() {
@@ -132,6 +144,7 @@ export class SearchService {
           query: `*${search.replace(/ /g, '*')}*`,
           fields: ['title'],
           analyze_wildcard: true,
+          fuzziness: 'AUTO',
         },
       });
     }
