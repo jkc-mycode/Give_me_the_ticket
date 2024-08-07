@@ -8,6 +8,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const categoryQuery = params.get('category') || ''; // 카테고리 쿼리 가져오기
   let currentCategory = categoryQuery;
 
+  // 검색어를 검색창에 설정
+  headerSearchInput.value = searchQuery;
+
   // 서버에서 데이터 가져오기
   async function fetchShows(page, limit, search = '', category = '') {
     try {
