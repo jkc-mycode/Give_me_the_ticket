@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GIVE ME THE TICKET</title>
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="https://cdn-icons-png.flaticon.com/128/432/432312.png"
+    />
 
     <!-- 부트스트랩 CSS CDN -->
     <link
@@ -38,7 +43,10 @@
     <main>
       <div class="container">
         <!-- Heading -->
-        <h1>SHOW CREATE</h1>
+        <h1>공연 생성</h1>
+
+        <!-- 에러 메시지 표시 -->
+        <div id="error-message" class="alert alert-danger" style="display: none"></div>
 
         <!-- 공연 생성 폼 -->
         <form id="createShowForm">
@@ -51,12 +59,24 @@
             <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
           </div>
           <div class="mb-3">
-            <label for="category" class="form-label">카테고리</label>
-            <select class="form-control" id="category" name="category" required>
-              <option value="Musical">Musical</option>
-              <option value="Concert">Concert</option>
-              <option value="Play">Play</option>
-            </select>
+            <label for="categoryDropdown" class="form-label">카테고리</label>
+            <div class="dropdown">
+              <button
+                class="btn btn-secondary dropdown-toggle"
+                type="button"
+                id="categoryDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                카테고리 선택
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="categoryDropdown">
+                <li><a class="dropdown-item" href="#" data-value="Musical">뮤지컬</a></li>
+                <li><a class="dropdown-item" href="#" data-value="Concert">콘서트</a></li>
+                <li><a class="dropdown-item" href="#" data-value="Play">연극</a></li>
+              </ul>
+            </div>
+            <input type="hidden" id="category" name="category" required />
           </div>
           <div class="mb-3">
             <label for="runtime" class="form-label">상영 시간 (분)</label>

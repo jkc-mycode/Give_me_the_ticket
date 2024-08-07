@@ -5,6 +5,10 @@ document.addEventListener('DOMContentLoaded', function () {
   const addScheduleBtn = document.querySelector('#addScheduleBtn');
   const removeScheduleBtn = document.querySelector('#removeScheduleBtn');
   const token = window.localStorage.getItem('accessToken');
+  const categoryButton = document.getElementById('categoryDropdown');
+  const categoryInput = document.getElementById('category');
+  const dropdownItems = document.querySelectorAll('.dropdown-item');
+  const errorMessageDiv = document.getElementById('error-message');
 
   // 로그인하지 않은 사용자는 로그인 페이지로 이동
   if (!token) {
@@ -13,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return;
   }
 
-  //사용자 정보 가져오기
+  // 사용자 정보 가져오기
   async function getUserInfo() {
     try {
       const response = await axios.get('/users/me', {
@@ -51,6 +55,15 @@ document.addEventListener('DOMContentLoaded', function () {
       window.location.href = '/views'; // 메인 페이지로 이동
       return;
     }
+
+    // 드롭다운 항목 클릭하면 해당 항목으로 텍스트 변경 이벤트
+    dropdownItems.forEach((item) => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        categoryButton.textContent = item.textContent;
+        categoryInput.value = item.getAttribute('data-value');
+      });
+    });
 
     // 이미지 미리보기 생성
     const createImagePreview = (url) => {
@@ -150,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const createShowDto = {
           title: formData.get('title'),
           content: formData.get('content'),
-          category: formData.get('category'),
+          category: categoryInput.value,
           runtime: Number(formData.get('runtime')),
           location: formData.get('location'),
           price: Number(formData.get('price')),
@@ -177,12 +190,29 @@ document.addEventListener('DOMContentLoaded', function () {
               <input type="time" class="form-control mb-2" name="scheduleTime" required>
             </div>
           `;
+          //공연 생성 후 공연 목록 페이지로 이동
+          window.location.href = `/views/shows/list`;
         } else {
           alert('공연 생성에 실패했습니다.');
         }
       } catch (error) {
         console.error('공연 생성 오류:', error);
-        alert('공연 생성 중 오류가 발생했습니다.');
+
+        //에러 메세지 출력
+        if (error.response && error.response.data && error.response.data.message) {
+          // 에러 메시지가 배열인 경우 첫 번째 메시지만 표시
+          const errorMessage = Array.isArray(error.response.data.message)
+            ? error.response.data.message[0]
+            : error.response.data.message;
+
+          errorMessageDiv.textContent = errorMessage;
+          errorMessageDiv.style.display = 'block';
+
+          // 화면 맨 위로 스크롤
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          alert('공연 생성 중 오류가 발생했습니다.');
+        }
       }
     });
   })();

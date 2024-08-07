@@ -4,8 +4,8 @@ header {
   padding-right: 14%;
 }
 
-.dropdown-menu>li {
-  width: 180px
+.dropdown-menu > li {
+  width: 180px;
 }
 
 .navbar-expand-lg {
@@ -21,12 +21,25 @@ header {
   width: 220px;
 }
 
-.nav-item>a {
+.nav-item > a {
   color: gray;
 }
 
 .nav {
   --bs-nav-link-hover-color: var(--bs-navbar-hover-color);
+}
+
+#logo {
+  width: 100%;
+}
+
+.navbar-brand {
+  width: 6%;
+  margin-right: 3%;
+}
+
+#adminTab {
+  display: none;
 }
 
 #logo {
