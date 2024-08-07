@@ -25,7 +25,9 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
 
   async validate(accessToken: string, refreshToken: string, profile: any) {
     const email = profile._json.kakao_account.email;
-    const nickname = new Date().getTime().toString(AUTH_STRATEGY.KAKAO.RANDOM_NICKNAME.NUMBER); // 랜덤 닉네임 생성
+    const userName = profile._json.kakao_account.profile.nickname;
+    const nickname =
+      userName + new Date().getTime().toString(AUTH_STRATEGY.KAKAO.RANDOM_NICKNAME.NUMBER); // 랜덤 닉네임 생성
 
     // 기존에 가입한 사용자인지 확인
     let user = await this.usersRepository.findOne({ where: { email } });
