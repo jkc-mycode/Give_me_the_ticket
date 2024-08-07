@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const signUpBtn = document.querySelector('.signup__btn');
   const kakaoSignInBtn = document.querySelector('.kakao__btn');
 
+  let isSignUpMode = false;
+
   // 이미 로그인 했는지 확인
   if (window.localStorage.getItem('accessToken')) {
     alert('잘못된 접근입니다. 다시 시도해 주세요.');
@@ -19,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
   //----------- sign up ---------------------
   signUp.addEventListener('click', function (e) {
     e.preventDefault();
+    isSignUpMode = true;
 
     const h1 = signUp.closest('li').parentNode.previousElementSibling; // h1 요소 찾기
     h1.textContent = 'SIGN UP';
@@ -126,6 +129,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const inputs = document.querySelectorAll('.input__block .input');
     inputs.forEach(function (input) {
       input.value = '';
+    });
+  });
+
+  // 엔터 키 이벤트 추가
+  const inputs = document.querySelectorAll('.input__block .input');
+  inputs.forEach((input) => {
+    input.addEventListener('keypress', (e) => {
+      if (e.keyCode === 13) {
+        if (isSignUpMode) {
+          signUpBtn.click();
+        } else {
+          signInBtn.click();
+        }
+      }
     });
   });
 });

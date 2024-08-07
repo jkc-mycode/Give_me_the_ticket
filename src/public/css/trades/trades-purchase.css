@@ -1,0 +1,18 @@
+.form-floating {
+  margin: 45;
+}
+
+.btn {
+  padding: 10, 30px;
+}
+
+h1 {
+  display: flex;
+  justify-content: center;
+}
+
+.checkBox {
+  margin-top: 100;
+  display: flex;
+  justify-content: center;
+}

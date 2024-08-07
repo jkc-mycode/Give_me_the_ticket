@@ -1,11 +1,16 @@
 #carouselExampleIndicators {
-  margin: 1% 18% 2% 18%;
+  margin: 1% 28% 2% 28%;
+}
+
+.carousel-inner {
+  height: 335px;
 }
 
 .category-container {
   display: flex;
   justify-content: center;
   margin-top: 10px;
+  height: 80%;
 }
 
 .category-btn {
@@ -17,4 +22,82 @@
 .category-btn:hover {
   color: gray;
   text-decoration: underline;
+}
+
+#mainShowListTitle {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 2%;
+}
+
+#showList {
+  height: 100%;
+  padding: 0 7% 0 7%;
+  margin-right: 0px;
+  margin-left: 0px;
+}
+
+.col-2 {
+  flex: 0 0 20%;
+  max-width: 20%;
+  height: 300px;
+}
+
+.card-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-img-top {
+  height: 300px;
+}
+
+.card-body {
+  height: 200px;
+}
+
+.view-details {
+  width: 100%;
+}
+
+#mainShowListTitle {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 2%;
+}
+
+#showList {
+  height: 100%;
+  padding: 0 7% 0 7%;
+  margin-right: 0px;
+  margin-left: 0px;
+}
+
+.col-2 {
+  flex: 0 0 20%;
+  max-width: 20%;
+  height: 300px;
+}
+
+.card-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-img-top {
+  height: 300px;
+}
+
+.card-body {
+  height: 200px;
+}
+
+.view-details {
+  width: 100%;
 }

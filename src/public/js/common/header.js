@@ -17,6 +17,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       },
     });
 
+    if (response.data.getUserProfile.role === 'ADMIN') {
+      document.getElementById('adminTab').style.display = 'flex';
+    }
+
     // 로그인 한 상태라면
     signBefore.style.display = 'none';
     signAfter.style.display = 'flex';

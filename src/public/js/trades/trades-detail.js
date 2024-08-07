@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backBtn = document.querySelector('.back__btn');
   const token = window.localStorage.getItem('accessToken');
   const tradeContainer = document.querySelector('#tradeBox');
+  const PurchaseBtn = document.querySelector('#createTrade');
   // const title = document.querySelector('.title');
   // const price = document.querySelector('.price');
   // const location = document.querySelector('.location');
@@ -27,6 +28,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = `/views`;
   });
 
+  function getTradeIdFromParam() {
+    const pathSegments = window.location.pathname.split('/');
+    return pathSegments[pathSegments.length - 1];
+  }
+
   //중고거래 상세 정보 가져오기
   async function getDetailTrade(tradeId) {
     try {
@@ -43,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   tradeContainer.innerHTML = '';
   tradeContainer.innerHTML += `<div class="tradeImage">
           <img
-            src="https://i.ytimg.com/vi/ncp7nyI3Fso/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLAU9oJCAdxlFtD7q_laTBWldkQnTA"
+            src="${result.imageUrl}"
             alt="이미지 파일 존재하지 않습니다"
           />
         </div>
@@ -54,4 +60,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="closedAt">만료 시한: ${result.closedAt}</div>
         <div class="createdAt">생성 시간:${result.createdAt}</div>
         <div class="updatedAt">마지막으로 수정한 시간:${result.updatedAt}</div>`;
+  PurchaseBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    try {
+      const data = await axios.post(
+        `/trades/${tradeId}`,
+        {}, // 서버로 보낼 데이터 (없다면 빈 객체)
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // 인증 헤더에 토큰 추가
+          },
+        }
+      );
+      alert('거래에 성공했습니다!');
+      window.location.href = '/views/trades/list';
+    } catch (err) {
+      console.error('중고 거래 구매에 실패했습니다.');
+      alert('중고 거래 구매에 실패했습니다.');
+    }
+  });
 });
