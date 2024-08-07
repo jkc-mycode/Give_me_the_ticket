@@ -56,10 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
         },
       });
 
-      console.log('Response data: ', response.data);
-
       const user = response.data.getUserProfile;
-      console.log('User data: ', user);
 
       document.getElementById('nickname').textContent = user.nickname;
       document.getElementById('email').textContent = user.email;
@@ -102,16 +99,11 @@ document.addEventListener('DOMContentLoaded', function () {
         },
       });
 
-      console.log('Point response data: ', response.data);
-
       const user = response.data.getUserProfile;
-      console.log('User Point data: ', user);
 
       document.getElementById('userPoint').textContent = user.point;
     } catch (err) {
       console.log(err.response.data);
-      const errorMessage = err.response.data.message;
-      alert(errorMessage);
     }
 
     try {
@@ -122,14 +114,11 @@ document.addEventListener('DOMContentLoaded', function () {
         },
       });
 
-      console.log('Response data: ', response.data);
-
       const pointLog = response.data.getPointLog;
-      console.log('Point Log: ', pointLog);
 
       // 포인트 내역이 존재하지 않을 때
       if (pointLog.length === 0) {
-        alert('포인트 내역이 없습니다.');
+        pointLogContainer.innerHTML = '';
         return;
       }
 
@@ -166,8 +155,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (err) {
       // 사용자 포인트 내역 조회 실패 시 에러 처리
       console.log(err.response.data);
-      const errorMessage = err.response.data.message;
-      alert(errorMessage);
     }
   }
 
@@ -198,14 +185,11 @@ document.addEventListener('DOMContentLoaded', function () {
         },
       });
 
-      console.log('Response data: ', response.data);
-
       const ticketList = response.data.getTicketList;
-      console.log('Ticket List: ', ticketList);
 
       // 예매 목록이 존재하지 않을 때
       if (ticketList.length === 0) {
-        alert('예매 목록이 없습니다.');
+        ticketListContainer.innerHTML = '';
         return;
       }
 
@@ -276,8 +260,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (err) {
       // 사용자 예매 목록 조회 실패 시 에러 처리
       console.log(err.response.data);
-      const errorMessage = err.response.data.message;
-      alert(errorMessage);
     }
   }
 
@@ -303,14 +285,11 @@ document.addEventListener('DOMContentLoaded', function () {
         },
       });
 
-      console.log('Response data: ', response.data);
-
       const bookmarkList = response.data.getBookmarkList;
-      console.log('Bookmark List: ', bookmarkList);
 
       // 북마크 목록이 존재하지 않을 때
       if (bookmarkList.length === 0) {
-        alert('북마크 목록이 없습니다.');
+        bookmarkListContainer.innerHTML = '';
         return;
       }
 
@@ -320,9 +299,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const logElement = document.createElement('div');
         logElement.classList.add('bookmark-list');
 
-        const showIdElement = document.createElement('p');
-        showIdElement.textContent = `Show ID : ${log.showId}`;
-        logElement.appendChild(showIdElement);
+        const showTitleElement = document.createElement('p');
+        showTitleElement.textContent = `Show Title : ${log.title}`;
+        logElement.appendChild(showTitleElement);
 
         const createdAtElement = document.createElement('p');
         createdAtElement.textContent = `Bookmark date : ${log.createdAt}`;
@@ -339,8 +318,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (err) {
       // 사용자 북마크 목록 조회 실패 시 에러 처리
       console.log(err.response.data);
-      const errorMessage = err.response.data.message;
-      alert(errorMessage);
     }
   }
 
@@ -366,14 +343,11 @@ document.addEventListener('DOMContentLoaded', function () {
         },
       });
 
-      console.log('Response data: ', response.data);
-
       const tradeLog = response.data.getTradeLog;
-      console.log('Trade Log: ', tradeLog);
 
       // 거래 내역이 존재하지 않을 때
       if (tradeLog.length === 0) {
-        alert('거래 내역이 없습니다.');
+        tradeLogContainer.innerHTML = '';
         return;
       }
 
@@ -406,8 +380,6 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (err) {
       // 사용자 거래 내역 조회 실패 시 에러 처리
       console.log(err.response.data);
-      const errorMessage = err.response.data.message;
-      alert(errorMessage);
     }
   }
 

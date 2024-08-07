@@ -51,7 +51,6 @@ export class PaymentsService {
   async verifyPayment(user: User, imp_uid: string, merchant_uid: string, amount: number) {
     try {
       const token = await this.getToken();
-      console.log('portone token: ', token);
 
       // portone 서버에서 결제 정보 가져오기
       const response = await lastValueFrom(
@@ -61,7 +60,6 @@ export class PaymentsService {
       );
 
       const payment = response.data.response;
-      console.log('portone 결제 정보: ', payment);
 
       if (!payment) {
         throw new NotFoundException('결제 내역을 찾을 수 없습니다.');
@@ -72,8 +70,6 @@ export class PaymentsService {
       if (type !== 'charge') {
         throw new BadRequestException('유효하지 않은 merchant_uid');
       }
-
-      console.log(`결제 검증 - imp_uid: ${imp_uid}, merchant_uid: ${merchant_uid}`);
 
       if (payment.amount !== amount) {
         throw new InternalServerErrorException('결제 금액 불일치');
@@ -103,7 +99,7 @@ export class PaymentsService {
           throw new InternalServerErrorException('결제 상태 불일치');
       }
     } catch (err) {
-      console.log('결제 검증 실패 에러: ', err);
+      console.log(err);
       throw new InternalServerErrorException('결제 결과 검증 실패');
     }
   }

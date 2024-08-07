@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // 수정 후 마이 페이지로 이동
       window.location.href = '/views/users/me';
     } catch (err) {
-      console.log('Error: ', err.response.data);
+      console.log(err.response.data);
       alert(err.response.data.message);
     }
   });

@@ -84,7 +84,10 @@ export class UsersService {
   // 북마크 목록 조회
   async getBookmarkList(id: number) {
     try {
-      const bookmark = await this.bookmarkRepository.find({ where: { userId: id } });
+      const bookmark = await this.bookmarkRepository.find({
+        where: { userId: id },
+        relations: ['show'],
+      });
 
       if (bookmark.length === 0) {
         throw new NotFoundException(
@@ -92,7 +95,13 @@ export class UsersService {
         );
       }
 
-      return bookmark;
+      return bookmark.map((bookmark) => ({
+        id: bookmark.id,
+        userId: bookmark.userId,
+        showId: bookmark.showId,
+        title: bookmark.show.title,
+        createdAt: bookmark.createdAt,
+      }));
     } catch (err) {
       throw new InternalServerErrorException(
         USER_BOOKMARK_MESSAGES.COMMON.BOOKMARK.GET_LIST.FAILURE.FAIL
