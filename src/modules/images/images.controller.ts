@@ -28,7 +28,6 @@ export class ImagesController {
     // 만약 사용자 프로필 사진이면 1로 수정
     // 만약 공연 등록 이미지라면 여러장에 대한 이미지를 업로드 하고
     // 반환되는 URL를 공연 등록 시 배열 형태로 DTO에 전달
-    console.log(files, maxImageLength);
     return await this.imagesService.uploadImage(files, maxImageLength);
   }
 }

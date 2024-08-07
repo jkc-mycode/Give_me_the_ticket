@@ -15,10 +15,9 @@ export class SearchService {
     @InjectRepository(Show) private readonly showRepository: Repository<Show>
   ) {}
 
-  // 모듈이 초기화 될 때 인덱스 생성 및 모든 show 동기화
+  // 모듈이 초기화 될 때 인덱스 생성
   async onModuleInit() {
     await this.createIndex();
-    await this.syncAllShows();
   }
 
   // Elasticsearch 인덱스 생성
@@ -36,7 +35,7 @@ export class SearchService {
                   ngram_tokenizer: {
                     type: 'ngram',
                     min_gram: 1,
-                    max_gram: 5,
+                    max_gram: 20,
                     token_chars: ['letter', 'digit', 'whitespace'],
                   },
                 },
@@ -57,7 +56,7 @@ export class SearchService {
                   search_analyzer: 'ngram_analyzer',
                 },
                 category: { type: 'keyword' },
-                id: { type: 'integer' },
+                id: { type: 'long' },
                 imageUrl: { type: 'text' },
               },
             },
@@ -70,28 +69,19 @@ export class SearchService {
   }
 
   // show 데이터 인덱싱
-  private async indexShowData(show: Show) {
+  public async indexShowData(show: Show) {
     try {
-      const showWithImages = await this.showRepository.findOne({
+      const shows = await this.showRepository.findOne({
         where: { id: show.id },
-        relations: ['images'],
       });
 
       await this.eService.index({
         index: this.indexName,
-        id: showWithImages.id.toString(),
+        id: shows.id.toString(),
         body: {
-          id: showWithImages.id,
-          userId: showWithImages.userId,
-          title: showWithImages.title,
-          content: showWithImages.content,
-          category: showWithImages.category,
-          runtime: showWithImages.runtime,
-          location: showWithImages.location,
-          price: showWithImages.price,
-          totalSeat: showWithImages.totalSeat,
-          createdAt: showWithImages.createdAt,
-          updatedAt: showWithImages.updatedAt,
+          id: shows.id,
+          title: shows.title,
+          category: shows.category,
         },
       });
     } catch (error) {
@@ -103,22 +93,22 @@ export class SearchService {
   // show 동기화 (스케줄링)
   private async syncAllShows() {
     try {
-      const [deletedShows, allShows] = await Promise.all([
-        this.showRepository.find({ where: { deletedAt: MoreThan(new Date(0)) } }),
-        this.showRepository.find({ where: { deletedAt: null }, relations: ['images'] }),
-      ]);
+      const indexTime = new Date(Date.now() - 5 * 60 * 1000);
 
-      await Promise.all([
-        ...deletedShows.map(({ id }) => this.deleteShowIndex(id)),
-        ...allShows.map((show) => this.indexShowData(show)),
-      ]);
+      const updatedShows = await this.showRepository.find({
+        where: { updatedAt: MoreThan(indexTime) },
+      });
+
+      if (updatedShows.length > 0) {
+        await Promise.all(updatedShows.map((show) => this.indexShowData(show)));
+      }
     } catch (error) {
       console.error('동기화 오류:', error);
       throw new InternalServerErrorException(SHOW_MESSAGES.INDEX.FAIL);
     }
   }
 
-  @Cron('* * * * *') // 1분 마다 동기화
+  @Cron('*/5 * * * *') //5분마다 동기화
   async handleCron() {
     await this.syncAllShows();
   }
@@ -147,6 +137,7 @@ export class SearchService {
     }
 
     const queryBody = {
+      _source: ['id'],
       query: { bool: { must: mustQueries } },
       from: (page - 1) * limit,
       size: limit,
@@ -159,23 +150,23 @@ export class SearchService {
         body: queryBody,
       });
       const hits = result.hits.hits;
-      const results = hits.map((item) => item._source);
+      const ids = hits.map((item) => item._source.id);
       const totalHits =
         typeof result.hits.total === 'number' ? result.hits.total : result.hits.total.value;
 
-      return { results, total: totalHits };
+      return { ids, total: totalHits };
     } catch (error) {
-      console.error('Search error:', error);
-      return { results: [], total: 0 };
+      console.error('검색 오류:', error);
+      return { ids: [], total: 0 };
     }
   }
 
   // show 삭제 시 인덱스에서 삭제
   async deleteShowIndex(showId: number) {
     try {
-      await this.eService.deleteByQuery({
+      await this.eService.delete({
         index: this.indexName,
-        body: { query: { match: { id: showId } } },
+        id: showId.toString(),
       });
     } catch (error) {
       throw new InternalServerErrorException(SHOW_MESSAGES.DELETE.FAIL);
