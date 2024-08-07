@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backBtn = document.querySelector('.back__btn');
   const token = window.localStorage.getItem('accessToken');
   const tradeContainer = document.querySelector('#tradeBox');
-  const PurchaseContainer = document.querySelector('#PurchaseBox');
+  const PurchaseBtn = document.querySelector('#createTrade');
   // const title = document.querySelector('.title');
   // const price = document.querySelector('.price');
   // const location = document.querySelector('.location');
@@ -60,4 +60,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="closedAt">만료 시한: ${result.closedAt}</div>
         <div class="createdAt">생성 시간:${result.createdAt}</div>
         <div class="updatedAt">마지막으로 수정한 시간:${result.updatedAt}</div>`;
+  PurchaseBtn.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const end = await axios.post(`/trades/${tradeId}`);
+  });
 });
