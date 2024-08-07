@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function () {
               );
 
               if (notified.data.statusCode === 200) {
-                alert('결제 결과 검증 완료');
+                window.location.href = '/views/users/me'; // 내 정보 조회 페이지 (마이 페이지)로 이동
               } else {
                 throw new Error(notified.data.message || '결제 검증 중 오류 발생');
               }
