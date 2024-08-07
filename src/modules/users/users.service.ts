@@ -140,21 +140,22 @@ export class UsersService {
     try {
       const tradeLog = await this.tradeLogRepository.find({
         where: [{ sellerId: id }, { buyerId: id }],
+        relations: ['trade', 'trade.ticket', 'trade.ticket.show'],
       });
 
       if (tradeLog.length === 0) {
         throw new NotFoundException(USER_MESSAGES.USER.TRADE.GET_LOG.FAILURE.NOT_FOUND);
       }
 
-      // 거래 ID 추출하여 거래 데이터 가져오기
-      const tradeId = tradeLog.map((log) => log.tradeId);
-      const trade = await this.tradeRepository.find({
-        where: { id: In(tradeId) },
-        relations: { ticket: true },
-      });
-
       // 날짜 형식 변환
-      const dateFormatTradeLog = tradeLog.map((trade) => {
+      const dateFormatTradeLog = tradeLog.map((tradeLog) => {
+        const {
+          trade,
+          trade: {
+            ticket,
+            ticket: { show },
+          },
+        } = tradeLog;
         // KST로 변환 (+9시간)
         const kstDate = new Date(trade.createdAt);
         kstDate.setHours(kstDate.getHours() + 9);
@@ -162,8 +163,19 @@ export class UsersService {
         const dateFormat = format(kstDate, 'yyyy-MM-dd HH:mm:ss');
 
         return {
-          ...trade,
-          createdAt: dateFormat,
+          showId: show.id,
+          ticketId: ticket.id,
+          showTitle: ticket.title, // 공연 제목
+          ticketPrice: ticket.price, // 티켓 원래 가격
+          tradeId: trade.id,
+          tradePrice: trade.price, // 중고 거래 가격
+          tradeCreatedAt: trade.createdAt, // 거래 생성 시간
+          tradeStatus: trade.flag, // 거래 상태
+          tradeLogId: tradeLog.id,
+          buyerId: tradeLog.buyerId, // 판매자 id
+          sellerId: tradeLog.sellerId, // 구매자 id
+          tradeLogCreatedAt: tradeLog.createdAt, // 거래 내역 생성 일자
+          createdAt: dateFormat, // 수정!
         };
       });
 
