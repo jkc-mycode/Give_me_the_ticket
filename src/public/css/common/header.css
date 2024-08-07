@@ -1,8 +1,7 @@
 header {
   background-color: #e3f2fd;
   padding-left: 10%;
-  padding-right: 10%;
-  padding-bottom: 20px; /* 여백 추가 */
+  padding-right: 14%;
 }
 
 .navbar-expand-lg {
@@ -11,17 +10,30 @@ header {
 }
 
 .justify-content-center {
-  width: 60%;
+  width: 50%;
 }
 
 .justify-content-end {
-  width: 200px;
+  width: 220px;
 }
 
-.nav-item > a {
+.nav-item>a {
   color: gray;
 }
 
 .nav {
   --bs-nav-link-hover-color: var(--bs-navbar-hover-color);
+}
+
+#logo {
+  width: 100%;
+}
+
+.navbar-brand {
+  width: 6%;
+  margin-right: 3%;
+}
+
+#adminTab {
+  display: none;
 }
