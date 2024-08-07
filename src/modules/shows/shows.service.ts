@@ -129,7 +129,17 @@ export class ShowsService {
   /*공연 목록 조회 */
   async getShowList(getShowListDto: GetShowListDto) {
     const { category, search, page, limit } = getShowListDto;
-    const { results, total } = await this.searchService.searchShows(category, search, page, limit);
+    const { ids, total } = await this.searchService.searchShows(category, search, page, limit);
+
+    if (!ids || ids.length === 0) {
+      return { results: [], total, page, totalPages: 0 };
+    }
+
+    const results = await this.showRepository.find({
+      where: { id: In(ids) },
+      relations: ['images'],
+      order: { id: 'DESC' },
+    });
 
     return {
       results,
@@ -245,8 +255,8 @@ export class ShowsService {
       // 트랜잭션 커밋
       await queryRunner.commitTransaction();
 
-      //Elasticsearch 인덱싱
-      await this.searchService.createShowIndex(show);
+      // Elasticsearch 인덱스 업데이트 (업데이트)
+      await this.searchService.indexShowData(show);
 
       return {};
     } catch (error) {
