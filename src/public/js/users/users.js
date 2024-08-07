@@ -141,7 +141,16 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.appendChild(descriptionElement);
 
         const typeElement = document.createElement('p');
-        typeElement.textContent = `유형 : ${log.type}`;
+        let typeText = log.type;
+
+        // 타입에 따라 텍스트 변경
+        if (log.type === 'DEPOSIT') {
+          typeText = '입금';
+        } else if (log.type === 'WITHDRAW') {
+          typeText = '출금';
+        }
+
+        typeElement.textContent = `유형 : ${typeText}`;
         logElement.appendChild(typeElement);
 
         pointLogContainer.appendChild(logElement);
