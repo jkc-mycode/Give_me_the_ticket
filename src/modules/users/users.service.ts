@@ -121,8 +121,8 @@ export class UsersService {
           id: bookmark.id,
           userId: bookmark.userId,
           showId: bookmark.showId,
-          title: bookmark.show.title,
-          content: bookmark.show.content,
+          showTitle: bookmark.show.title,
+          showContent: bookmark.show.content,
           createdAt: dateFormat,
         };
       });
@@ -148,38 +148,58 @@ export class UsersService {
       }
 
       // 날짜 형식 변환
-      const dateFormatTradeLog = tradeLog.map((tradeLog) => {
-        const {
-          trade,
-          trade: {
-            ticket,
-            ticket: { show },
-          },
-        } = tradeLog;
+      const dateFormat = (date: Date) => {
         // KST로 변환 (+9시간)
-        const kstDate = new Date(trade.createdAt);
+        const kstDate = new Date(date);
         kstDate.setHours(kstDate.getHours() + 9);
 
-        const dateFormat = format(kstDate, 'yyyy-MM-dd HH:mm:ss');
+        return format(kstDate, 'yyyy-MM-dd HH:mm:ss');
+      };
 
-        return {
-          showId: show.id,
-          ticketId: ticket.id,
-          showTitle: ticket.title, // 공연 제목
-          ticketPrice: ticket.price, // 티켓 원래 가격
-          tradeId: trade.id,
-          tradePrice: trade.price, // 중고 거래 가격
-          tradeCreatedAt: trade.createdAt, // 거래 생성 시간
-          tradeStatus: trade.flag, // 거래 상태
-          tradeLogId: tradeLog.id,
-          buyerId: tradeLog.buyerId, // 판매자 id
-          sellerId: tradeLog.sellerId, // 구매자 id
-          tradeLogCreatedAt: tradeLog.createdAt, // 거래 내역 생성 일자
-          createdAt: dateFormat, // 수정!
-        };
-      });
+      // Nickname 가져오기
+      const getUserName = async (userId: number) => {
+        if (userId === 0) {
+          return '';
+        }
 
-      return dateFormatTradeLog;
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+
+        return user ? user.nickname : null;
+      };
+
+      const formatTradeLog = await Promise.all(
+        tradeLog.map(async (log) => {
+          const {
+            trade,
+            trade: {
+              ticket,
+              ticket: { show },
+            },
+          } = log;
+
+          const buyerNickname = await getUserName(log.buyerId);
+          const sellerNickname = await getUserName(log.sellerId);
+
+          return {
+            showId: show.id,
+            ticketId: ticket.id,
+            showTitle: ticket.title, // 공연 제목
+            ticketPrice: ticket.price, // 티켓 원래 가격
+            tradeId: trade.id,
+            tradePrice: trade.price, // 중고 거래 가격
+            tradeCreatedAt: dateFormat(trade.createdAt), // 거래 생성 시간
+            tradeStatus: trade.flag, // 거래 상태
+            tradeLogId: log.id,
+            buyerId: log.buyerId,
+            sellerId: log.sellerId,
+            buyerNickname, // 구매자 닉네임
+            sellerNickname, // 판매자 닉네임
+            tradeLogCreatedAt: dateFormat(log.createdAt), // 거래 내역 생성 일자
+          };
+        })
+      );
+
+      return formatTradeLog;
     } catch (err) {
       throw new InternalServerErrorException(USER_MESSAGES.USER.TRADE.GET_LOG.FAILURE.FAIL);
     }
