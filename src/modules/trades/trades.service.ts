@@ -359,6 +359,7 @@ export class TradesService {
     if (trade.sellerId !== userId) {
       throw new BadRequestException(MESSAGES.TRADES.NOT_EXISTS.AUTHORITY);
     }
+    await this.ticketRepository.update({ id: trade.ticketId }, { status: TicketStatus.USEABLE });
 
     //모든 검증이 끝난 뒤 삭제 로직
     return await this.tradeRepository.delete(tradeId);
