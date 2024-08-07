@@ -132,17 +132,17 @@ export class ShowsService {
   /*공연 목록 조회 */
   async getShowList(getShowListDto: GetShowListDto) {
     const { category, search, page, limit } = getShowListDto;
-    const { ids, total } = await this.searchService.searchShows(category, search, page, limit);
+    const { results, total } = await this.searchService.searchShows(category, search, page, limit);
 
-    if (!ids || ids.length === 0) {
-      return { results: [], total, page, totalPages: 0 };
-    }
+    // if (!ids || ids.length === 0) {
+    //   return { results: [], total, page, totalPages: 0 };
+    // }
 
-    const results = await this.showRepository.find({
-      where: { id: In(ids) },
-      relations: ['images'],
-      order: { id: 'DESC' },
-    });
+    // const results = await this.showRepository.find({
+    //   where: { id: In(ids) },
+    //   relations: ['images'],
+    //   order: { id: 'DESC' },
+    // });
 
     return {
       results,
