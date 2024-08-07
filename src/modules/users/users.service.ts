@@ -47,15 +47,15 @@ export class UsersService {
       const pointLog = await this.pointLogRepository.find({ where: { userId: id } });
 
       // 날짜 형식 변환
-      const dateFormatPointLog = pointLog.map((log) => {
+      const dateFormatPointLog = pointLog.map((point) => {
         // KST로 변환 (+9시간)
-        const kstDate = new Date(log.createdAt);
+        const kstDate = new Date(point.createdAt);
         kstDate.setHours(kstDate.getHours() + 9);
 
         const dateFormat = format(kstDate, 'yyyy-MM-dd HH:mm:ss');
 
         return {
-          ...log,
+          ...point,
           createdAt: dateFormat,
         };
       });
@@ -75,7 +75,21 @@ export class UsersService {
         throw new NotFoundException(USER_MESSAGES.USER.TICKET.GET_LIST.FAILURE.NOT_FOUND);
       }
 
-      return ticket;
+      // 날짜 형식 변환
+      const dateFormatTicket = ticket.map((ticket) => {
+        // KST로 변환 (+9시간)
+        const kstDate = new Date(ticket.createdAt);
+        kstDate.setHours(kstDate.getHours() + 9);
+
+        const dateFormat = format(kstDate, 'yyyy-MM-dd HH:mm:ss');
+
+        return {
+          ...ticket,
+          createdAt: dateFormat,
+        };
+      });
+
+      return dateFormatTicket;
     } catch (err) {
       throw new InternalServerErrorException(USER_MESSAGES.USER.TICKET.GET_LIST.FAILURE.FAIL);
     }
@@ -84,7 +98,10 @@ export class UsersService {
   // 북마크 목록 조회
   async getBookmarkList(id: number) {
     try {
-      const bookmark = await this.bookmarkRepository.find({ where: { userId: id } });
+      const bookmark = await this.bookmarkRepository.find({
+        where: { userId: id },
+        relations: ['show'],
+      });
 
       if (bookmark.length === 0) {
         throw new NotFoundException(
@@ -92,7 +109,25 @@ export class UsersService {
         );
       }
 
-      return bookmark;
+      // 날짜 형식 변환
+      const dateFormatBookmark = bookmark.map((bookmark) => {
+        // KST로 변환 (+9시간)
+        const kstDate = new Date(bookmark.createdAt);
+        kstDate.setHours(kstDate.getHours() + 9);
+
+        const dateFormat = format(kstDate, 'yyyy-MM-dd HH:mm:ss');
+
+        return {
+          id: bookmark.id,
+          userId: bookmark.userId,
+          showId: bookmark.showId,
+          showTitle: bookmark.show.title,
+          showContent: bookmark.show.content,
+          createdAt: dateFormat,
+        };
+      });
+
+      return dateFormatBookmark;
     } catch (err) {
       throw new InternalServerErrorException(
         USER_BOOKMARK_MESSAGES.COMMON.BOOKMARK.GET_LIST.FAILURE.FAIL
@@ -105,20 +140,66 @@ export class UsersService {
     try {
       const tradeLog = await this.tradeLogRepository.find({
         where: [{ sellerId: id }, { buyerId: id }],
+        relations: ['trade', 'trade.ticket', 'trade.ticket.show'],
       });
 
       if (tradeLog.length === 0) {
         throw new NotFoundException(USER_MESSAGES.USER.TRADE.GET_LOG.FAILURE.NOT_FOUND);
       }
 
-      // 거래 ID 추출하여 거래 데이터 가져오기
-      const tradeId = tradeLog.map((log) => log.tradeId);
-      const trade = await this.tradeRepository.find({
-        where: { id: In(tradeId) },
-        relations: { ticket: true },
-      });
+      // 날짜 형식 변환
+      const dateFormat = (date: Date) => {
+        // KST로 변환 (+9시간)
+        const kstDate = new Date(date);
+        kstDate.setHours(kstDate.getHours() + 9);
 
-      return trade;
+        return format(kstDate, 'yyyy-MM-dd HH:mm:ss');
+      };
+
+      // Nickname 가져오기
+      const getUserName = async (userId: number) => {
+        if (userId === 0) {
+          return '';
+        }
+
+        const user = await this.userRepository.findOne({ where: { id: userId } });
+
+        return user ? user.nickname : null;
+      };
+
+      const formatTradeLog = await Promise.all(
+        tradeLog.map(async (log) => {
+          const {
+            trade,
+            trade: {
+              ticket,
+              ticket: { show },
+            },
+          } = log;
+
+          const buyerNickname = await getUserName(log.buyerId);
+          const sellerNickname = await getUserName(log.sellerId);
+
+          return {
+            showId: show.id,
+            ticketId: ticket.id,
+            showTitle: ticket.title, // 공연 제목
+            ticketPrice: ticket.price, // 티켓 원래 가격
+            tradeId: trade.id,
+            tradePrice: trade.price, // 중고 거래 가격
+            tradeCreatedAt: dateFormat(trade.createdAt), // 거래 생성 시간
+            tradeStatus: trade.flag, // 거래 상태
+            tradeLogId: log.id,
+            buyerId: log.buyerId,
+            sellerId: log.sellerId,
+            buyerNickname, // 구매자 닉네임
+            sellerNickname, // 판매자 닉네임
+            tradeLogCreatedAt: dateFormat(log.createdAt), // 거래 내역 생성 일자
+          };
+        })
+      );
+
+      return formatTradeLog;
     } catch (err) {
       throw new InternalServerErrorException(USER_MESSAGES.USER.TRADE.GET_LOG.FAILURE.FAIL);
     }

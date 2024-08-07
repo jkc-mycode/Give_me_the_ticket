@@ -7,15 +7,12 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       // 백엔드 사용자 정보 조회 API 호출
       const token = window.localStorage.getItem('accessToken');
-      console.log('accessToken: ', token);
 
       const response = await axios.get('/users/me', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      console.log('User data: ', response.data.getUserProfile);
 
       if (response.status === 200) {
         return response.data.getUserProfile;
@@ -38,8 +35,6 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
-      console.log('User: ', user);
-
       const chargeAmount = Number(document.getElementById('chargeAmount').value);
 
       if (!chargeAmount || chargeAmount <= 0) {
@@ -49,7 +44,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // 포인트 충전 설정
       const merchantUid = `charge-${new Date().getTime()}`; // 주문 '고유' 번호 (충전)
-      console.log('merchant_uid: ', merchantUid);
 
       const userEmail = user.email;
       const userName = user.nickname;
@@ -97,10 +91,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
               );
 
-              console.log('결제 검증 response: ', notified.data);
-
               if (notified.data.statusCode === 200) {
-                alert('결제 결과 검증 완료');
+                window.location.href = '/views/users/me'; // 내 정보 조회 페이지 (마이 페이지)로 이동
               } else {
                 throw new Error(notified.data.message || '결제 검증 중 오류 발생');
               }
