@@ -364,12 +364,18 @@ export class TradesService {
     if (!trade) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE);
 
     //해당 티켓 존재 확인
-
     const ticket = await this.ticketRepository.findOne({ where: { id: trade.ticketId } });
     if (!ticket) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TICKET);
 
-    //구매자와 판매자의 유저 정보 가져오기
+    //해당 티켓의 소유 갯수 확인
+    const haveTicket = await this.ticketRepository.find({
+      where: { showId: ticket.showId, userId: ticket.userId },
+    });
+    if (!(haveTicket.length > 5)) {
+      throw new BadRequestException('동일시간의 동일공연은 5장만 소지할 수 있습니다!');
+    }
 
+    //구매자와 판매자의 유저 정보 가져오기
     const seller = await this.userRepository.findOne({ where: { id: ticket.userId } });
     if (!seller) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.SELLER);
     const buyer = await this.userRepository.findOne({ where: { id: buyerId } });
