@@ -19,8 +19,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
       return data;
     } catch (error) {
-      console.error(error);
-      alert('공연 데이터 가져오기 실패');
+      console.error('공연 데이터 가져오기 실패 : ', error);
+
+      // 에러가 발생한 경우 얼럿으로 에러 메시지를 표시합니다.
+      if (error.response && error.response.data && error.response.data.message) {
+        const errorMessage = Array.isArray(error.response.data.message)
+          ? error.response.data.message[0]
+          : error.response.data.message;
+
+        alert(errorMessage);
+        //공연 검색 실패 시 메인페이지로 이동
+        window.location.href = `/views`;
+      }
       return null;
     }
   }
@@ -34,8 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     showListContainer.innerHTML = shows
       .map((show) => {
-        const images = Array.isArray(show.images) ? show.images : [];
-        const imageUrl = images.length > 0 ? images[0].imageUrl : 'default-image-url.jpg';
+        const imageUrl = show.imageUrl.length > 0 ? show.imageUrl[0] : 'default-image-url.jpg';
         return `
         <div class="col-md-4 mb-3">
           <div class="card">

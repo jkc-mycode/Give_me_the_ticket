@@ -11,8 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     shows = data.data;
     showListContainer.innerHTML = shows
       .map((show) => {
-        const images = Array.isArray(show.images) ? show.images : [];
-        const imageUrl = images.length > 0 ? images[0].imageUrl : 'default-image-url.jpg';
+        const imageUrl = show.imageUrl.length > 0 ? show.imageUrl[0] : 'default-image-url.jpg';
         return `
         <div class="col-2">
           <div class="card">
@@ -21,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               <h5 class="card-title">${show.title}</h5>
               <p class="card-text">위치: ${show.location}</p>
               <div class="mt-auto"> 
-                <a href="/views/shows/${show.id}" class="btn btn-primary view-details">View Details</a>
+                <a href="/views/shows/${show.id}" class="btn btn-primary view-details">상세보기</a>
               </div>
             </div>
           </div>

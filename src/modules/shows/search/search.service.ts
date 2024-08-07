@@ -23,25 +23,30 @@ export class SearchService {
   // Elasticsearch 인덱스 생성
   private async createIndex() {
     try {
-      const { body: indexExists } = await this.eService.indices.exists({ index: this.indexName });
+      const indexExists = await this.eService.indices.exists({ index: this.indexName });
 
-      if (!indexExists) {
+      if (!indexExists.body) {
         await this.eService.indices.create({
           index: this.indexName,
           body: {
             settings: {
               analysis: {
-                tokenizer: {
-                  ngram_tokenizer: {
-                    type: 'ngram',
-                    token_chars: ['letter', 'digit', 'whitespace'],
+                analyzer: {
+                  autocomplete_analyzer: {
+                    tokenizer: 'autocomplete',
+                    filter: ['lowercase'],
+                  },
+                  autocomplete_search_analyzer: {
+                    tokenizer: 'keyword',
+                    filter: ['lowercase'],
                   },
                 },
-                analyzer: {
-                  ngram_analyzer: {
-                    type: 'custom',
-                    tokenizer: 'ngram_tokenizer',
-                    filter: ['lowercase'],
+                tokenizer: {
+                  autocomplete: {
+                    type: 'edge_ngram',
+                    min_gram: 1,
+                    max_gram: 30,
+                    token_chars: ['letter', 'digit', 'whitespace'],
                   },
                 },
               },
@@ -50,11 +55,17 @@ export class SearchService {
               properties: {
                 title: {
                   type: 'text',
-                  analyzer: 'ngram_analyzer',
-                  search_analyzer: 'ngram_analyzer',
+                  fields: {
+                    complete: {
+                      type: 'text',
+                      analyzer: 'autocomplete_analyzer',
+                      search_analyzer: 'autocomplete_search_analyzer',
+                    },
+                  },
                 },
-                category: { type: 'keyword' },
                 id: { type: 'long' },
+                category: { type: 'keyword' },
+                location: { type: 'text' },
                 imageUrl: { type: 'text' },
               },
             },
@@ -70,13 +81,24 @@ export class SearchService {
   // show 데이터 인덱싱
   public async indexShowData(show: Show) {
     try {
+      const showData = await this.showRepository.findOne({
+        where: { id: show.id },
+        relations: { images: true },
+      });
+
+      if (!showData) {
+        throw new InternalServerErrorException('Show not found');
+      }
+
       await this.eService.index({
         index: this.indexName,
-        id: show.id.toString(),
+        id: showData.id.toString(),
         body: {
-          id: show.id,
-          title: show.title,
-          category: show.category,
+          id: showData.id,
+          title: showData.title,
+          category: showData.category,
+          location: showData.location,
+          imageUrl: showData.images.map((image) => image.imageUrl),
         },
       });
     } catch (error) {
@@ -85,7 +107,7 @@ export class SearchService {
     }
   }
 
-  //전체 show 동기화
+  // //전체 show 동기화
   // private async syncAllShows() {
   //   try {
   //     const allShows = await this.showRepository.find();
@@ -102,7 +124,7 @@ export class SearchService {
   //   }
   // }
 
-  // show 동기화 (스케줄링)
+  //show 동기화 (스케줄링)
   private async syncAllShows() {
     try {
       const indexTime = new Date(Date.now() - 5 * 60 * 1000);
@@ -140,17 +162,17 @@ export class SearchService {
 
     if (search) {
       mustQueries.push({
-        query_string: {
-          query: `*${search.replace(/ /g, '*')}*`,
-          fields: ['title'],
-          analyze_wildcard: true,
-          fuzziness: 'AUTO',
+        match: {
+          title: {
+            query: search,
+            fuzziness: 'AUTO',
+            minimum_should_match: '55%',
+          },
         },
       });
     }
 
     const queryBody = {
-      _source: ['id'],
       query: { bool: { must: mustQueries } },
       from: (page - 1) * limit,
       size: limit,
@@ -158,19 +180,21 @@ export class SearchService {
     };
 
     try {
-      const { body: result } = await this.eService.search({
+      const result = await this.eService.search({
         index: this.indexName,
         body: queryBody,
       });
-      const hits = result.hits.hits;
-      const ids = hits.map((item) => item._source.id);
+      const hits = result.body.hits.hits;
+      const results = hits.map((item) => item._source);
       const totalHits =
-        typeof result.hits.total === 'number' ? result.hits.total : result.hits.total.value;
+        typeof result.body.hits.total === 'number'
+          ? result.body.hits.total
+          : result.body.hits.total.value;
 
-      return { ids, total: totalHits };
+      return { results, total: totalHits };
     } catch (error) {
       console.error('검색 오류:', error);
-      return { ids: [], total: 0 };
+      return { results: [], total: 0 };
     }
   }
 
