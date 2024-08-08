@@ -72,7 +72,10 @@ export class UsersService {
   // 예매 목록 조회
   async getTicketList(id: number) {
     try {
-      const ticket = await this.ticketRepository.find({ where: { userId: id } });
+      const ticket = await this.ticketRepository.find({
+        where: { userId: id },
+        order: { createdAt: 'DESC' },
+      });
 
       if (ticket.length === 0) {
         throw new NotFoundException(USER_MESSAGES.USER.TICKET.GET_LIST.FAILURE.NOT_FOUND);
@@ -103,6 +106,7 @@ export class UsersService {
     try {
       const bookmark = await this.bookmarkRepository.find({
         where: { userId: id },
+        order: { createdAt: 'DESC' },
         relations: ['show'],
       });
 
@@ -143,6 +147,7 @@ export class UsersService {
     try {
       const tradeLog = await this.tradeLogRepository.find({
         where: [{ sellerId: id }, { buyerId: id }],
+        order: { createdAt: 'DESC' },
         relations: ['trade', 'trade.ticket', 'trade.ticket.show'],
       });
 
