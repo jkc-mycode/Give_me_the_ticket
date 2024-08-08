@@ -453,10 +453,10 @@ export class ShowsService {
 
       // 사용자의 포인트 차감
       user.point -= show.price;
-      const pointLog = await queryRunner.manager.save(User, user);
+      await queryRunner.manager.save(User, user);
 
       //사용자의 포인트로그 기록 생성
-      queryRunner.manager.create(PointLog, {
+      const pointLog = queryRunner.manager.create(PointLog, {
         userId: user.id,
         type: PointType.WITHDRAW,
         description: `${show.title} 티켓 결제`,
