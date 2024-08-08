@@ -8,6 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // 티켓 정보를 표시할 요소 생성
     const ticketContainer = document.getElementById('ticket-info');
 
+    if (ticket.status !== 'USEABLE') {
+      alert('중고 거래가능한 상태가 아닙니다.');
+      window.location.href = '/views/users/me';
+    }
+
     // 티켓 정보를 HTML로 구성
     ticketContainer.innerHTML = `
       <h3>티켓 정보</h3>

@@ -172,15 +172,9 @@ export class ShowsController {
   async createTicket(
     @Param('showId') showId: number,
     @Body() createTicketDto: CreateTicketDto,
-    @Req() req: any,
-    pointlog: PointLog
+    @Req() req: any
   ) {
-    const ticket = await this.showsService.createTicket(
-      showId,
-      createTicketDto,
-      req.user,
-      pointlog
-    );
+    const ticket = await this.showsService.createTicket(showId, createTicketDto, req.user);
     return {
       status: HttpStatus.CREATED,
       message: SHOW_TICKET_MESSAGES.COMMON.TICKET.SUCCESS,
@@ -202,10 +196,9 @@ export class ShowsController {
   async refundTicket(
     @Param('showId') showId: number,
     @Param('ticketId') ticketId: number,
-    @Req() req: any,
-    pointlog: PointLog
+    @Req() req: any
   ) {
-    await this.showsService.refundTicket(showId, ticketId, req.user, pointlog);
+    await this.showsService.refundTicket(showId, ticketId, req.user);
     return {
       status: HttpStatus.OK,
       message: SHOW_TICKET_MESSAGES.COMMON.REFUND.SUCCESS,
