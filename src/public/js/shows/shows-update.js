@@ -28,10 +28,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   const priceInput = document.getElementById('price');
   const dropdownItems = document.querySelectorAll('.dropdown-item');
 
+  // 한글 카테고리를 영어로 변환
+  let categoryTypeToEng = {
+    뮤지컬: 'Musical',
+    연극: 'Play',
+    콘서트: 'Concert',
+  };
+
+  // 영어 카테고리를 한글로 변환
+  let categoryTypeToKor = {
+    Musical: '뮤지컬',
+    Play: '연극',
+    Concert: '콘서트',
+  };
+
   // 기존의 공연 정보 각 Input에 넣기
   titleInput.value = title;
   contentInput.value = content;
-  categoryInput.innerHTML = category;
+  categoryInput.innerHTML = categoryTypeToKor[category];
   runtimeInput.value = runtime;
   locationInput.value = location;
   priceInput.value = price;
@@ -137,7 +151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const updateShowDto = {
         title: titleInput.value,
         content: contentInput.value,
-        category: categoryInput.innerHTML,
+        category: categoryTypeToEng[categoryInput.innerHTML],
         runtime: runtimeInput.value,
         location: locationInput.value,
         price: priceInput.value,
@@ -153,7 +167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       console.log(response);
       alert(response.data.message);
-      window.location.href = `/views/shows/${showId}`;
+      // window.location.href = `/views/shows/${showId}`;
     } catch (err) {
       console.log(err);
       alert(err.response.data.message);
