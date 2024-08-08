@@ -175,7 +175,7 @@ export class ShowsController {
     @Req() req: any,
     pointlog: PointLog
   ) {
-    const ticket = await this.showsService.addTicketQueue(
+    const ticket = await this.showsService.createTicket(
       showId,
       createTicketDto,
       req.user,
