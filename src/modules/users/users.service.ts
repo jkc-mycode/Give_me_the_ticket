@@ -44,7 +44,10 @@ export class UsersService {
   // 포인트 내역 조회
   async getPointLog(id: number) {
     try {
-      const pointLog = await this.pointLogRepository.find({ where: { userId: id } });
+      const pointLog = await this.pointLogRepository.find({
+        where: { userId: id },
+        order: { createdAt: 'DESC' },
+      });
 
       // 날짜 형식 변환
       const dateFormatPointLog = pointLog.map((point) => {

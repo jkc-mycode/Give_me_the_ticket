@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.classList.add('point-log');
 
         const createdAtElement = document.createElement('p');
-        createdAtElement.textContent = `포인트 충전 및 사용 일자 : ${log.createdAt}`;
+        createdAtElement.textContent = `포인트 변경 일자 : ${log.createdAt}`;
         logElement.appendChild(createdAtElement);
 
         const priceElement = document.createElement('p');
