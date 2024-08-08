@@ -2,10 +2,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const showListContainer = document.querySelector('#showList');
   const categoryButtons = document.querySelectorAll('.category-btn');
   const params = new URLSearchParams(window.location.search);
-  const page = parseInt(params.get('page') || '1');
-  const limit = parseInt(params.get('limit') || '6');
   const searchQuery = params.get('search') || ''; // 검색어 쿼리 가져오기
   const categoryQuery = params.get('category') || ''; // 카테고리 쿼리 가져오기
+  const page = parseInt(params.get('page') || '1');
+  const limit = parseInt(params.get('limit') || '6');
+
   let currentCategory = categoryQuery;
 
   // 검색어를 검색창에 설정

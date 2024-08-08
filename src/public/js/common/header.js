@@ -68,6 +68,7 @@ headerSearchButton.addEventListener('click', () => {
   const currentUrl = new URL(window.location.href);
   currentUrl.pathname = '/views/shows/list';
   currentUrl.searchParams.set('search', search);
+  currentUrl.searchParams.set('page', 1);
   window.location.href = currentUrl.href;
 });
 
@@ -78,6 +79,7 @@ headerSearchForm.addEventListener('submit', (event) => {
   const currentUrl = new URL(window.location.href);
   currentUrl.pathname = '/views/shows/list';
   currentUrl.searchParams.set('search', search);
+  currentUrl.searchParams.set('page', 1);
   window.location.href = currentUrl.href;
 });
 
