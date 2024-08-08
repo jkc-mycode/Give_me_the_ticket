@@ -393,12 +393,7 @@ export class ShowsService {
   // }
 
   /* 티켓 예매 */
-  async createTicket(
-    showId: number,
-    createTicketDto: CreateTicketDto,
-    user: User,
-    pointLog: PointLog
-  ) {
+  async createTicket(showId: number, createTicketDto: CreateTicketDto, user: User) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -458,7 +453,7 @@ export class ShowsService {
 
       // 사용자의 포인트 차감
       user.point -= show.price;
-      await queryRunner.manager.save(User, user);
+      const pointLog = await queryRunner.manager.save(User, user);
 
       //사용자의 포인트로그 기록 생성
       queryRunner.manager.create(PointLog, {
@@ -512,7 +507,7 @@ export class ShowsService {
   }
 
   /*티켓 환불 */
-  async refundTicket(showId: number, ticketId: number, user: User, pointlog: PointLog) {
+  async refundTicket(showId: number, ticketId: number, user: User) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
