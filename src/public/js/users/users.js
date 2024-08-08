@@ -233,7 +233,22 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.appendChild(priceElement);
 
         const statusElement = document.createElement('p');
-        statusElement.textContent = `티켓 상태 : ${log.status}`;
+        let statusText = log.status;
+
+        // 상태에 따라 텍스트 변경
+        if (log.status === 'USEABLE') {
+          statusText = '사용 가능';
+        } else if (log.status === 'TRADING') {
+          statusText = '거래 중';
+        } else if (log.status === 'REFUNDED') {
+          statusText = '환불 완료';
+        } else if (log.status === 'EXPIRED') {
+          statusText = '티켓 만료';
+        } else if (log.status === 'SOLD') {
+          statusText = '판매됨';
+        }
+
+        statusElement.textContent = `티켓 상태 : ${statusText}`;
         logElement.appendChild(statusElement);
 
         const createdAtElement = document.createElement('p');
@@ -393,7 +408,16 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.appendChild(tradeCreatedAtElement);
 
         const tradeStatusElement = document.createElement('p');
-        tradeStatusElement.textContent = `거래 상태 : ${log.tradeStatus}`;
+        let tradeStatusText = log.status;
+
+        // 상태에 따라 텍스트 변경
+        if (log.status === 'ACTIVATION') {
+          tradeStatusText = '거래 활성';
+        } else if (log.status === 'INACTIVE') {
+          tradeStatusText = '거래 비활성';
+        }
+
+        tradeStatusElement.textContent = `거래 상태 : ${tradeStatusText}`;
         logElement.appendChild(tradeStatusElement);
 
         const buyerIdElement = document.createElement('p');

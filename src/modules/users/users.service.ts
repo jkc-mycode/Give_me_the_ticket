@@ -192,7 +192,7 @@ export class UsersService {
             showId: show.id,
             ticketId: ticket.id,
             showTitle: ticket.title, // 공연 제목
-            ticketPrice: ticket.price, // 티켓 원래 가격
+            ticketPrice: show.price, // 티켓 원래 가격
             tradeId: trade.id,
             tradePrice: trade.price, // 중고 거래 가격
             tradeCreatedAt: dateFormat(trade.createdAt), // 거래 생성 시간
