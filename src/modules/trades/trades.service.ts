@@ -380,7 +380,8 @@ export class TradesService {
     const haveTicket = await this.ticketRepository.find({
       where: { showId: ticket.showId, userId: ticket.userId },
     });
-    if (!(haveTicket.length > 5)) {
+    if (haveTicket.length > 5) {
+      console.log(haveTicket.length);
       throw new BadRequestException('동일시간의 동일공연은 5장만 소지할 수 있습니다!');
     }
 
