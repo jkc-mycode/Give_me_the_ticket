@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function () {
     } catch (err) {
       if (err.response && err.response.data) {
         alert(err.response.data.message);
+        window.location.href = `/views/me`;
       } else {
         console.error('Error:', err);
         alert('서버와의 통신 중 오류가 발생하였습니다.');

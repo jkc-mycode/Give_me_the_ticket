@@ -364,40 +364,40 @@ export class ShowsService {
 
   /* 티켓 예매 동시성 처리, 큐에 작업 추가 */
 
-  async addTicketQueue(
-    showId: number,
-    createTicketDto: CreateTicketDto,
-    user: User,
-    pointlog: PointLog
-  ) {
-    const job = await this.ticketQueue.add(
-      QUEUES.ADD_TICKET_QUEUE,
-      {
-        showId,
-        user,
-        createTicketDto,
-        pointlog,
-      },
-      {
-        removeOnComplete: true,
-        removeOnFail: true,
-      }
-    );
+  // async addTicketQueue(
+  //   showId: number,
+  //   createTicketDto: CreateTicketDto,
+  //   user: User,
+  //   pointlog: PointLog
+  // ) {
+  //   const job = await this.ticketQueue.add(
+  //     QUEUES.ADD_TICKET_QUEUE,
+  //     {
+  //       showId,
+  //       user,
+  //       createTicketDto,
+  //       pointlog,
+  //     },
+  //     {
+  //       removeOnComplete: true,
+  //       removeOnFail: true,
+  //     }
+  //   );
 
-    // 작업 완료 대기 및 결과 반환
-    const result = await job.waitUntilFinished(this.ticketQueueEvents.queueEvents);
-    if (!result) {
-      throw new NotFoundException(SHOW_TICKET_MESSAGES.COMMON.TICKET.NOT_FOUND);
-    }
-    return result;
-  }
+  //   // 작업 완료 대기 및 결과 반환
+  //   const result = await job.waitUntilFinished(this.ticketQueueEvents.queueEvents);
+  //   if (!result) {
+  //     throw new NotFoundException(SHOW_TICKET_MESSAGES.COMMON.TICKET.NOT_FOUND);
+  //   }
+  //   return result;
+  // }
 
   /* 티켓 예매 */
   async createTicket(
     showId: number,
     createTicketDto: CreateTicketDto,
     user: User,
-    pointlog: PointLog
+    pointLog: PointLog
   ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -416,6 +416,7 @@ export class ShowsService {
       // 스케줄이 있는지 확인합니다.
       const schedule = await queryRunner.manager.findOne(Schedule, {
         where: { id: scheduleId, showId: showId },
+        lock: { mode: 'pessimistic_write' },
       });
 
       if (!schedule) {
@@ -460,7 +461,7 @@ export class ShowsService {
       await queryRunner.manager.save(User, user);
 
       //사용자의 포인트로그 기록 생성
-      const pointLog = queryRunner.manager.create(PointLog, {
+      queryRunner.manager.create(PointLog, {
         userId: user.id,
         type: PointType.WITHDRAW,
         description: `${show.title} 티켓 결제`,
@@ -484,10 +485,21 @@ export class ShowsService {
 
       await queryRunner.manager.save(Ticket, ticket);
 
-      // 좌석 차감 처리
-      schedule.remainSeat -= SHOW_TICKETS.COMMON.SEAT.DEDUCTED;
+      // // 좌석 차감 처리:  감소되고나서 잔여 좌석이 음수가 되면 예외처리를 합니다.
 
-      await queryRunner.manager.save(Schedule, schedule);
+      await queryRunner.manager.decrement(
+        Schedule,
+        { id: schedule.id },
+        'remainSeat',
+        SHOW_TICKETS.COMMON.SEAT.DEDUCTED
+      );
+      const updatedSchedule = await queryRunner.manager.findOne(Schedule, {
+        where: { id: scheduleId, showId: showId },
+      });
+      if (updatedSchedule.remainSeat < 0) {
+        throw new ConflictException(SHOW_TICKET_MESSAGES.COMMON.SEAT.NOT_ENOUGH);
+      }
+
       await queryRunner.commitTransaction();
       await queryRunner.release();
       return ticket;
@@ -506,13 +518,12 @@ export class ShowsService {
     await queryRunner.startTransaction();
     try {
       // 환불할 티켓이 있는지 확인합니다.
-      //사용 중이거나 거래중인 티켓만 환불하도록 제한을 걸었습니다.
-
+      //사용 중인 티켓만 환불가능
       const ticket = await queryRunner.manager.findOne(Ticket, {
         where: {
           id: ticketId,
           showId,
-          status: In([TicketStatus.USEABLE, TicketStatus.TRADING]),
+          status: TicketStatus.USEABLE,
         },
       });
 
