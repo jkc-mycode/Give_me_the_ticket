@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const bookingBtn = document.querySelector('.booking__btn');
   const updateBtn = document.querySelector('.update__btn');
   const backBtn = document.querySelector('.back__btn');
-  const bookmarkBtn = document.querySelector('.bookmark__btn');
   const deleteBtn = document.querySelector('.delete__btn');
   const token = window.localStorage.getItem('accessToken');
   const scheduleDropdownMenu = document.querySelector('#scheduleDropdownMenu');
@@ -72,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
               (schedule) => `
               <li>
                 <a class="dropdown-item" href="#" data-schedule-id="${schedule.id}">
-                  ${schedule.date} ${schedule.time}
+                  날짜 : ${schedule.date} | 시간 : ${schedule.time} | 잔여좌석 : ${schedule.remainSeat}
                 </a>
               </li>
             `
@@ -139,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   backBtn.addEventListener('click', function (e) {
     e.preventDefault();
-    window.location.href = `/views`;
+    window.location.href = `/views/shows/list`;
   });
 
   scheduleDropdownMenu.addEventListener('click', function (e) {
