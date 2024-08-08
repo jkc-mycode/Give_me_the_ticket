@@ -152,7 +152,7 @@ $ npm run start:prod
 
 #### 5-2-2. /src/modules/shows/shows.service.ts
 
-- Elasticsearch를 이용해 오타를 보정하여 유사 검색을 합니다.
+- 목록 조회 시 인덱싱한 데이터를 가져와 반환합니다.
 
 - https://github.com/jkc-mycode/Give_me_the_ticket/blob/3fa41ab72531a177aff08c53434bf55cb5dcffd1/src/modules/shows/shows.service.ts#L132-L143
 
@@ -199,7 +199,7 @@ $ npm run start:prod
 - https://github.com/jkc-mycode/Give_me_the_ticket/blob/3fa41ab72531a177aff08c53434bf55cb5dcffd1/src/modules/trades/trades.service.ts#L389-L437
 
 - 중고 거래 티켓 구매 흐름도
-  !![ticket trades](./images/trades.flowchat.png)
+  ![ticket trades](./images/trades.flowchat.png)
 
 - 중고 거래 페이지
 - 중고 거래 목록 조회 페이지에서 중고 거래 게시물을 확인할 수 있습니다.
@@ -209,8 +209,8 @@ $ npm run start:prod
   ![ticket trades](./images/trades-2.png)
 
 - 거래에 성공했다는 창이 뜨며, 내 정보 조회 -> MY TICKET 확인 시 구매한 티켓이 있는 것을 확인 할 수 있습니다.
-- ![ticket trades](./images/trades-3.png)
-- ![ticket trades](./images/trades-4.png)
+  ![ticket trades](./images/trades-3.png)
+  ![ticket trades](./images/trades-4.png)
   <br>
 
 ## 6. 트러블슈팅
@@ -237,7 +237,14 @@ $ npm run start:prod
 
 - **해결 방안** : "minmum_shold_match" : "55%"로 유사도를 조절하여 해결
 
-<br>
+- 유사 검색 해결 전 (minimum_should_match 옵션 설정 전)
+- '테스트공연' 검색을 위해 '테스트'를 검색 시 '스'와 '트'가 포함된 다른 공연도 조회됩니다.
+  ![alt text](./images/show-search-1.png)
+
+- 유사 검색 해결 후 (minimum_should_match : 55% 설정 후)
+- '테스트공연' 검색을 위해 '테스트'를 검색 시 원하는 결과인 '테스트공연'만 조회됩니다.
+  ![alt text](./images/show-search-2.png)
+  <br>
 
 ### 6-3. CI/CD 설정
 
