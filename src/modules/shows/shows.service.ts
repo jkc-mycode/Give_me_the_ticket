@@ -134,16 +134,6 @@ export class ShowsService {
     const { category, search, page, limit } = getShowListDto;
     const { results, total } = await this.searchService.searchShows(category, search, page, limit);
 
-    // if (!ids || ids.length === 0) {
-    //   return { results: [], total, page, totalPages: 0 };
-    // }
-
-    // const results = await this.showRepository.find({
-    //   where: { id: In(ids) },
-    //   relations: ['images'],
-    //   order: { id: 'DESC' },
-    // });
-
     return {
       results,
       total,
@@ -174,10 +164,11 @@ export class ShowsService {
       location: show.location,
       price: show.price,
       totalSeat: show.totalSeat,
-      schedules: show.schedules.map(({ id, date, time }) => ({
+      schedules: show.schedules.map(({ id, date, time, remainSeat }) => ({
         id,
         date,
         time,
+        remainSeat,
       })),
       imageUrl: show.images.map(({ imageUrl }) => imageUrl),
       createdAt: show.createdAt,

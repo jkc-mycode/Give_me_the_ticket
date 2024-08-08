@@ -54,6 +54,21 @@ h1 {
   cursor: pointer;
 }
 
+.dropdown-menu {
+  width: 100%;
+}
+
+.dropdown-item {
+  white-space: normal;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.dropdown-toggle {
+  width: 100%;
+  text-align: left;
+}
+
 .booking-form {
   width: 100%;
   max-width: 680px;
