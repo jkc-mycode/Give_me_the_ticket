@@ -132,6 +132,7 @@ export class TradesController {
     description: SWAGGER.TRADES.GET_TRADE_LOGS.API_NOT_FOUND_RESPONSE.DESCRIPTION,
   })
   @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.USER)
   async getLogs(@Req() req: { user: User }) {
     const user = req.user;
     return await this.tradesService.getLogs(user.id);

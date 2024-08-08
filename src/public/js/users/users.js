@@ -423,8 +423,21 @@ document.addEventListener('DOMContentLoaded', function () {
         const deleteTradeBtn = document.createElement('button');
         deleteTradeBtn.textContent = '삭제';
         // 삭제 버튼 이벤트 추가
-        deleteTradeBtn.addEventListener('click', () => {
-          alert('삭제 버튼');
+        deleteTradeBtn.addEventListener('click', async () => {
+          try {
+            if (confirm('삭제하시겠습니까?')) {
+              await axios.delete(`/trades/${log.tradeId}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`, // 인증 헤더에 토큰 추가
+                },
+              });
+              alert('삭제에 성공했습니다!');
+              location.href = location.href;
+            }
+          } catch (err) {
+            alert('삭제에 실패했습니다.');
+            console.error('삭제에 실패했습니다.', err);
+          }
         });
         logElement.appendChild(deleteTradeBtn);
 
