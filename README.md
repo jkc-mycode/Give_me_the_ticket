@@ -233,7 +233,7 @@ $ npm run start:prod
 
 - **문제** : 공연 목록 조회 시 전달 data안에 이미지 URL을 함께 전달하고 있지만 새로고침을 연달아 클릭 시 data안에 이미지URL이 휘발되는 문제 발생
 
-![alt text](image-2.png)
+![show search](./images/show-search-1.png)
 
 - **추정 원인**
 
@@ -270,18 +270,18 @@ $ npm run start:prod
 
 - 유사 검색 해결 전 (minimum_should_match 옵션 설정 전)
 - '테스트공연' 검색을 위해 '테스트'를 검색 시 '스'와 '트'가 포함된 다른 공연도 조회됩니다.
-  ![alt text](./images/show-search-1.png)
+  ![show search](./images/show-search-2.png)
 
 - 유사 검색 해결 후 (minimum_should_match : 55% 설정 후)
 - '테스트공연' 검색을 위해 '테스트'를 검색 시 원하는 결과인 '테스트공연'만 조회됩니다.
-  ![alt text](./images/show-search-2.png)
+  ![show search](./images/show-search-3.png)
   <br>
 
 ### 6-3. CI/CD 설정
 
 - **문제** : CD workflow 멈춤 현상
-  ![alt text](image.png)
-  ![alt text](image-1.png)
+  ![CI/CD](./images/ci-cd-1.png)
+  ![CI/CD](./images/ci-cd-2.png)
 
 - **추정 원인**
 
