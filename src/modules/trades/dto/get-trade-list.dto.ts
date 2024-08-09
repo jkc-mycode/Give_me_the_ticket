@@ -12,7 +12,7 @@ export class GetTradeListDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  page: Number;
+  page: number = 1;
 
   /**
    * 페이지당 게시물 갯수
@@ -22,5 +22,5 @@ export class GetTradeListDto {
   @IsInt()
   @Min(1)
   @Max(100)
-  limit: Number;
+  limit: number = 10;
 }
