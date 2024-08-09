@@ -6,6 +6,7 @@ import { addHours, startOfDay, subDays, subHours } from 'date-fns';
 //Dto
 import { CreateTradeDto } from './dto/create-trade.dto';
 import { UpdateTradeDto } from './dto/update-trade.dto';
+import { GetTradeListDto } from './dto/get-trade-list.dto';
 
 //error Type
 import {
@@ -167,9 +168,16 @@ export class TradesService {
   //=========ConvenienceFunction======================
 
   //<1> 중고 거래 목록 보기//완료 (검증 대부분 완료)
-  async getList() {
+  async getList(getTradeListDto: GetTradeListDto) {
+    const { page, limit } = getTradeListDto;
+    const total_count = await this.tradeRepository.count();
+
+    const skip: number = (page - 1) * limit;
+
     let trade_list = await this.tradeRepository.find({
       select: { id: true, ticketId: true, createdAt: true, closedAt: true },
+      skip: skip,
+      take: limit,
     });
 
     //중고 거래 목록 조회 //테스트 완료

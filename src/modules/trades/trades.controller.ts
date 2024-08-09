@@ -1,3 +1,4 @@
+//common decorator
 import {
   Body,
   Controller,
@@ -11,18 +12,29 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+
 import { TradesService } from './trades.service';
 import { update } from 'lodash';
+
+import { BadRequestException } from '@nestjs/common';
+
+//entity
+import { User } from 'src/entities/users/user.entity';
+
+import { number } from 'joi';
+
+//auth
+import { AuthGuard } from '@nestjs/passport';
+
+//dto
 import { CreateTradeDto } from './dto/create-trade.dto';
 import { UpdateTradeDto } from './dto/update-trade.dto';
-import { User } from 'src/entities/users/user.entity';
-import { number } from 'joi';
+import { GetTradeListDto } from './dto/get-trade-list.dto';
 import { TestDto } from './dto/test-dto';
-import { MESSAGES } from 'src/commons/constants/trades/messages';
 
 //constants
 import { SWAGGER } from 'src/commons/constants/trades/swagger.constant';
+import { MESSAGES } from 'src/commons/constants/trades/messages';
 
 //swagger
 import {
@@ -146,8 +158,10 @@ export class TradesController {
     description: SWAGGER.TRADES.GET_TRADE_LIST.API_OPERATION.DESCRIPTION,
   })
   @ApiOkResponse({ description: '' })
-  async getList() {
-    return await this.tradesService.getList();
+  async getList(@Body() getTradeListDto: GetTradeListDto) {
+    if (!getTradeListDto)
+      throw new BadRequestException('이동하고자 하는 페이지를 입력해 주십시오!');
+    return await this.tradesService.getList(getTradeListDto);
   }
 
   //<3>중고 거래 생성
