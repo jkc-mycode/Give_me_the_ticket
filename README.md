@@ -171,7 +171,7 @@ $ npm run start:prod
 - https://github.com/jkc-mycode/Give_me_the_ticket/blob/3fa41ab72531a177aff08c53434bf55cb5dcffd1/src/modules/shows/shows.service.ts#L517-L612
 
 - 공연 티켓 환불 흐름도
-  ![ticket deposit](image.png)
+  ![ticket deposit](./images/ticket.flowchat.png)
 
 - 공연 티켓 환불 페이지
 - 내 정보 페이지 -> MY TICKET -> 환불을 원하는 티켓의 환불 버튼을 클릭합니다.
@@ -227,7 +227,38 @@ $ npm run start:prod
 
 <br>
 
-### 6-2. Elasticsearch 유사 검색 이용
+### 6-2. Elasticsearch 이용
+
+#### 6-2-1. 데이터 휘발
+
+- **문제** : 공연 목록 조회 시 전달 data안에 이미지 URL을 함께 전달하고 있지만 새로고침을 연달아 클릭 시 data안에 이미지URL이 휘발되는 문제 발생
+
+![alt text](image-2.png)
+
+- **추정 원인**
+
+  - 내가 기대한 내용 : 기존의 인덱싱된 인덱스는 그대로 두고, 변동이 있는 인덱스만 인덱싱
+
+  - 실제 동작하는 내용 : 기존 인덱스를 모두 삭제하고 다시 모든 데이터를 인덱싱
+    → 실제 인덱스는 15개 밖에 없는데, 새로고침 할 떄 마다 Elasticsearch안에 삭제된 문서가 증가함
+
+  - 결과 : 기존 데이터를 비우고 다시 인덱싱하는 과정보다 실제 새로고침하는 시간이 더 짧아 JOIN이 있는 이미지 URL을 가져오는게 늦어져 data안에 이미지 URL이 휘발되는 것으로 추정
+
+- **시도한 내용**
+
+  - 짧은 스케줄링 간격과 deletedAt컬럼 때문에 기존 데이터도 지워버리고 다시 인덱싱하는 듯해 수정
+
+  - 기존 코드 : 1분마다 deletedAt컬럼을 기준으로 컬럼 값이 있다면 인덱스를 삭제하고, 값이 null이라면 인덱스를 생성 하도록 구현
+
+  - 수정한 코드 : 5분마다 updatedAt컬럼을 기준으로 스케줄링을 돌며 현재 시간의 5분 전과 비교하여 변경된 데이터만 인덱싱하도록 구현
+
+- **해결 방안**
+  - Elasticsearch(search.service.ts) : 인덱싱한 id만 반환
+  - 공연 목록 조회 API (shows.service.ts) : 인덱싱한 id에 해당하는 데이터를 DB에서 조회하여 데이터 반환
+  - 최종 해결 방법 : 기존에 연결한 AWS OpenSearch 도메인을 삭제하고, 새로운 도메인을 생성하여 연결하였더니 기존에 작성한 코드로도 데이터가 휘발되지 않고 정상 작동함
+    <br>
+
+#### 6-2-2. 유사 검색
 
 - **문제** : 유사 검색을 위해 match쿼리에 fuzziness를 설정하여 검색 시 너무 많은 정보가 검색됨
 
@@ -249,9 +280,33 @@ $ npm run start:prod
 ### 6-3. CI/CD 설정
 
 - **문제** : CD workflow 멈춤 현상
+  ![alt text](image.png)
+  ![alt text](image-1.png)
 
-- **추정 원인** : applyboy/ssh-action를 다운로드 하는 과정에서 CPU 점유율이 100%로 치솟음
+- **추정 원인**
 
-- **시도한 내용** : 인스턴스 유형 업그레이드, 불필요한 패키지 삭제 등
+  - npm ci 에서 aws-sdk 패키지를 설치할 때 메모리를 너무 많이 잡아먹어서 메모리 누수로 인해 서버에서 다음 동작을 하지 못해 Timeout이 발생하는 것으로 추정
 
-- **해결 방안** : applyboy/ssh-action를 사용하지 않고 Github Actions VM에서 직접 SSH에 접속하는 명령어를 cd.yml 에 작성
+  - EC2 인스턴스 서버에서 CPU 점유율이 거의 100%까지 치솟아서 이로 인해 서버가 느려지거나 멈추는 것이라고 추정함
+
+  - AWS EC2 인스턴스에서 실행하지 않고 일반 로컬 서버에서 실행하면 정상 동작함
+
+  - 완벽하진 않지만 CD 과정에서 `appleboy/ssh-action` 를 다운로드 하는 과정에서 타임 아웃이 발생하고 그로 인해 CPU 점유율이 100%로 치솟는 다고 추정함
+
+- **시도한 내용**
+
+  - 혹시나 `cd.yml` 파일의 오타가 있는지 확인하고 실제로 오타가 있어서 수정함
+  - Github Actions Secret에 들어갈 키의 값들을 다시 설정함
+  - 사용하지 않는 패키지들 `package.json` 파일에서 삭제함
+
+  - t2.micro에서 t3로 EC2 인스턴스의 유형을 변경함
+  - `npm ci` 명령어에 별도의 옵션을 추가해서 빠르게 진행되도록 수정함
+  - 직접 사용하지 않는 패키지들을 삭제함
+  - `npm ci` 전에 최대한 리소스를 줄이기 위해 EC2 인스턴스에서 실행 중인 pm2 서버를 종료 먼저하고 `npm ci` 를 진행함
+
+- **해결 방안**
+
+  - 이미지를 S3에 업로드 할 때 aws-sdk 패키지를 실제로 사용하지 않기 때문에 `package.json`에서 해당 패키지를 삭제
+  - 결과적으로 `appleboy/ssh-action` 으로 인한 문제가 맞는 것 같음
+  - 해당 action을 사용하지 않고 직접 SSH를 통해서 명령을 실행하는 방법을 사용
+  - Github Actions VM에서 직접 SSH에 접속하는 명령을 통해서 EC2 인스턴스에 접근함
