@@ -408,12 +408,12 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.appendChild(tradeCreatedAtElement);
 
         const tradeStatusElement = document.createElement('p');
-        let tradeStatusText = log.status;
+        let tradeStatusText = log.tradeStatus;
 
         // 상태에 따라 텍스트 변경
-        if (log.status === 'ACTIVATION') {
+        if (log.tradeStatus === 'ACTIVATION') {
           tradeStatusText = '거래 활성';
-        } else if (log.status === 'INACTIVE') {
+        } else if (log.tradeStatus === 'INACTIVE') {
           tradeStatusText = '거래 비활성';
         }
 
