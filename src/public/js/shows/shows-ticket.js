@@ -22,6 +22,55 @@ document.addEventListener('DOMContentLoaded', function () {
     return;
   }
 
+  async function getShowDetail(showId) {
+    try {
+      const [showResponse, pointResponse] = await Promise.all([
+        axios.get(`/shows/${showId}`),
+        axios.get('/users/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }),
+      ]);
+
+      const data = showResponse.data.data;
+      const pointData = pointResponse.data.getUserProfile;
+
+      // 공연 정보가져오기
+      if (showResponse.status === 200 && data && pointData) {
+        // 스케줄 정보 가져오기
+        const schedule = showResponse.data.data.schedules.find(
+          (schedule) => schedule.id === Number(selectedScheduleId)
+        );
+
+        if (!schedule) {
+          alert('선택한 스케줄을 찾을 수 없습니다.');
+          return;
+        }
+
+        const showsContainer = document.querySelector('#shows');
+
+        showsContainer.innerHTML = `
+        
+          <h2>${data.title}</h2>
+          <p>가격: ${data.price}원</p>
+          <p>위치: ${data.location}</p>
+           <p>공연일: ${schedule.date}</p>
+        <p>시간: ${schedule.time}</p>
+          <p>현재 포인트: ${pointData.point}</p>
+          <p>예매 후 포인트: ${pointData.point - data.price} </p>
+     
+        `;
+      } else {
+        console.error('서버에서 데이터를 가져오지 못했습니다.');
+      }
+    } catch (error) {
+      console.error('공연 정보 가져오기 오류:', error);
+    }
+  }
+
+  getShowDetail(showId);
+
   bookingBtn.addEventListener('click', async (e) => {
     e.preventDefault();
 
