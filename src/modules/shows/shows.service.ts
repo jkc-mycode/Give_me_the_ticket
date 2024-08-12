@@ -1,8 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
-  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -34,6 +32,9 @@ import { QUEUES } from 'src/commons/constants/queue.constant';
 import { TicketQueueEvents } from 'src/queue-events/ticket.queue-event';
 import { PointLog } from 'src/entities/users/point-log.entity';
 import { PointType } from 'src/commons/types/users/point.type';
+
+import { RedisService } from '../redis/redis.service';
+
 @Injectable()
 export class ShowsService {
   constructor(
@@ -41,9 +42,7 @@ export class ShowsService {
     @InjectRepository(Bookmark) private bookmarkRepository: Repository<Bookmark>,
     @InjectRepository(Ticket) private ticketRepository: Repository<Ticket>,
     @InjectRepository(Image) private imagesRepository: Repository<Image>,
-    @InjectRepository(PointLog) private pointLogRepository: Repository<PointLog>,
-    @InjectQueue(QUEUES.TICKET_QUEUE) private ticketQueue: Queue,
-    private readonly ticketQueueEvents: TicketQueueEvents,
+    private readonly redisService: RedisService,
     private dataSource: DataSource,
     private readonly imagesService: ImagesService,
     private readonly searchService: SearchService
@@ -362,44 +361,17 @@ export class ShowsService {
     return bookmark;
   }
 
-  /* 티켓 예매 동시성 처리, 큐에 작업 추가 */
-
-  // async addTicketQueue(
-  //   showId: number,
-  //   createTicketDto: CreateTicketDto,
-  //   user: User,
-  //   pointlog: PointLog
-  // ) {
-  //   const job = await this.ticketQueue.add(
-  //     QUEUES.ADD_TICKET_QUEUE,
-  //     {
-  //       showId,
-  //       user,
-  //       createTicketDto,
-  //       pointlog,
-  //     },
-  //     {
-  //       removeOnComplete: true,
-  //       removeOnFail: true,
-  //     }
-  //   );
-
-  //   // 작업 완료 대기 및 결과 반환
-  //   const result = await job.waitUntilFinished(this.ticketQueueEvents.queueEvents);
-  //   if (!result) {
-  //     throw new NotFoundException(SHOW_TICKET_MESSAGES.COMMON.TICKET.NOT_FOUND);
-  //   }
-  //   return result;
-  // }
-
   /* 티켓 예매 */
   async createTicket(showId: number, createTicketDto: CreateTicketDto, user: User) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
+    let lock;
     try {
+      lock = await this.redisService.acquireLock();
       const { scheduleId } = createTicketDto;
+
       // 공연이 있는지 확인합니다.
       const show = await queryRunner.manager.findOne(Show, {
         where: { id: showId },
@@ -411,14 +383,13 @@ export class ShowsService {
       // 스케줄이 있는지 확인합니다.
       const schedule = await queryRunner.manager.findOne(Schedule, {
         where: { id: scheduleId, showId: showId },
-        lock: { mode: 'pessimistic_write' },
       });
 
       if (!schedule) {
         throw new NotFoundException(SHOW_TICKET_MESSAGES.COMMON.SCHEDULE.NOT_FOUND);
       }
 
-      //지정 좌석이 있는지 확인합니다.
+      // 지정 좌석이 있는지 확인합니다.
       if (schedule.remainSeat <= SHOW_TICKETS.COMMON.SEAT.UNSIGNED) {
         throw new ConflictException(SHOW_TICKET_MESSAGES.COMMON.SEAT.NOT_ENOUGH);
       }
@@ -434,7 +405,7 @@ export class ShowsService {
         throw new ConflictException(SHOW_TICKET_MESSAGES.COMMON.TICKET.MAXIMUM);
       }
 
-      //date와 time을 하나의 showTime으로 연결합니다.
+      // date와 time을 하나의 showTime으로 연결합니다.
       const showTime = `${String(schedule.date)}T${String(schedule.time)}.000Z`;
 
       // 공연 시간 기준 2시간 전
@@ -455,7 +426,7 @@ export class ShowsService {
       user.point -= show.price;
       await queryRunner.manager.save(User, user);
 
-      //사용자의 포인트로그 기록 생성
+      // 사용자의 포인트로그 기록 생성
       const pointLog = queryRunner.manager.create(PointLog, {
         userId: user.id,
         type: PointType.WITHDRAW,
@@ -480,8 +451,7 @@ export class ShowsService {
 
       await queryRunner.manager.save(Ticket, ticket);
 
-      // // 좌석 차감 처리:  감소되고나서 잔여 좌석이 음수가 되면 예외처리를 합니다.
-
+      // 좌석 차감 처리: 감소되고 나서 잔여 좌석이 음수가 되면 예외처리 합니다.
       await queryRunner.manager.decrement(
         Schedule,
         { id: schedule.id },
@@ -494,14 +464,16 @@ export class ShowsService {
       if (updatedSchedule.remainSeat < 0) {
         throw new ConflictException(SHOW_TICKET_MESSAGES.COMMON.SEAT.NOT_ENOUGH);
       }
+      //락 해제 - 성공이든 실패든 해제하는 부분
 
       await queryRunner.commitTransaction();
       await queryRunner.release();
+      await lock.release();
       return ticket;
-      //각각 성공, 실패 여부를 return 합니다.
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
+      await lock.release();
       throw error;
     }
   }
