@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const backBtn = document.querySelector('.back__btn');
   const token = window.localStorage.getItem('accessToken');
+  const numberbtns = document.querySelectorAll('.numberbtn');
   const tradeListContainer = document.querySelector('#tradeList');
 
   if (!token) {
@@ -15,15 +16,49 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = `/views`;
   });
 
+  //page값을 알아내는 함수
+  function getPageFromParam() {
+    const pathSegments = window.location.pathname.split('/');
+    const page = pathSegments[pathSegments.length - 1];
+    return page;
+  }
+
+  //페이지네이션 기능
+  //현재 위치의 버튼을 밝게 표현
+
+  async function activeBtn(page) {
+    numberbtns.forEach((btn) => {
+      if (btn.textContent === page) {
+        btn.classList.add('active-page');
+      }
+    });
+  }
+
+  const previousPage = document.querySelector(`#previousPage`);
+  const nextPage = document.querySelector(`#nextPage`);
+
+  async function pagination() {
+    // 각 링크에 클릭 이벤트 추가
+    numberbtns.forEach((btn) => {
+      btn.addEventListener('click', function (e) {
+        // 다른 링크들에서 active 클래스 제거
+        numberbtns.forEach((btn) => btn.classList.remove('active-page'));
+
+        // 클릭한 링크에 active 클래스 추가
+        e.target.classList.add('active-page');
+        window.location.href = `/views/trades/page/${e.target.textContent}`;
+      });
+    });
+  }
+
   //데이터 가져오기
-  async function fetchTradesList() {
+  async function fetchTradesList(page) {
     try {
-      const { data } = await axios.get('/trades');
-      // console.log(data);
+      const { data } = await axios.get(`/trades/page/${page}`);
 
       return data;
     } catch (err) {
-      console.err('Failed to fetch to trades show Error:', err);
+      console.error('Failed to fetch to trades show Error:', err);
       alert('Failed To fetch Trades');
       return null;
     }
@@ -34,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tradeListContainer = document.getElementById('tradeList');
     tradeListContainer.innerHTML = '';
     trades.forEach((trade) => {
-      const tradItemHTML = `<a href="${trade.id}"><div class="col">
+      const tradItemHTML = `<a href="/views/trades/${trade.id}"><div class="col">
           <div class="card h-100">
             <img src=${trade.imageurl} class="card-img-top" alt="이미지 존재하지 않음" />
             <div class="card-body">
@@ -53,9 +88,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       tradeListContainer.innerHTML += tradItemHTML;
     });
   }
+  const page = getPageFromParam();
+  const result = await fetchTradesList(page);
 
-  const result = await fetchTradesList();
   if (result) {
+    activeBtn(page);
     showTradeList(result);
+    pagination();
   }
 });
