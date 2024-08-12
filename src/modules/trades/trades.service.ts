@@ -38,6 +38,7 @@ import { DataSource, Like } from 'typeorm';
 import { QUEUES } from 'src/commons/constants/queue.constant';
 import { Role } from 'src/commons/types/users/user-role.type';
 import { TicketStatus } from 'src/commons/types/shows/ticket.type';
+import { FLAG } from 'src/commons/types/flag/flag-type';
 import { number } from 'joi';
 
 //entities
@@ -175,6 +176,7 @@ export class TradesService {
     const skip: number = (page - 1) * limit;
 
     let trade_list = await this.tradeRepository.find({
+      where: { flag: FLAG.ACTIVATION },
       select: { id: true, ticketId: true, createdAt: true, closedAt: true },
       skip: skip,
       take: limit,
@@ -198,7 +200,8 @@ export class TradesService {
           new Date().getTime() >=
           this.combineDateAndTime(String(ticket.date), ticket.time).getTime() - 60 * 1000 * 60 * 2
         ) {
-          await this.tradeRepository.delete(trade.id);
+          await this.tradeRepository.update({ id: trade.id }, { flag: FLAG.INACTIVE });
+          return null;
         }
 
         if (ticket) {
@@ -213,7 +216,10 @@ export class TradesService {
         return trade;
       })
     );
-    if (!trade_list[0]) {
+
+    trade_list = trade_list.filter((trade) => trade !== null);
+
+    if (!trade_list.length) {
       return { message: MESSAGES.TRADES.NOT_EXISTS.TRADE_LIST };
     }
 
@@ -305,11 +311,11 @@ export class TradesService {
 
     try {
       //정책에 따라 티켓의 가격을 중고거래 게시된 시점의 가격으로 고정
-      await queryRunner.manager.update(
-        Ticket,
-        { id: ticketId },
-        { price: price, status: TicketStatus.TRADING }
-      );
+      await queryRunner.manager.save(Ticket, {
+        id: ticketId,
+        price: price,
+        status: TicketStatus.TRADING,
+      });
 
       const closedAt = await this.returnCloseTime(ticket.id);
       const trade = await queryRunner.manager.save(Trade, {
@@ -370,7 +376,7 @@ export class TradesService {
     await this.ticketRepository.update({ id: trade.ticketId }, { status: TicketStatus.USEABLE });
 
     //모든 검증이 끝난 뒤 삭제 로직
-    return await this.tradeRepository.delete(tradeId);
+    return await this.tradeRepository.update({ id: tradeId }, { flag: FLAG.INACTIVE });
   }
 
   //<6> 티켓 구매 메서드 (buyerId는 기존의 userId와 같다) (현재 수정중)
@@ -407,6 +413,10 @@ export class TradesService {
     let query = await this.ticketRepository.query('SELECT MAX(id) AS maxId FROM tickets');
     const newId = query[0].maxId + 1;
 
+    //해당 거래의 로그 가져오기
+    const tradeLog = await this.tradeLogRepository.findOne({ where: { tradeId: trade.id } });
+    const tradeLogId = tradeLog.id;
+
     //<6-1>쿼리 러너문 만들기=========트랜잭션 시작=========가져온 변수:trade,ticket,seller,buyer,===============================================
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -426,7 +436,7 @@ export class TradesService {
       await queryRunner.manager.save(User, seller);
 
       //tradeLog데이타베이스에도 저장
-      const log = { tradeId: tradeId, buyerId, sellerId: seller.id };
+      const log = { id: tradeLogId, tradeId: tradeId, buyerId };
       await queryRunner.manager.save(TradeLog, log);
 
       //티켓 변경 로직 START========================
@@ -457,7 +467,8 @@ export class TradesService {
         { id: trade.ticketId },
         { status: TicketStatus.USEABLE }
       );
-      await queryRunner.manager.delete(Trade, tradeId);
+      await queryRunner.manager.update(Trade, { id: tradeId }, { flag: FLAG.INACTIVE });
+      await queryRunner.manager.update(TradeLog, { tradeId: tradeId }, { buyerId: buyer.id });
 
       await queryRunner.commitTransaction();
     } catch (err) {
