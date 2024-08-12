@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -34,8 +35,8 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles(Role.USER)
   @Get('/me/point')
-  async getPointLog(@Req() req: any) {
-    const getPointLog = await this.userService.getPointLog(req.user.id);
+  async getPointLog(@Req() req: any, @Query('description') description?: string) {
+    const getPointLog = await this.userService.getPointLog(req.user.id, description);
 
     return {
       statusCode: HttpStatus.OK,

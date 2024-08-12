@@ -18,7 +18,7 @@ import { USER_MESSAGES } from 'src/commons/constants/users/user-message.constant
 import { USER_BOOKMARK_MESSAGES } from 'src/commons/constants/users/user-bookmark-messages.constant';
 
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, Like, Repository } from 'typeorm';
 import { format } from 'date-fns';
 
 @Injectable()
@@ -42,10 +42,22 @@ export class UsersService {
   ) {}
 
   // 포인트 내역 조회
-  async getPointLog(id: number) {
+  async getPointLog(id: number, description?: string) {
     try {
+      const whereStatus: any = { userId: id };
+
+      if (description) {
+        if (description === '포인트 충전') {
+          whereStatus.description = '포인트 충전';
+        } else if (description === '티켓 결제') {
+          whereStatus.description = Like('%티켓 결제%');
+        } else if (description === '티켓 환불') {
+          whereStatus.description = Like('%티켓 환불%');
+        }
+      }
+
       const pointLog = await this.pointLogRepository.find({
-        where: { userId: id },
+        where: whereStatus,
         order: { createdAt: 'DESC' },
       });
 
