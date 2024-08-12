@@ -16,6 +16,8 @@ import { ShowsConsumer } from './shows.consumer';
 import { QUEUES } from 'src/commons/constants/queue.constant';
 import { TicketQueueEvents } from 'src/queue-events/ticket.queue-event';
 import { PointLog } from 'src/entities/users/point-log.entity';
+import { RedisModule } from '../redis/redis.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -24,6 +26,7 @@ import { PointLog } from 'src/entities/users/point-log.entity';
     }),
     TypeOrmModule.forFeature([Show, User, Ticket, Bookmark, Schedule, Image, PointLog]),
     SearchModule,
+    RedisModule,
   ],
   controllers: [ShowsController],
 
