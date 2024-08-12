@@ -26,10 +26,6 @@ import { USER_BOOKMARK_MESSAGES } from 'src/commons/constants/users/user-bookmar
 import { ImagesService } from '../images/images.service';
 import { SearchService } from './search/search.service';
 import { addHours, startOfDay, subDays, subHours } from 'date-fns';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
-import { QUEUES } from 'src/commons/constants/queue.constant';
-import { TicketQueueEvents } from 'src/queue-events/ticket.queue-event';
 import { PointLog } from 'src/entities/users/point-log.entity';
 import { PointType } from 'src/commons/types/users/point.type';
 
@@ -367,6 +363,7 @@ export class ShowsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
+    //트랜잭션 시도 후 락 걸기 시작
     let lock;
     try {
       lock = await this.redisService.acquireLock();
@@ -430,7 +427,7 @@ export class ShowsService {
       const pointLog = queryRunner.manager.create(PointLog, {
         userId: user.id,
         type: PointType.WITHDRAW,
-        description: `${show.title} 티켓 결제`,
+        description: SHOW_TICKET_MESSAGES.COMMON.TICKET.PAYMENT(show.title),
         price: show.price,
       });
 
@@ -455,13 +452,13 @@ export class ShowsService {
       await queryRunner.manager.decrement(
         Schedule,
         { id: schedule.id },
-        'remainSeat',
+        SHOW_TICKETS.COMMON.SEAT.REMAIN,
         SHOW_TICKETS.COMMON.SEAT.DEDUCTED
       );
       const updatedSchedule = await queryRunner.manager.findOne(Schedule, {
         where: { id: scheduleId, showId: showId },
       });
-      if (updatedSchedule.remainSeat < 0) {
+      if (updatedSchedule.remainSeat < SHOW_TICKETS.COMMON.SEAT.UNSIGNED) {
         throw new ConflictException(SHOW_TICKET_MESSAGES.COMMON.SEAT.NOT_ENOUGH);
       }
       //락 해제 - 성공이든 실패든 해제하는 부분
@@ -566,7 +563,7 @@ export class ShowsService {
       const pointLog = queryRunner.manager.create(PointLog, {
         userId: user.id,
         price: refundPoint,
-        description: `${ticket.title} 티켓 환불`,
+        description: SHOW_TICKET_MESSAGES.COMMON.TICKET.REFUND(ticket.title),
         type: PointType.DEPOSIT,
       });
 

@@ -11,6 +11,7 @@ export const SHOW_TICKETS = {
       DEDUCTED: 1,
       INCREASED: 1,
       UNSIGNED: 0,
+      REMAIN: 'remainSeat',
     },
     REFUND_POINT: 0,
     TICKET: {
