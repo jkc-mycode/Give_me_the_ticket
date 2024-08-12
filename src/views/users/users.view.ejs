@@ -60,6 +60,17 @@
         <!-- Point Log Content -->
         <div class="content" id="pointLogContent" style="display: none">
           <p>Point : <span id="userPoint"></span></p>
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="pointLogDropdown"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              내역 선택
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="pointLogDropdown">
+              <li><a class="dropdown-item" href="#">포인트 충전</a></li>
+              <li><a class="dropdown-item" href="#">티켓 결제</a></li>
+              <li><a class="dropdown-item" href="#">티켓 환불</a></li>
+            </ul>
+          </div>
           <hr>
           <!-- point charge button -->
           <button class="charge__btn" id="chargeBtn">포인트 충전</button>
