@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
     isSignUpMode = true;
 
     const h1 = signUp.closest('li').parentNode.previousElementSibling; // h1 요소 찾기
-    h1.textContent = 'SIGN UP';
+    h1.textContent = '회원가입';
     signUp.parentElement.style.opacity = '1';
     Array.from(signUp.parentElement.parentElement.children).forEach(function (sibling) {
       if (sibling !== signUp.parentElement) sibling.style.opacity = '.6';
