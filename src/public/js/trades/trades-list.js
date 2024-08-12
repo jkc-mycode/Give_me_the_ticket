@@ -4,6 +4,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const numberbtns = document.querySelectorAll('.numberbtn');
   const tradeListContainer = document.querySelector('#tradeList');
 
+  //page값을 알아내는 함수
+  function getPageFromParam() {
+    const pathSegments = window.location.pathname.split('/');
+    const page = pathSegments[pathSegments.length - 1];
+    return page;
+  }
+
+  const page = getPageFromParam();
+
   if (!token) {
     window.location.href = '/views/auth/sign';
     alert('로그인이 필요합니다.');
@@ -16,13 +25,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.href = `/views`;
   });
 
-  //page값을 알아내는 함수
-  function getPageFromParam() {
-    const pathSegments = window.location.pathname.split('/');
-    const page = pathSegments[pathSegments.length - 1];
-    return page;
-  }
-
   //페이지네이션 기능
   //현재 위치의 버튼을 밝게 표현
 
@@ -34,22 +36,32 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  const previousPage = document.querySelector(`#previousPage`);
-  const nextPage = document.querySelector(`#nextPage`);
-
   async function pagination() {
+    const pluspage = Math.floor((page - 1) / 5) * 5;
+    console.log(pluspage);
     // 각 링크에 클릭 이벤트 추가
     numberbtns.forEach((btn) => {
+      btn.textContent = `${Number(btn.textContent) + pluspage}`;
       btn.addEventListener('click', function (e) {
-        // 다른 링크들에서 active 클래스 제거
-        numberbtns.forEach((btn) => btn.classList.remove('active-page'));
-
-        // 클릭한 링크에 active 클래스 추가
-        e.target.classList.add('active-page');
         window.location.href = `/views/trades/page/${e.target.textContent}`;
       });
     });
   }
+
+  const previousPage = document.querySelector(`#previousPage`);
+  const nextPage = document.querySelector(`#nextPage`);
+
+  previousPage.addEventListener('click', function (e) {
+    const previousPageNumber = parseInt(page, 10) - 1;
+    if (previousPageNumber > 0) {
+      window.location.href = `/views/trades/page/${previousPageNumber}`;
+    }
+  });
+
+  nextPage.addEventListener('click', function (e) {
+    const nextPageNumber = parseInt(page, 10) + 1;
+    window.location.href = `/views/trades/page/${nextPageNumber}`;
+  });
 
   //데이터 가져오기
   async function fetchTradesList(page) {
@@ -88,12 +100,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       tradeListContainer.innerHTML += tradItemHTML;
     });
   }
-  const page = getPageFromParam();
+
   const result = await fetchTradesList(page);
 
   if (result) {
-    activeBtn(page);
     showTradeList(result);
     pagination();
+    activeBtn(page);
   }
 });
