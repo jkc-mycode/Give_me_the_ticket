@@ -204,6 +204,8 @@ export class UsersService {
             showId: show.id,
             ticketId: ticket.id,
             showTitle: ticket.title, // 공연 제목
+            showDate: ticket.date,
+            showTime: ticket.time,
             ticketPrice: show.price, // 티켓 원래 가격
             tradeId: trade.id,
             tradePrice: trade.price, // 중고 거래 가격
@@ -218,7 +220,6 @@ export class UsersService {
           };
         })
       );
-
       return formatTradeLog;
     } catch (err) {
       throw new InternalServerErrorException(USER_MESSAGES.USER.TRADE.GET_LOG.FAILURE.FAIL);

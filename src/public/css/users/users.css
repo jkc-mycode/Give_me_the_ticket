@@ -6,12 +6,15 @@
 }
 
 h1 {
-  color: #e91e63;
-  font-size: 48px;
+  font-size: 40px;
   letter-spacing: -3px;
   text-align: center;
   margin: 50px 0 70px 0;
   transition: 0.2s linear;
+}
+
+.nickname {
+  color: #e91e63;
 }
 
 .links li a {
@@ -231,4 +234,60 @@ hr.separator::after {
   background: rgba(15, 19, 42, 0.2);
   height: 1px;
   width: 45%;
+}
+
+.btn-custom {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif;
+  text-align: center;
+  text-decoration: none;
+  background-color: #3072ff;
+  color: white;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s linear;
+  margin-right: 10px;
+}
+
+.btn-custom:last-child {
+  margin-right: 0;
+}
+
+.btn-custom:hover {
+  background-color: #255ab3;
+}
+
+.btn-update {
+  background-color: #3072ff;
+}
+
+.btn-update:hover {
+  background-color: #255ab3;
+}
+
+.btn-delete {
+  background-color: #e91e63;
+}
+
+.btn-delete:hover {
+  background-color: #c2185b;
+}
+
+.btn-refund {
+  background-color: #ff5722;
+}
+
+.btn-refund:hover {
+  background-color: #e64a19;
+}
+
+.btn-resale {
+  background-color: #4caf50;
+}
+
+.btn-resale:hover {
+  background-color: #388e3c;
 }

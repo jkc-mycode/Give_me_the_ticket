@@ -11,6 +11,7 @@ h1 {
 
 .form-label {
   font-weight: bold;
+  margin-top: 15px;
 }
 
 .btn-primary {

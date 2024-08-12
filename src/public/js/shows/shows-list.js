@@ -1,6 +1,15 @@
+// 페이지 이동 함수 전역 선언
+function goToPage(pageNumber, category, search) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('page', pageNumber);
+  url.searchParams.set('category', category);
+  url.searchParams.set('search', search);
+  window.location.href = url.toString();
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const showListContainer = document.querySelector('#showList');
-  const categoryButtons = document.querySelectorAll('.category-btn');
+  const paginationContainer = document.querySelector('#pagination');
   const params = new URLSearchParams(window.location.search);
   const searchQuery = params.get('search') || ''; // 검색어 쿼리 가져오기
   const categoryQuery = params.get('category') || ''; // 카테고리 쿼리 가져오기
@@ -8,6 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const limit = parseInt(params.get('limit') || '6');
 
   let currentCategory = categoryQuery;
+  let currentPage = page;
 
   // 검색어를 검색창에 설정
   headerSearchInput.value = searchQuery;
@@ -29,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           : error.response.data.message;
 
         alert(errorMessage);
-        //공연 검색 실패 시 메인페이지로 이동
+        // 공연 검색 실패 시 메인페이지로 이동
         window.location.href = `/views`;
       }
       return null;
@@ -64,34 +74,75 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 페이지네이션 렌더링
   function renderPagination(totalPages, currentPage) {
-    const paginationContainer = document.querySelector('#pagination');
-    paginationContainer.innerHTML = Array.from({ length: totalPages }, (_, i) => {
-      const pageIndex = i + 1;
-      const activeClass = pageIndex === currentPage ? 'active' : '';
-      return `
-        <li class="page-item ${activeClass}">
-          <a class="page-link" href="?page=${pageIndex}&limit=${limit}&category=${currentCategory}&search=${searchQuery}">${pageIndex}</a>
+    const maxPagesToShow = 3;
+    const startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    let paginationHTML = '';
+
+    // 이전 페이지 버튼
+    if (currentPage > 1) {
+      paginationHTML += `
+        <li class="page-item">
+          <a class="page-link" href="#" aria-label="Previous" data-page="${currentPage - 1}">
+            &laquo; 이전
+          </a>
         </li>
       `;
-    }).join('');
+    }
+
+    // 페이지 번호
+    for (let i = startPage; i <= endPage; i++) {
+      const activeClass = i === currentPage ? 'active' : '';
+      paginationHTML += `
+        <li class="page-item ${activeClass}">
+          <a class="page-link" href="#" data-page="${i}">${i}</a>
+        </li>
+      `;
+    }
+
+    // 다음 페이지 버튼
+    if (currentPage < totalPages) {
+      paginationHTML += `
+        <li class="page-item">
+          <a class="page-link" href="#" aria-label="Next" data-page="${currentPage + 1}">
+            다음 &raquo;
+          </a>
+        </li>
+      `;
+    }
+
+    paginationContainer.innerHTML = paginationHTML;
+
+    // 페이지 버튼 클릭 이벤트 리스너 추가
+    paginationContainer.querySelectorAll('.page-link').forEach((link) => {
+      link.addEventListener('click', function (event) {
+        event.preventDefault(); // 기본 동작 방지
+        const pageNumber = parseInt(this.dataset.page);
+        goToPage(pageNumber, currentCategory, searchQuery);
+      });
+    });
   }
 
   // 카테고리 버튼 클릭 이벤트 핸들러
-  categoryButtons.forEach((button) => {
-    button.addEventListener('click', async () => {
+  document.querySelectorAll('.category-btn').forEach((button) => {
+    button.addEventListener('click', async function () {
+      document.querySelectorAll('.category-btn').forEach((btn) => btn.classList.remove('active'));
+      this.classList.add('active');
       currentCategory = button.dataset.category;
-      const result = await fetchShows(page, limit, searchQuery, currentCategory);
+
+      const result = await fetchShows(1, limit, searchQuery, currentCategory);
       if (result && result.data) {
         renderShows(result.data);
-        renderPagination(result.totalPages, page);
+        renderPagination(result.totalPages, 1);
       }
     });
   });
 
   // 초기 데이터 로딩
-  const result = await fetchShows(page, limit, searchQuery, currentCategory);
+  const result = await fetchShows(currentPage, limit, searchQuery, currentCategory);
   if (result && result.data) {
     renderShows(result.data);
-    renderPagination(result.totalPages, page);
+    renderPagination(result.totalPages, currentPage);
   }
 });

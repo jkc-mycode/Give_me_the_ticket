@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MY PAGE</title>
+  <title>회원정보-GIVE ME THE TICKET</title>
   <link rel="shortcut icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/128/432/432312.png" />
 
   <!-- 부트스트랩 CSS CDN-->
@@ -30,15 +30,15 @@
     <main>
       <div class="container">
         <!-- Heading -->
-        <h1>MY PAGE</h1>
+        <h1 id="pageHeader"><span class="nickname"></span>님의 페이지입니다.</h1>
 
         <!-- Links -->
         <ul class="links">
-          <li><a href="#" id="myProfile">MY PROFILE</a></li>
-          <li><a href="#" id="myPoint">MY POINT</a></li>
-          <li><a href="#" id="myTicket">MY TICKET</a></li>
-          <li><a href="#" id="myBookmark">MY BOOKMARK</a></li>
-          <li><a href="#" id="myTrade">MY TRADE</a></li>
+          <li><a href="#" id="myProfile">회원정보</a></li>
+          <li><a href="#" id="myPoint">포인트 조회</a></li>
+          <li><a href="#" id="myTicket">예매내역 조회</a></li>
+          <li><a href="#" id="myBookmark">찜목록 조회</a></li>
+          <li><a href="#" id="myTrade">중고거래 내역 조회</a></li>
         </ul>
 
         <!-- Profile Content -->
@@ -48,7 +48,7 @@
           <p>이메일 : <span id="email"></span></p>
           <p>보유 포인트 : <span id="point"></span></p>
           <!-- update user button -->
-          <button class="update__btn" id="updateBtn">회원 정보 수정</button>
+          <button class="update__btn" id="updateBtn">회원정보수정</button>
           <!-- separator -->
           <div class="separator">
             <p>OR</p>
@@ -59,7 +59,7 @@
 
         <!-- Point Log Content -->
         <div class="content" id="pointLogContent" style="display: none">
-          <p>Point : <span id="userPoint"></span></p>
+          <p>보유 포인트 : <span id="userPoint"></span></p>
           <div class="dropdown">
             <button class="btn btn-secondary dropdown-toggle" type="button" id="pointLogDropdown"
               data-bs-toggle="dropdown" aria-expanded="false">
@@ -71,10 +71,10 @@
               <li><a class="dropdown-item" href="#">티켓 환불</a></li>
             </ul>
           </div>
-          <hr>
+          <hr />
           <!-- point charge button -->
           <button class="charge__btn" id="chargeBtn">포인트 충전</button>
-          <hr>
+          <hr />
           <div id="pointLogContainer"></div>
         </div>
 
