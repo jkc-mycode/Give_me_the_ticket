@@ -1,9 +1,22 @@
+.container {
+  max-width: 600px;
+}
+
+main {
+  padding-top: 20px;
+}
+
+.form-label {
+  font-weight: bold;
+  margin-top: 15px;
+}
+
 #imagePreview {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .position-relative {
-    position: relative;
+  position: relative;
 }

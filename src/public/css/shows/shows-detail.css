@@ -10,15 +10,6 @@ body {
   margin: 50px auto;
 }
 
-h1 {
-  color: #e91e63;
-  font-size: 48px;
-  letter-spacing: -3px;
-  text-align: center;
-  margin: 50px 0 70px 0;
-  transition: 0.2s linear;
-}
-
 .links {
   list-style-type: none;
 }
@@ -59,84 +50,51 @@ h1 {
 }
 
 .dropdown-item {
-  white-space: normal;
-  padding: 10px;
+  width: 100%;
   font-size: 14px;
 }
 
-.dropdown-toggle {
-  width: 100%;
-  text-align: left;
-}
-
-.booking-form {
-  width: 100%;
-  max-width: 680px;
-  margin: 40px auto 10px;
-}
-
-.booking-form .input__block {
-  margin: 20px auto;
-  display: block;
-  position: relative;
-}
-
-.booking-form .input__block.first-input__block::before {
-  content: '';
-  position: absolute;
-  top: -15px;
-  left: 50px;
-  display: block;
-  width: 0;
-  height: 0;
-  background: transparent;
-  border-left: 15px solid transparent;
-  border-right: 15px solid transparent;
-  border-bottom: 15px solid rgba(15, 19, 42, 0.1);
-  transition: 0.2s linear;
-}
-
-.booking-form .input__block > input {
+.btn-custom {
   display: block;
   width: 90%;
   max-width: 680px;
+  margin: 20px auto;
   height: 50px;
-  margin: 0 auto;
-  border-radius: 8px;
-  border: none;
-  background: rgba(15, 19, 42, 0.1);
-  color: rgba(15, 19, 42, 0.3);
-  padding: 0 0 0 15px;
-  font-size: 14px;
+  cursor: pointer;
+  font-size: 16px;
   font-family: 'Montserrat', sans-serif;
-}
-
-.booking-form .input__block input:focus,
-.booking-form .input__block input:active {
-  outline: none;
-  border: none;
-  color: rgba(15, 19, 42, 1);
+  border-radius: 8px;
+  line-height: 50px;
+  text-align: center;
 }
 
 .booking-form .booking__btn {
-  background: #e91e63;
+  background: #3072ff;
   color: white;
-  display: block;
-  width: 92.5%;
-  max-width: 680px;
-  height: 50px;
-  border-radius: 8px;
-  margin: 0 auto;
-  border: none;
-  cursor: pointer;
-  font-size: 14px;
-  font-family: 'Montserrat', sans-serif;
-  box-shadow: 0 15px 30px rgba(233, 30, 99, 0.36);
   transition: 0.2s linear;
 }
 
-.booking-form .booking__btn:hover {
-  box-shadow: 0 0 0 rgba(233, 30, 99, 0);
+.update__btn {
+  background: #a05bf0;
+  color: white;
+  transition: 0.2s linear;
+}
+
+.delete__btn {
+  background: #e91e63;
+  color: white;
+  transition: 0.2s linear;
+}
+
+.back__btn {
+  background: #25282d;
+  color: white;
+  transition: 0.2s linear;
+}
+
+.back__btn .fa {
+  font-size: 20px;
+  padding: 0 5px 0 0;
 }
 
 .separator {
@@ -170,79 +128,4 @@ h1 {
   background: rgba(15, 19, 42, 0.2);
   height: 1px;
   width: 45%;
-}
-
-.update__btn {
-  display: block;
-  width: 90%;
-  max-width: 680px;
-  margin: 20px auto;
-  height: 50px;
-  cursor: pointer;
-  font-size: 14px;
-  font-family: 'Montserrat', sans-serif;
-  border-radius: 8px;
-  border: none;
-  line-height: 40px;
-}
-
-.update__btn.update__btn {
-  background: #5b90f0;
-  color: white;
-  box-shadow: 0 15px 30px rgba(91, 144, 240, 0.36);
-  transition: 0.2s linear;
-}
-
-.delete__btn {
-  display: block;
-  width: 90%;
-  max-width: 680px;
-  margin: 20px auto;
-  height: 50px;
-  cursor: pointer;
-  font-size: 14px;
-  font-family: 'Montserrat', sans-serif;
-  border-radius: 8px;
-  border: none;
-  line-height: 40px;
-}
-
-.back__btn.back__btn .fa {
-  font-size: 20px;
-  padding: 0 5px 0 0;
-}
-
-.back__btn.back__btn:hover {
-  box-shadow: 0 0 0 rgba(91, 144, 240, 0);
-}
-
-.back__btn.back__btn {
-  background: #25282d;
-  color: white;
-  box-shadow: 0 15px 30px rgba(37, 40, 45, 0.36);
-  transition: 0.2s linear;
-}
-
-.back__btn {
-  display: block;
-  width: 90%;
-  max-width: 680px;
-  margin: 20px auto;
-  height: 50px;
-  cursor: pointer;
-  font-size: 14px;
-  font-family: 'Montserrat', sans-serif;
-  border-radius: 8px;
-  border: none;
-  line-height: 40px;
-}
-
-.back__btn.back__btn,
-.back__btn.back__btn .fa {
-  font-size: 20px;
-  padding: 0 5px 0 0;
-}
-
-.back__btn.back__btn:hover {
-  box-shadow: 0 0 0 rgba(37, 40, 45, 0);
 }

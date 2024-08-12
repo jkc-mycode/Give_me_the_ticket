@@ -58,6 +58,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const user = response.data.getUserProfile;
 
+      // 페이지 제목 설정
+      const pageHeader = document.querySelector('#pageHeader .nickname');
+      if (pageHeader && user.nickname) {
+        pageHeader.textContent = user.nickname;
+      }
+
       document.getElementById('nickname').textContent = user.nickname;
       document.getElementById('email').textContent = user.email;
       document.getElementById('point').textContent = user.point;
@@ -209,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.classList.add('ticket-list');
 
         const titleElement = document.createElement('p');
-        titleElement.textContent = `공연 제목 : ${log.title}`;
+        titleElement.textContent = `공연명 : ${log.title}`;
         logElement.appendChild(titleElement);
 
         const timeElement = document.createElement('p');
@@ -217,11 +223,11 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.appendChild(timeElement);
 
         const runtimeElement = document.createElement('p');
-        runtimeElement.textContent = `공연 러닝타임 : ${log.runtime}`;
+        runtimeElement.textContent = `상영시간(분) : ${log.runtime}`;
         logElement.appendChild(runtimeElement);
 
         const dateElement = document.createElement('p');
-        dateElement.textContent = `공연 일자 : ${log.date}`;
+        dateElement.textContent = `공연 날짜 : ${log.date}`;
         logElement.appendChild(dateElement);
 
         const locationElement = document.createElement('p');
@@ -258,6 +264,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // 환불
         const refundButton = document.createElement('button');
         refundButton.textContent = '환불';
+        refundButton.classList.add('btn-custom', 'btn-refund');
         // 환불 버튼에 이벤트 추가
         refundButton.addEventListener('click', () => {
           window.location.href = `/views/shows/${log.showId}/ticket/${log.id}`;
@@ -267,6 +274,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // 중고 판매
         const resaleButton = document.createElement('button');
         resaleButton.textContent = '중고 판매';
+        resaleButton.classList.add('btn-custom', 'btn-resale');
         // 중고 판매 버튼 이벤트 추가
         resaleButton.addEventListener('click', () => {
           window.sessionStorage.setItem('ticket', JSON.stringify(log));
@@ -326,11 +334,11 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.dataset.showId = log.showId;
 
         const showTitleElement = document.createElement('p');
-        showTitleElement.textContent = `공연 제목 : ${log.showTitle}`;
+        showTitleElement.textContent = `공연명 : ${log.showTitle}`;
         logElement.appendChild(showTitleElement);
 
         const showContentElement = document.createElement('p');
-        showContentElement.textContent = `공연 설명 : ${log.showContent}`;
+        showContentElement.textContent = `공연 내용 : ${log.showContent}`;
         logElement.appendChild(showContentElement);
 
         const createdAtElement = document.createElement('p');
@@ -392,8 +400,12 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.classList.add('trade-log');
 
         const showTitleElement = document.createElement('p');
-        showTitleElement.textContent = `공연 제목 : ${log.showTitle}`;
+        showTitleElement.textContent = `공연명 : ${log.showTitle}`;
         logElement.appendChild(showTitleElement);
+
+        const showDateTimeElement = document.createElement('p');
+        showDateTimeElement.textContent = `공연 날짜 및 시간 : ${log.date} ${log.time}`;
+        logElement.appendChild(showDateTimeElement);
 
         const ticketPriceElement = document.createElement('p');
         ticketPriceElement.textContent = `티켓 원가 : ${log.ticketPrice}`;
@@ -403,18 +415,14 @@ document.addEventListener('DOMContentLoaded', function () {
         tradePriceElement.textContent = `중고 거래 가격 : ${log.tradePrice}`;
         logElement.appendChild(tradePriceElement);
 
-        const tradeCreatedAtElement = document.createElement('p');
-        tradeCreatedAtElement.textContent = `거래 생성 시간 : ${log.tradeCreatedAt}`;
-        logElement.appendChild(tradeCreatedAtElement);
-
         const tradeStatusElement = document.createElement('p');
         let tradeStatusText = log.tradeStatus;
 
         // 상태에 따라 텍스트 변경
         if (log.tradeStatus === 'ACTIVATION') {
-          tradeStatusText = '거래 활성';
+          tradeStatusText = '거래 진행 중';
         } else if (log.tradeStatus === 'INACTIVE') {
-          tradeStatusText = '거래 비활성';
+          tradeStatusText = '거래 중지';
         }
 
         tradeStatusElement.textContent = `거래 상태 : ${tradeStatusText}`;
@@ -428,15 +436,20 @@ document.addEventListener('DOMContentLoaded', function () {
         sellerIdElement.textContent = `판매자 닉네임 : ${log.sellerNickname}`;
         logElement.appendChild(sellerIdElement);
 
+        const tradeCreatedAtElement = document.createElement('p');
+        tradeCreatedAtElement.textContent = `중고 거래 게시물 생성 일자 : ${log.tradeCreatedAt}`;
+        logElement.appendChild(tradeCreatedAtElement);
+
         const tradeLogCreatedAtElement = document.createElement('p');
-        tradeLogCreatedAtElement.textContent = `거래 내역 생성 일자 : ${log.tradeLogCreatedAt}`;
+        tradeLogCreatedAtElement.textContent = `거래 내역 일자 : ${log.tradeLogCreatedAt}`;
         logElement.appendChild(tradeLogCreatedAtElement);
 
         // 수정
         const updateTradeBtn = document.createElement('button');
         updateTradeBtn.textContent = '수정';
+        updateTradeBtn.classList.add('btn-custom', 'btn-update');
+
         // 수정 버튼에 이벤트 추가
-        console.log(log);
         updateTradeBtn.addEventListener('click', () => {
           window.sessionStorage.setItem('trade', JSON.stringify(log));
           window.location.href = `/views/trades/${log.id}/edit`;
@@ -446,6 +459,8 @@ document.addEventListener('DOMContentLoaded', function () {
         // 삭제
         const deleteTradeBtn = document.createElement('button');
         deleteTradeBtn.textContent = '삭제';
+        deleteTradeBtn.classList.add('btn-custom', 'btn-delete');
+
         // 삭제 버튼 이벤트 추가
         deleteTradeBtn.addEventListener('click', async () => {
           try {
@@ -475,43 +490,43 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     } catch (err) {
       // 사용자 거래 내역 조회 실패 시 에러 처리
-      console.log(err.response.data);
+      console.log(err.response?.data || err.message);
     }
-  }
 
-  //----------- update user ---------------------
-  updateBtn.addEventListener('click', function (e) {
-    e.preventDefault();
-    window.location.href = '/views/users/me/update'; // 회원 정보 수정 페이지로 이동
-  });
+    //----------- update user ---------------------
+    updateBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      window.location.href = '/views/users/me/update'; // 회원 정보 수정 페이지로 이동
+    });
 
-  //----------- delete user ---------------------
-  deleteBtn.addEventListener('click', async function (e) {
-    e.preventDefault();
-    try {
-      // 회원 탈퇴 확인 창
-      if (confirm('회원 탈퇴하시겠습니까?')) {
-        if (confirm('정말로 탈퇴하시겠습니까?')) {
-          // 백엔드 회원 탈퇴 API 호출
-          const response = await axios.delete('/users/me', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          // 탈퇴했기 때문에 localStorage에 있는 토큰들 삭제
-          window.localStorage.clear();
+    //----------- delete user ---------------------
+    deleteBtn.addEventListener('click', async function (e) {
+      e.preventDefault();
+      try {
+        // 회원 탈퇴 확인 창
+        if (confirm('회원 탈퇴하시겠습니까?')) {
+          if (confirm('정말로 탈퇴하시겠습니까?')) {
+            // 백엔드 회원 탈퇴 API 호출
+            const response = await axios.delete('/users/me', {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            // 탈퇴했기 때문에 localStorage에 있는 토큰들 삭제
+            window.localStorage.clear();
 
-          // 회원 탈퇴 성공 문구 출력
-          alert(response.data.message);
+            // 회원 탈퇴 성공 문구 출력
+            alert(response.data.message);
 
-          // 탈퇴 후 홈으로 이동
-          window.location.href = '/views';
+            // 탈퇴 후 홈으로 이동
+            window.location.href = '/views';
+          }
         }
+        return;
+      } catch (err) {
+        console.log(err);
+        alert(err.response.data.message);
       }
-      return;
-    } catch (err) {
-      console.log(err);
-      alert(err.response.data.message);
-    }
-  });
+    });
+  }
 });
