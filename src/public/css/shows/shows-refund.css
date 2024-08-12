@@ -101,13 +101,15 @@ h1 {
 
 /* 버튼 스타일 */
 .btn-custom {
-  display: block;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 90%;
   max-width: 680px;
   margin: 20px auto;
   height: 50px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   font-family: 'Montserrat', sans-serif;
   border-radius: 8px;
   line-height: 50px;

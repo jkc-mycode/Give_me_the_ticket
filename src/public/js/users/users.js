@@ -404,7 +404,7 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.appendChild(showTitleElement);
 
         const showDateTimeElement = document.createElement('p');
-        showDateTimeElement.textContent = `공연 날짜 및 시간 : ${log.date} ${log.time}`;
+        showDateTimeElement.textContent = `공연 날짜 및 시간 : ${log.showDate} ${log.showTime}`;
         logElement.appendChild(showDateTimeElement);
 
         const ticketPriceElement = document.createElement('p');
