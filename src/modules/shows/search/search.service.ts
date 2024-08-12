@@ -18,9 +18,10 @@ export class SearchService {
   // 모듈이 초기화 될 때 인덱스 생성
   async onModuleInit() {
     await this.createIndex();
+    //await this.syncAllShows();
   }
 
-  // Elasticsearch 인덱스 생성
+  //Elasticsearch 인덱스 생성
   private async createIndex() {
     try {
       const indexExists = await this.eService.indices.exists({ index: this.indexName });
@@ -32,21 +33,15 @@ export class SearchService {
             settings: {
               analysis: {
                 analyzer: {
-                  autocomplete_analyzer: {
-                    tokenizer: 'autocomplete',
-                    filter: ['lowercase'],
-                  },
-                  autocomplete_search_analyzer: {
-                    tokenizer: 'keyword',
+                  my_ngram_analyzer: {
+                    tokenizer: 'my_ngram_tokenizer',
                     filter: ['lowercase'],
                   },
                 },
                 tokenizer: {
-                  autocomplete: {
-                    type: 'edge_ngram',
-                    min_gram: 1,
-                    max_gram: 30,
-                    token_chars: ['letter', 'digit', 'whitespace'],
+                  my_ngram_tokenizer: {
+                    type: 'ngram',
+                    token_chars: ['letter', 'digit'],
                   },
                 },
               },
@@ -55,13 +50,7 @@ export class SearchService {
               properties: {
                 title: {
                   type: 'text',
-                  fields: {
-                    complete: {
-                      type: 'text',
-                      analyzer: 'autocomplete_analyzer',
-                      search_analyzer: 'autocomplete_search_analyzer',
-                    },
-                  },
+                  analyzer: 'my_ngram_analyzer',
                 },
                 id: { type: 'long' },
                 category: { type: 'keyword' },
@@ -166,7 +155,7 @@ export class SearchService {
           title: {
             query: search,
             fuzziness: 'AUTO',
-            minimum_should_match: '55%',
+            minimum_should_match: '80%',
           },
         },
       });
