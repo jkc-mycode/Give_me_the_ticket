@@ -60,7 +60,11 @@ document.addEventListener('DOMContentLoaded', function () {
           <p>카테고리: ${data.category}</p>
           <p>가격: ${data.price}원</p>
           <p>상영 시간: ${data.runtime}분</p>
-          <p>내용: ${data.content}</p>
+          <p>내용:</p>
+     <div>${data.content
+       .split('\n')
+       .map((paragraph) => `<p>${paragraph}</p>`)
+       .join('')}</div>
           <p>위치: ${data.location}</p>
           <p>총 좌석: ${data.totalSeat}석</p>
         `;
@@ -143,6 +147,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   scheduleDropdownMenu.addEventListener('click', function (e) {
     if (e.target && e.target.matches('a.dropdown-item')) {
+      e.preventDefault(); //스크롤링 제거
       const scheduleId = e.target.getAttribute('data-schedule-id');
       if (scheduleId) {
         window.selectedScheduleId = scheduleId; // 전역 변수에 저장

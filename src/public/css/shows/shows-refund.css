@@ -100,25 +100,37 @@ h1 {
 }
 
 /* 버튼 스타일 */
-.refund__btn {
-  background: #e91e63;
-  color: white;
-  display: block;
-  width: 92.5%;
+.btn-custom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
   max-width: 680px;
+  margin: 20px auto;
   height: 50px;
-  border-radius: 8px;
-  margin: 0 auto;
-  border: none;
   cursor: pointer;
   font-size: 14px;
   font-family: 'Montserrat', sans-serif;
-  box-shadow: 0 15px 30px rgba(233, 30, 99, 0.36);
+  border-radius: 8px;
+  line-height: 50px;
+  text-align: center;
+}
+
+.refund__btn {
+  background: #e91e63;
+  color: white;
   transition: 0.2s linear;
 }
 
-.refund__btn:hover {
-  box-shadow: 0 0 0 rgba(233, 30, 99, 0);
+.back__btn {
+  background: #25282d;
+  color: white;
+  transition: 0.2s linear;
+}
+
+.back__btn .fa {
+  font-size: 20px;
+  padding: 0 5px 0 0;
 }
 
 /* 구분선 스타일 */
@@ -135,44 +147,22 @@ h1 {
   max-width: 680px;
 }
 
-.separator::before,
+.separator::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 0;
+  background: rgba(15, 19, 42, 0.2);
+  height: 1px;
+  width: 45%;
+}
+
 .separator::after {
   content: '';
   position: absolute;
   top: 8px;
-  height: 1px;
-  background: rgba(15, 19, 42, 0.2);
-}
-
-.separator::before {
-  left: 0;
-  width: 45%;
-}
-
-.separator::after {
   right: 0;
+  background: rgba(15, 19, 42, 0.2);
+  height: 1px;
   width: 45%;
-}
-
-/* 돌아가기 버튼 스타일 */
-.back__btn {
-  display: block;
-  width: 92.5%;
-  max-width: 680px;
-  margin: 20px auto;
-  height: 50px;
-  cursor: pointer;
-  font-size: 14px;
-  font-family: 'Montserrat', sans-serif;
-  border-radius: 8px;
-  border: none;
-  line-height: 40px;
-  background: #25282d;
-  color: white;
-  box-shadow: 0 15px 30px rgba(37, 40, 45, 0.36);
-  transition: 0.2s linear;
-}
-
-.back__btn:hover {
-  box-shadow: 0 0 0 rgba(37, 40, 45, 0);
 }

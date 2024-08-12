@@ -8,6 +8,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // 티켓 정보를 표시할 요소 생성
     const ticketContainer = document.getElementById('ticket-info');
 
+    let ticketStatusText = '';
+
+    // 상태에 따라 텍스트 변경
+    if (ticket.status === 'USEABLE') {
+      ticketStatusText = '유효함';
+    } else if (ticket.status === 'TRADING') {
+      ticketStatusText = '거래 중';
+    } else if (ticket.status === 'REFUNDED') {
+      ticketStatusText = '티켓 환불 완료';
+    } else if (ticket.status === 'EXPIRED') {
+      ticketStatusText = '공연 일자 만료';
+    } else if (ticket.status === 'SOLD') {
+      ticketStatusText = '중고 거래 완료';
+    }
+
     if (ticket.status !== 'USEABLE') {
       alert('중고 거래가능한 상태가 아닙니다.');
       window.location.href = '/views/users/me';
@@ -15,17 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 티켓 정보를 HTML로 구성
     ticketContainer.innerHTML = `
-      <h3>티켓 정보</h3>
-      <p>제목: ${ticket.title}</p>
-      <p>공연일자: ${ticket.date}</p>
-      <p>공연시간: ${ticket.time}</p>
-      <p>상영시간(분): ${ticket.runtime}</p>
-      <p>공연장소: ${ticket.location}</p>
-      <p>원래가격: ${ticket.price}</p>
-      <p>티켓상태: ${ticket.status}</p>
+      <p>공연명: ${ticket.title}</p>
+      <p>공연 날짜: ${ticket.date}</p>
+      <p>공연 시간: ${ticket.time}</p>
+      <p>상영 시간(분): ${ticket.runtime}</p>
+      <p>위치: ${ticket.location}</p>
+      <p>티켓 예매 가격: ${ticket.price}</p>
+      <p>티켓 상태: ${ticketStatusText}</p>
     `;
   }
-
   createTradeBtn.addEventListener('click', async () => {
     const tradePrice = document.getElementById('price').value;
 
@@ -52,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       alert(response.data.message);
       window.sessionStorage.removeItem('ticket');
-      window.location.href = '/views/users/me';
+      window.location.href = '/views/trades/list';
     } catch (err) {
       console.log(err);
       alert(err.response.data.message);

@@ -7,20 +7,33 @@ main {
 }
 
 .category-container {
-  display: flex;
-  justify-content: center;
   margin-bottom: 20px;
+  text-align: center;
 }
 
 .category-btn {
-  color: black;
-  font-size: 16px;
-  margin: 0 10px;
+  background-color: #f0f0f0;
+  color: #000;
+  border: none;
+  padding: 10px 20px;
+  margin: 0 5px;
+  border-radius: 5px;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+  text-decoration: none;
 }
 
 .category-btn:hover {
-  color: gray;
-  text-decoration: underline;
+  background-color: #007bff;
+  color: #fff;
+  text-decoration: none;
+}
+
+.category-btn.active {
+  background-color: #007bff;
+  color: #fff;
+  text-decoration: none;
 }
 
 .card {

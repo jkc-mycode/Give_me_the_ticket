@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SHOW DETAIL</title>
+    <title>공연 상세-GIVE ME THE TICKET</title>
     <link
       rel="shortcut icon"
       type="image/x-icon"
@@ -45,9 +45,6 @@
     <%- include('../common/header.view.ejs') %>
     <main>
       <div class="container">
-        <!-- Heading -->
-        <h1>SHOW DETAIL</h1>
-
         <button
           id="bookmarkBtn"
           class="bookmark__btn btn btn-outline-danger"
@@ -94,11 +91,11 @@
 
         <!-- book button -->
         <form class="booking-form">
-          <button class="booking__btn btn btn-primary">예매</button>
+          <button class="btn-custom btn btn-primary booking__btn">예매하기</button>
         </form>
 
         <!-- update button -->
-        <button class="update__btn btn btn-warning">수정</button>
+        <button class="btn-custom btn btn-warning update__btn">수정하기</button>
 
         <!-- separator -->
         <div class="separator">
@@ -106,10 +103,10 @@
         </div>
 
         <!-- back button -->
-        <button class="back__btn btn btn-secondary">뒤로가기</button>
+        <button class="btn-custom btn btn-secondary back__btn">뒤로가기</button>
 
         <!-- delete button -->
-        <button class="delete__btn btn btn-info">삭제</button>
+        <button class="btn-custom btn btn-info delete__btn">삭제하기</button>
       </div>
     </main>
     <footer></footer>

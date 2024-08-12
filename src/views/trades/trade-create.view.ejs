@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MY PAGE</title>
+    <title>중고거래 생성-GIVE ME THE TICKET</title>
     <link
       rel="shortcut icon"
       type="image/x-icon"
@@ -39,12 +39,14 @@
     <!-- include 안에는 상대 경로 작성 -->
     <%- include('../common/header.view.ejs') %>
     <main>
+      <!-- Heading -->
+      <h1>티켓 정보</h1>
       <div class="container">
         <!-- 공연 정보 -->
         <div id="ticket-info" class="mt-4"></div>
         <!-- 중고 티켓 가격 입력 -->
         <label for="price" class="form-label"><b>중고 가격</b></label>
-        <p style="color: red">주의! 티켓의 가격은 중고 게시/수정 당시의 가격으로 결정됩니다</p>
+        <p style="color: red">주의! 티켓의 환불 가격은 중고 게시/수정 당시의 가격으로 결정됩니다</p>
         <input type="text" id="price" class="form-control" />
         <br />
         <!-- 판매 버튼 -->
