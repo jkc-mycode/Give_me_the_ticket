@@ -557,8 +557,21 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
   //----------- update user ---------------------
-  updateBtn.addEventListener('click', function (e) {
+  updateBtn.addEventListener('click', async function (e) {
     e.preventDefault();
+    // 백엔드 사용자 프로필 조회 API 호출
+    const response = await axios.get('/users/me', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    // 로컬 사용자가 아니면 알람 출력
+    if (response.data.getUserProfile.provider !== 'LOCAL') {
+      alert('로컬 사용자만 수정 가능합니다.');
+      return null;
+    }
+
     window.location.href = '/views/users/me/update'; // 회원 정보 수정 페이지로 이동
   });
 

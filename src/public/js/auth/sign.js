@@ -18,6 +18,13 @@ document.addEventListener('DOMContentLoaded', function () {
     window.location.href = '/views';
   }
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const error = urlParams.get('error');
+
+  if (error) {
+    alert(error); // 에러 메시지 알림
+  }
+
   //----------- sign up ---------------------
   signUp.addEventListener('click', function (e) {
     e.preventDefault();
