@@ -15,6 +15,7 @@ import { JwtService } from '@nestjs/jwt';
 import _ from 'lodash';
 import { AUTH_MESSAGE } from 'src/commons/constants/auth/auth-message.constant';
 import { HASH_SALT, REFRESH_TOKEN } from 'src/commons/constants/auth/auth.constant';
+import { Provider } from 'src/commons/types/users/provider.type';
 
 @Injectable()
 export class AuthService {
@@ -91,13 +92,19 @@ export class AuthService {
   }
 
   // 토큰 발급
-  async generateTokens(user: User) {
+  async generateTokens(user: User, provider: Provider, isSocial: boolean) {
     // 토큰 발급
     const accessToken = this.jwtService.sign({ id: user.id });
     const refreshToken = this.jwtService.sign(
       { id: user.id },
       { secret: process.env.REFRESH_SECRET_KEY, expiresIn: REFRESH_TOKEN.EXPIRES_IN }
     );
+
+    // 소셜 로그인일 때
+    if (isSocial) {
+      // 리프레시 토큰 저장
+      await this.usersRepository.update({ id: user.id }, { refreshToken, provider });
+    }
 
     // 리프레시 토큰 저장
     await this.usersRepository.update({ id: user.id }, { refreshToken });
@@ -106,8 +113,13 @@ export class AuthService {
   }
 
   // 로그인
-  async signIn(user: User) {
-    return await this.generateTokens(user);
+  async signIn(user: User, provider = Provider.LOCAL, isSocial = false) {
+    try {
+      return await this.generateTokens(user, provider, isSocial);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   }
 
   // 로그아웃
@@ -128,6 +140,6 @@ export class AuthService {
 
   // 토큰 재발급
   async reissue(user: User) {
-    return await this.generateTokens(user);
+    return await this.generateTokens(user, Provider.LOCAL, false);
   }
 }
