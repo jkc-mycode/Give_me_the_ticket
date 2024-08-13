@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -24,24 +24,29 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
   }
 
   async validate(accessToken: string, refreshToken: string, profile: any) {
-    const email = profile._json.kakao_account.email;
-    const userName = profile._json.kakao_account.profile.nickname;
-    const nickname =
-      userName + new Date().getTime().toString(AUTH_STRATEGY.KAKAO.RANDOM_NICKNAME.NUMBER); // 랜덤 닉네임 생성
+    try {
+      const email = profile._json.kakao_account.email;
+      const userName = profile._json.kakao_account.profile.nickname;
+      const nickname =
+        userName + new Date().getTime().toString(AUTH_STRATEGY.KAKAO.RANDOM_NICKNAME.NUMBER); // 랜덤 닉네임 생성
 
-    // 기존에 가입한 사용자인지 확인
-    let user = await this.usersRepository.findOne({ where: { email } });
-    // 없는 사용자면 데이터베이스에 사용자 정보 추가
-    if (!user) {
-      user = await this.usersRepository.save({
-        email,
-        // 빈 문자열로 설정해도 이메일로 빈 이메일로 일반 로그인 할 수 없음
-        // PassportStrategy에서 비밀번호로 빈 문자열을 받지 못하게 되어 있어서
-        password: '',
-        nickname,
-      });
+      // 기존에 가입한 사용자인지 확인
+      let user = await this.usersRepository.findOne({ where: { email } });
+      // 없는 사용자면 데이터베이스에 사용자 정보 추가
+      if (!user) {
+        user = await this.usersRepository.save({
+          email,
+          // 빈 문자열로 설정해도 이메일로 빈 이메일로 일반 로그인 할 수 없음
+          // PassportStrategy에서 비밀번호로 빈 문자열을 받지 못하게 되어 있어서
+          password: '',
+          nickname,
+        });
+      }
+
+      return user;
+    } catch (err) {
+      console.log(err);
+      throw new InternalServerErrorException('잘못된 접근입니다.');
     }
-
-    return user;
   }
 }

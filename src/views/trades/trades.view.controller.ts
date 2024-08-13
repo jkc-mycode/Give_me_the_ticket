@@ -2,7 +2,11 @@ import { Controller, Get, Post, Render } from '@nestjs/common';
 
 @Controller('views/trades')
 export class TradeViewsController {
+<<<<<<< HEAD
   @Get('/list')
+=======
+  @Get('/page')
+>>>>>>> db73f2923d703a46af244d2ba40c6284c7e6aa99
   @Render('trades/list.view.ejs')
   getTradeList() {}
 
