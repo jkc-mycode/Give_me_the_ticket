@@ -75,10 +75,6 @@ export class SearchService {
         relations: { images: true },
       });
 
-      if (!showData) {
-        throw new InternalServerErrorException('Show not found');
-      }
-
       await this.eService.index({
         index: this.indexName,
         id: showData.id.toString(),
@@ -155,7 +151,7 @@ export class SearchService {
           title: {
             query: search,
             fuzziness: 'AUTO',
-            minimum_should_match: '80%',
+            minimum_should_match: 2,
           },
         },
       });
