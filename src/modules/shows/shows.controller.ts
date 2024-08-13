@@ -76,11 +76,34 @@ export class ShowsController {
    * */
   @Get(':showId')
   async getShow(@Param('showId') showId: number) {
+    // 조회수 증가
+    await this.showsService.increaseViews(showId);
+
     const show = await this.showsService.getShow(showId);
     return {
       status: HttpStatus.OK,
       message: SHOW_MESSAGES.GET.SUCCEED,
       data: show,
+    };
+  }
+
+  /**
+   * 공연 인기별 조회
+   * @param limit
+   * @param sortBy
+   * @returns
+   * */
+
+  @Get('/ranked')
+  async getRankedShows(
+    @Query('limit') limit: number = 10,
+    @Query('sortBy') sortBy: 'views' | 'bookings' = 'views'
+  ) {
+    const popularShows = await this.showsService.getRankedShows(limit, sortBy);
+    return {
+      status: HttpStatus.OK,
+      message: SHOW_MESSAGES.GET_LIST.SUCCEED,
+      data: popularShows,
     };
   }
 
@@ -175,6 +198,10 @@ export class ShowsController {
     @Req() req: any
   ) {
     const ticket = await this.showsService.createTicket(showId, createTicketDto, req.user);
+
+    // 예매수 증가
+    await this.showsService.increaseBookings(showId);
+
     return {
       status: HttpStatus.CREATED,
       message: SHOW_TICKET_MESSAGES.COMMON.TICKET.SUCCESS,
