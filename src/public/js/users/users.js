@@ -555,41 +555,40 @@ document.addEventListener('DOMContentLoaded', function () {
       // 사용자 거래 내역 조회 실패 시 에러 처리
       console.log(err.response?.data || err.message);
     }
-
-    //----------- update user ---------------------
-    updateBtn.addEventListener('click', function (e) {
-      e.preventDefault();
-      window.location.href = '/views/users/me/update'; // 회원 정보 수정 페이지로 이동
-    });
-
-    //----------- delete user ---------------------
-    deleteBtn.addEventListener('click', async function (e) {
-      e.preventDefault();
-      try {
-        // 회원 탈퇴 확인 창
-        if (confirm('회원 탈퇴하시겠습니까?')) {
-          if (confirm('정말로 탈퇴하시겠습니까?')) {
-            // 백엔드 회원 탈퇴 API 호출
-            const response = await axios.delete('/users/me', {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-            // 탈퇴했기 때문에 localStorage에 있는 토큰들 삭제
-            window.localStorage.clear();
-
-            // 회원 탈퇴 성공 문구 출력
-            alert(response.data.message);
-
-            // 탈퇴 후 홈으로 이동
-            window.location.href = '/views';
-          }
-        }
-        return;
-      } catch (err) {
-        console.log(err);
-        alert(err.response.data.message);
-      }
-    });
   }
+  //----------- update user ---------------------
+  updateBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    window.location.href = '/views/users/me/update'; // 회원 정보 수정 페이지로 이동
+  });
+
+  //----------- delete user ---------------------
+  deleteBtn.addEventListener('click', async function (e) {
+    e.preventDefault();
+    try {
+      // 회원 탈퇴 확인 창
+      if (confirm('회원 탈퇴하시겠습니까?')) {
+        if (confirm('정말로 탈퇴하시겠습니까?')) {
+          // 백엔드 회원 탈퇴 API 호출
+          const response = await axios.delete('/users/me', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          // 탈퇴했기 때문에 localStorage에 있는 토큰들 삭제
+          window.localStorage.clear();
+
+          // 회원 탈퇴 성공 문구 출력
+          alert(response.data.message);
+
+          // 탈퇴 후 홈으로 이동
+          window.location.href = '/views';
+        }
+      }
+      return;
+    } catch (err) {
+      console.log(err);
+      alert(err.response.data.message);
+    }
+  });
 });

@@ -70,21 +70,34 @@ document.addEventListener('DOMContentLoaded', function () {
         `;
 
         if (data.schedules && data.schedules.length > 0) {
-          scheduleDropdownMenu.innerHTML = data.schedules
-            .map(
-              (schedule) => `
-              <li>
-                <a class="dropdown-item" href="#" data-schedule-id="${schedule.id}">
-                  날짜 : ${schedule.date} | 시간 : ${schedule.time} | 잔여좌석 : ${schedule.remainSeat}
-                </a>
-              </li>
-            `
-            )
-            .join('');
+          const now = new Date();
+
+          // 잔여좌석이 0이 아니고, 현재 시간 이후의 스케줄만 필터링
+          const filteredSchedules = data.schedules.filter((schedule) => {
+            const scheduleDateTime = new Date(`${schedule.date} ${schedule.time}`);
+            return schedule.remainSeat > 0 && scheduleDateTime > now;
+          });
+
+          if (filteredSchedules.length > 0) {
+            scheduleDropdownMenu.innerHTML = filteredSchedules
+              .map(
+                (schedule) => `
+            <li>
+              <a class="dropdown-item" href="#" data-schedule-id="${schedule.id}">
+                날짜 : ${schedule.date} | 시간 : ${schedule.time} | 잔여좌석 : ${schedule.remainSeat}
+              </a>
+            </li>
+          `
+              )
+              .join('');
+          } else {
+            scheduleDropdownMenu.innerHTML =
+              '<li><a class="dropdown-item">공연 일정이 지났거나 유효한 일정 정보가 없습니다.</a></li>';
+          }
 
           // 저장된 스케줄 ID가 있는 경우 버튼 텍스트 업데이트
           if (window.selectedScheduleId) {
-            const selectedSchedule = data.schedules.find(
+            const selectedSchedule = filteredSchedules.find(
               (schedule) => schedule.id === window.selectedScheduleId
             );
             if (selectedSchedule) {
@@ -142,7 +155,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   backBtn.addEventListener('click', function (e) {
     e.preventDefault();
-    window.location.href = `/views/shows/list`;
+
+    // 기존 페이지로 이동
+    window.history.back();
   });
 
   scheduleDropdownMenu.addEventListener('click', function (e) {
@@ -188,6 +203,12 @@ document.addEventListener('DOMContentLoaded', function () {
         ? `/shows/${showId}/bookmark/${bookmarkId}`
         : `/shows/${showId}/bookmark`;
 
+      if (!token) {
+        alert('로그인이 필요합니다');
+        window.location.href = '/views/auth/sign';
+        return;
+      }
+
       const response = await axios({
         method: method,
         url: url,
@@ -195,17 +216,14 @@ document.addEventListener('DOMContentLoaded', function () {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(bookmarkId);
+
       if (response.status === 200 || response.status === 201) {
         isBookmarked = !isBookmarked;
         bookmarkId = isBookmarked ? response.data.bookmarkId : null; // 찜하기 성공 시 서버에서 bookmarkId를 반환한다고 가정합니다.
         updateBookmarkButton();
         alert(isBookmarked ? '찜하기가 완료되었습니다.' : '찜하기가 취소되었습니다.');
-      } else {
-        alert('요청에 실패하였습니다. 응답 상태 코드: ' + response.status);
       }
     } catch (error) {
-      console.error('찜하기 오류:', error);
       alert('요청에 실패하였습니다.');
     }
   });
