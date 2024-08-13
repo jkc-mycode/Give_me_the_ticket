@@ -121,22 +121,13 @@ export class TradesController {
 
   //<2>중고 거래 목록 조회
   @ApiBearerAuth()
-<<<<<<< HEAD
   @Get('/list')
-=======
-  @Get('page')
->>>>>>> db73f2923d703a46af244d2ba40c6284c7e6aa99
   @ApiOperation({
     summary: SWAGGER.TRADES.GET_TRADE_LIST.API_OPERATION.SUMMARY,
     description: SWAGGER.TRADES.GET_TRADE_LIST.API_OPERATION.DESCRIPTION,
   })
   @ApiOkResponse({ description: '' })
   async getList(@Query() getTradeListDto: GetTradeListDto) {
-<<<<<<< HEAD
-=======
-    if (!getTradeListDto)
-      throw new BadRequestException('이동하고자 하는 페이지와 범위를 입력해 주십시오!');
->>>>>>> db73f2923d703a46af244d2ba40c6284c7e6aa99
     return await this.tradesService.getList(getTradeListDto);
   }
 

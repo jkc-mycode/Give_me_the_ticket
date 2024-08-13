@@ -40,12 +40,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 데이터 보여주기
   function showTradeList(trades) {
+    console.log(trades);
     tradeListContainer.innerHTML = '';
     trades.forEach((trade) => {
       const tradItemHTML = `
       <div class="col-md-4 mb-3">
         <div class="card" data-trades-id="${trade.id}">
-          <img src=${trade.imageurl} class="card-img-top" alt="이미지 존재하지 않음" />
+            <img src=${trade.imageUrl} class="card-img-top">
           <div class="card-body">
             <h5 class="card-title">${trade.title}</h5>
             <p class="card-text">

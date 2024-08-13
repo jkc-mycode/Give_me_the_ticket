@@ -183,6 +183,10 @@ export class TradesService {
             where: { showId: ticket.showId },
           });
 
+          if (!ticket || !image) {
+            return null;
+          }
+
           //시간이 맞지 않는 티켓이 있다면 삭제 (가장 최근에 추가한 로직)
           if (
             new Date().getTime() >=
@@ -194,7 +198,7 @@ export class TradesService {
 
           if (ticket) {
             //show에서 장소와 이름을 추가,schedule에서 날짜와 시간을 추가
-            trade['imageurl'] = image.imageUrl;
+            trade['imageUrl'] = image.imageUrl;
             trade['title'] = ticket.title;
             trade['price'] = ticket.price;
             trade['date'] = ticket.date;
