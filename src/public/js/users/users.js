@@ -515,7 +515,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // 수정 버튼에 이벤트 추가
         updateTradeBtn.addEventListener('click', () => {
           window.sessionStorage.setItem('trade', JSON.stringify(log));
-          window.location.href = `/views/trades/${log.id}/edit`;
+          window.location.href = `/views/trades/${log.tradeId}/edit`;
         });
         logElement.appendChild(updateTradeBtn);
 
