@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -16,8 +17,10 @@ import { Image } from '../images/image.entity';
 import { Bookmark } from '../users/bookmark.entity';
 import { Ticket } from './ticket.entity';
 import { Factory } from 'nestjs-seeder';
+import { SHOW_TICKETS } from 'src/commons/constants/shows/show-tickets.constant';
 
 @Entity({ name: 'shows' })
+@Index([SHOW_TICKETS.COMMON.INDEX.USER, 'id'])
 export class Show {
   @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
