@@ -7,7 +7,7 @@ import {
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { lastValueFrom } from 'rxjs';
 
 import { User } from 'src/entities/users/user.entity';
@@ -17,6 +17,7 @@ import { PointType } from 'src/commons/types/users/point.type';
 @Injectable()
 export class PaymentsService {
   constructor(
+    private readonly dataSource: DataSource, // transaction
     private readonly httpService: HttpService, // portone API와 통신. HTTP 요청 보내기 위함
     private readonly configService: ConfigService,
 
@@ -49,6 +50,12 @@ export class PaymentsService {
 
   // portone 결제 내역 검증
   async verifyPayment(user: User, imp_uid: string, merchant_uid: string, amount: number) {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    // transaction 시작
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
       const token = await this.getToken();
 
@@ -88,19 +95,23 @@ export class PaymentsService {
             description: '포인트 충전',
             type: PointType.DEPOSIT,
           });
-          await this.pointLogRepository.save(pointLog);
+          await queryRunner.manager.save(PointLog, pointLog);
 
           // 사용자 포인트 업데이트
           user.point += payment.amount;
-          await this.userRepository.save(user);
+          await queryRunner.manager.save(User, user);
 
+          await queryRunner.commitTransaction();
           break;
         default:
           throw new InternalServerErrorException('결제 상태 불일치');
       }
     } catch (err) {
+      await queryRunner.rollbackTransaction();
       console.log(err);
       throw new InternalServerErrorException('결제 결과 검증 실패');
+    } finally {
+      await queryRunner.release();
     }
   }
 
