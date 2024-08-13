@@ -169,8 +169,8 @@ export class TradesService {
   //=========ConvenienceFunction======================
 
   //<1> 중고 거래 목록 보기//완료 (검증 대부분 완료)
-  async getList(getTradeListDto: GetTradeListDto) {
-    const { page, limit } = getTradeListDto;
+  async getList(page: number) {
+    const limit = 2;
 
     const total_count = await this.tradeRepository.count();
 
@@ -207,6 +207,7 @@ export class TradesService {
 
         if (ticket) {
           //show에서 장소와 이름을 추가,schedule에서 날짜와 시간을 추가
+          if (!image) return null;
           trade['imageurl'] = image.imageUrl;
           trade['title'] = ticket.title;
           trade['price'] = ticket.price;
