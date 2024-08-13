@@ -2,10 +2,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const signBefore = document.querySelector('#sign-in-before');
   const signAfter = document.querySelector('#sign-in-after');
   const signOutBtn = document.querySelector('#sign-out-btn');
-  const headerSearchInput = document.querySelector('#headerSearchInput');
-  const headerSearchButton = document.querySelector('#headerSearchButton');
-  const headerSearchForm = document.querySelector('#headerSearchForm');
-
   try {
     // localStorage에서 access token 가져오기
     const token = window.localStorage.getItem('accessToken');
@@ -66,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 headerSearchButton.addEventListener('click', () => {
   const search = headerSearchInput.value;
   const currentUrl = new URL(window.location.href);
-  currentUrl.pathname = '/views/shows/list';
+  currentUrl.pathname = '/views';
   currentUrl.searchParams.set('search', search);
   currentUrl.searchParams.set('page', 1);
   window.location.href = currentUrl.href;
@@ -77,7 +73,7 @@ headerSearchForm.addEventListener('submit', (event) => {
   event.preventDefault();
   const search = headerSearchInput.value;
   const currentUrl = new URL(window.location.href);
-  currentUrl.pathname = '/views/shows/list';
+  currentUrl.pathname = '/views';
   currentUrl.searchParams.set('search', search);
   currentUrl.searchParams.set('page', 1);
   window.location.href = currentUrl.href;

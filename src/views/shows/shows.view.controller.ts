@@ -2,11 +2,6 @@ import { Controller, Get, Render } from '@nestjs/common';
 
 @Controller('views/shows')
 export class ShowsViewsController {
-  //공연 목록 페이지
-  @Get('/list')
-  @Render('shows/shows-list.view.ejs')
-  showList() {}
-
   //공연 상세조회 페이지
   @Get('/:showId')
   @Render('shows/shows-detail.view.ejs')

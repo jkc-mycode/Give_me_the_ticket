@@ -14,7 +14,7 @@ import { RedisModule } from './modules/redis/redis.module';
 import { BullModule } from '@nestjs/bullmq';
 import { SearchModule } from './modules/shows/search/search.module';
 import { PaymentsModule } from './modules/payments/payments.module';
-import { ViewsController } from './views/index.view.controller';
+import { ViewsController } from './views/main/main.view.controller';
 import { AuthViewsController } from './views/auth/auth.view.controller';
 import { UsersViewsController } from './views/users/users.view.controller';
 import { ShowsViewsController } from './views/shows/shows.view.controller';
