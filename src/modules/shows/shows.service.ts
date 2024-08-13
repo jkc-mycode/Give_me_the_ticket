@@ -181,14 +181,6 @@ export class ShowsService {
     try {
       // 조회수 증가
       await this.redisClient.zincrby('show:views', 1, String(showId));
-
-      // TTL 설정 (1시간)
-      const ttl = await this.redisClient.ttl('show:views');
-
-      if (ttl === -1) {
-        // TTL이 설정되어 있지 않으면 설정
-        await this.redisClient.expire('show:views', 3600);
-      }
     } catch (error) {
       console.error('Redis 조회수 증가 에러:', error);
     }
@@ -197,19 +189,19 @@ export class ShowsService {
   /* 공연 인기별 조회 */
   async getRankedShows(limit: number, sortBy: 'views' | 'bookings'): Promise<Show[]> {
     const key = sortBy === 'views' ? 'show:views' : 'show:bookings';
-    //역순으로 랭킹 값 가져오기
+
+    // 역순으로 랭킹 값 가져오기
     const showIds = await this.redisClient.zrevrange(key, 0, limit - 1);
 
     if (showIds.length === 0) {
       return [];
     }
 
-    //가져온 id배열을 숫자로 변환
+    // 가져온 id 배열을 숫자로 변환
     const numericShowIds = showIds
       .map((id) => {
         const parsedId = parseInt(id, 10);
         if (isNaN(parsedId)) {
-          console.error(`Invalid ID encountered: ${id}`);
           return null;
         }
         return parsedId;
@@ -217,18 +209,23 @@ export class ShowsService {
       .filter((id): id is number => id !== null);
 
     if (numericShowIds.length === 0) {
-      console.log('No valid numeric IDs after filtering.');
       return [];
     }
 
-    // 숫자로 변환된 id를 db에서 찾아 조회하기
-    const shows = await this.showRepository.find({
-      where: {
-        id: In(numericShowIds),
-      },
-    });
+    try {
+      // 숫자로 변환된 id를 DB에서 찾아 조회하기
+      const shows = await this.showRepository.find({
+        where: {
+          id: In(numericShowIds),
+        },
+      });
 
-    return shows;
+      return shows;
+    } catch (error) {
+      // DB 쿼리 중 발생한 에러를 로그로 출력
+      console.error('쿼리 실패:', error);
+      throw error;
+    }
   }
 
   /*공연 수정 */
@@ -538,14 +535,6 @@ export class ShowsService {
   async increaseBookings(showId: number): Promise<void> {
     try {
       await this.redisClient.zincrby('show:bookings', 1, String(showId));
-
-      // TTL 설정 (1시간)
-      const ttl = await this.redisClient.ttl('show:bookings');
-
-      if (ttl === -1) {
-        // TTL이 설정되어 있지 않으면 설정
-        await this.redisClient.expire('show:bookings', 3600);
-      }
     } catch (error) {
       console.log('레디스 예매 수 증가 오류 :', error);
     }
