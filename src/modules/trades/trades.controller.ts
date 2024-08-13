@@ -8,64 +8,32 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  ValidationPipe,
   UseGuards,
   Req,
   Query,
 } from '@nestjs/common';
-
 import { TradesService } from './trades.service';
-import { update } from 'lodash';
-
-import { BadRequestException } from '@nestjs/common';
-
 //entity
 import { User } from 'src/entities/users/user.entity';
-
-import { number } from 'joi';
-
 //auth
 import { AuthGuard } from '@nestjs/passport';
-
 //dto
 import { CreateTradeDto } from './dto/create-trade.dto';
-import { UpdateTradeDto } from './dto/update-trade.dto';
 import { GetTradeListDto } from './dto/get-trade-list.dto';
+import { UpdateTradeDto } from './dto/update-trade.dto';
 import { TestDto } from './dto/test-dto';
-
 //constants
 import { SWAGGER } from 'src/commons/constants/trades/swagger.constant';
 import { MESSAGES } from 'src/commons/constants/trades/messages';
-
 //swagger
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiTags,
   ApiOkResponse,
-  ApiCreatedResponse,
-  ApiAcceptedResponse,
   ApiNoContentResponse,
-  ApiMovedPermanentlyResponse,
-  ApiBadRequestResponse,
   ApiUnauthorizedResponse,
   ApiNotFoundResponse,
-  ApiForbiddenResponse,
-  ApiMethodNotAllowedResponse,
-  ApiNotAcceptableResponse,
-  ApiRequestTimeoutResponse,
-  ApiConflictResponse,
-  ApiTooManyRequestsResponse,
-  ApiGoneResponse,
-  ApiPayloadTooLargeResponse,
-  ApiUnsupportedMediaTypeResponse,
-  ApiUnprocessableEntityResponse,
-  ApiInternalServerErrorResponse,
-  ApiNotImplementedResponse,
-  ApiBadGatewayResponse,
-  ApiServiceUnavailableResponse,
-  ApiGatewayTimeoutResponse,
-  ApiDefaultResponse,
 } from '@nestjs/swagger';
 import { Role } from 'src/commons/types/users/user-role.type';
 import { RolesGuard } from '../auth/utils/roles.guard';
@@ -153,15 +121,14 @@ export class TradesController {
 
   //<2>중고 거래 목록 조회
   @ApiBearerAuth()
-  @Get('page/:page')
+  @Get('/list')
   @ApiOperation({
     summary: SWAGGER.TRADES.GET_TRADE_LIST.API_OPERATION.SUMMARY,
     description: SWAGGER.TRADES.GET_TRADE_LIST.API_OPERATION.DESCRIPTION,
   })
   @ApiOkResponse({ description: '' })
-  async getList(@Param('page', ParseIntPipe) page: number) {
-    if (!page) throw new BadRequestException('이동하고자 하는 페이지와 범위를 입력해 주십시오!');
-    return await this.tradesService.getList(page);
+  async getList(@Query() getTradeListDto: GetTradeListDto) {
+    return await this.tradesService.getList(getTradeListDto);
   }
 
   //<3>중고 거래 생성

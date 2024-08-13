@@ -57,13 +57,16 @@ header {
 }
 
 #headerSearchForm {
-  max-width: 500px;
+  width: 100%;
+  max-width: 600px;
   display: flex;
   align-items: center;
+  margin: 0 auto;
 }
 
 #headerSearchInput {
-  height: 40px;
+  flex-grow: 1;
+  height: 45px;
   text-align: center;
   border-radius: 20px;
   padding-left: 1rem;
@@ -73,9 +76,9 @@ header {
 }
 
 #headerSearchButton {
-  width: 80px;
+  width: 95px;
   margin-left: 10px;
-  height: 40px;
+  height: 45px;
   border-radius: 20px;
   font-size: 1rem;
 }

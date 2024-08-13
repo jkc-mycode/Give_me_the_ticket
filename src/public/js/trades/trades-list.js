@@ -1,116 +1,130 @@
+// 페이지 이동 함수 전역 선언
+function goToPage(pageNumber) {
+  const url = new URL(window.location.href);
+  url.searchParams.set('page', pageNumber);
+  window.location.href = url.toString();
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
-  const backBtn = document.querySelector('.back__btn');
   const token = window.localStorage.getItem('accessToken');
-  const numberbtns = document.querySelectorAll('.numberbtn');
   const tradeListContainer = document.querySelector('#tradeList');
-  const previousPage = document.querySelector(`#previousPage`);
-  const nextPage = document.querySelector(`#nextPage`);
+  const paginationContainer = document.querySelector('#pagination');
+  const params = new URLSearchParams(window.location.search);
+  const page = parseInt(params.get('page') || '1');
+  const limit = parseInt(params.get('limit') || '6');
 
-  //page값을 알아내는 함수
-  function getPageFromParam() {
-    const pathSegments = window.location.pathname.split('/');
-    const page = pathSegments[pathSegments.length - 1];
-    return page;
-  }
-
-  const page = getPageFromParam();
+  let currentPage = page;
 
   if (!token) {
-    window.location.href = '/views/auth/sign';
     alert('로그인이 필요합니다.');
+    window.location.href = '/views/auth/sign';
     return;
   }
 
-  //돌아가기 버튼
-  backBtn.addEventListener('click', function (e) {
-    e.preventDefault();
-    window.location.href = `/views`;
-  });
-
-  //페이지네이션 기능
-  //현재 위치의 버튼을 밝게 표현
-
-  async function activeBtn(page) {
-    numberbtns.forEach((btn) => {
-      if (btn.textContent === page) {
-        btn.classList.add('active-page');
-      }
-    });
-  }
-
-  async function pagination() {
-    const pluspage = Math.floor((page - 1) / 5) * 5;
-    console.log(pluspage);
-    // 각 링크에 클릭 이벤트 추가
-    numberbtns.forEach((btn) => {
-      btn.textContent = `${Number(btn.textContent) + pluspage}`;
-      btn.addEventListener('click', function (e) {
-        window.location.href = `/views/trades/page/${e.target.textContent}`;
-      });
-    });
-  }
-
-  function MovePreviewNext() {
-    previousPage.addEventListener('click', function (e) {
-      const previousPageNumber = parseInt(page, 10) - 1;
-
-      //페이지 이동
-      if (previousPageNumber > 0) {
-        window.location.href = `/views/trades/page/${previousPageNumber}`;
-      }
-      nextPage.addEventListener('click', function (e) {
-        const nextPageNumber = parseInt(page, 10) + 1;
-
-        //페이지 이동
-        window.location.href = `/views/trades/page/${nextPageNumber}`;
-      });
-    });
-  }
-
-  //데이터 가져오기
-  async function fetchTradesList(page) {
+  // 데이터 가져오기
+  async function fetchTradesList(page, limit) {
     try {
-      const { data } = await axios.get(`/trades/page/${page}`);
+      const { data } = await axios.get(`/trades/list`, {
+        params: { page, limit },
+      });
 
       return data;
     } catch (err) {
-      console.error('Failed to fetch to trades show Error:', err);
-      alert('Failed To fetch Trades');
+      console.error('중고 거래 내역 가져오기 실패:', err);
+      alert('중고 거래 내역이 없습니다.');
+      // 중고 거래 목록 조회 실패 시 메인페이지로 이동
+      window.location.href = `/views`;
       return null;
     }
   }
 
   // 데이터 보여주기
-  async function showTradeList(trades) {
-    const tradeListContainer = document.getElementById('tradeList');
+  function showTradeList(trades) {
     tradeListContainer.innerHTML = '';
     trades.forEach((trade) => {
-      const tradItemHTML = `<a href="/views/trades/${trade.id}"><div class="col">
-          <div class="card h-100">
-            <img src=${trade.imageurl} class="card-img-top" alt="이미지 존재하지 않음" />
-            <div class="card-body">
-              <h5 class="card-title">${trade.title}</h5>
-              <p class="card-text">
-                가격:${trade.price}<br>
-                날짜:${trade.date}<br>
-                시간:${trade.time}<br>
-              </p>
-            </div>
-            <div class="card-footer">
-              <small class="text-body-secondary">만료기한:${trade.closedAt}</small>
-            </div>
+      const tradItemHTML = `
+      <div class="col-md-4 mb-3">
+        <div class="card" data-trades-id="${trade.id}">
+          <img src=${trade.imageurl} class="card-img-top" alt="이미지 존재하지 않음" />
+          <div class="card-body">
+            <h5 class="card-title">${trade.title}</h5>
+            <p class="card-text">
+              판매 가격: ${trade.price}<br>
+              공연 날짜: ${trade.date}<br>
+              공연 시간: ${trade.time}<br>
+            </p>
           </div>
-        </div></a>`;
+          <div class="card-footer">
+            <small class="text-body-secondary">만료기한: ${trade.closedAt}</small>
+          </div>
+        </div>
+      </div>`;
       tradeListContainer.innerHTML += tradItemHTML;
+    });
+    // 카드 클릭 시 상세 페이지로 이동
+    document.querySelectorAll('.card').forEach((card) => {
+      card.addEventListener('click', function () {
+        const tradesId = this.dataset.tradesId;
+        window.location.href = `/views/trades/${tradesId}`;
+      });
     });
   }
 
-  const result = await fetchTradesList(page);
+  // 페이지네이션 렌더링
+  function renderPagination(totalPages, currentPage) {
+    const maxPagesToShow = 3;
+    const startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
 
+    let paginationHTML = '';
+
+    // 이전 페이지 버튼
+    if (currentPage > 1) {
+      paginationHTML += `
+        <li class="page-item">
+          <a class="page-link" href="#" aria-label="Previous" data-page="${currentPage - 1}">
+            &laquo; 이전
+          </a>
+        </li>
+      `;
+    }
+
+    // 페이지 번호
+    for (let i = startPage; i <= endPage; i++) {
+      const activeClass = i === currentPage ? 'active' : '';
+      paginationHTML += `
+        <li class="page-item ${activeClass}">
+          <a class="page-link" href="#" data-page="${i}">${i}</a>
+        </li>
+      `;
+    }
+
+    // 다음 페이지 버튼
+    if (currentPage < totalPages) {
+      paginationHTML += `
+        <li class="page-item">
+          <a class="page-link" href="#" aria-label="Next" data-page="${currentPage + 1}">
+            다음 &raquo;
+          </a>
+        </li>
+      `;
+    }
+
+    paginationContainer.innerHTML = paginationHTML;
+
+    // 페이지 버튼 클릭 이벤트 리스너 추가
+    paginationContainer.querySelectorAll('.page-link').forEach((link) => {
+      link.addEventListener('click', function (event) {
+        event.preventDefault(); // 기본 동작 방지
+        const pageNumber = parseInt(this.dataset.page);
+        goToPage(pageNumber);
+      });
+    });
+  }
+
+  const result = await fetchTradesList(currentPage, limit);
   if (result) {
-    MovePreviewNext();
-    showTradeList(result);
-    pagination();
-    activeBtn(page);
+    showTradeList(result.trade_list); // 거래 목록 표시
+    renderPagination(Math.ceil(result.total_count / limit), currentPage); // 페이지네이션 렌더링
   }
 });
