@@ -58,18 +58,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         const imageUrl = show.imageUrl.length > 0 ? show.imageUrl[0] : 'default-image-url.jpg';
         return `
         <div class="col-md-4 mb-3">
-          <div class="card">
+          <div class="card" data-show-id="${show.id}">
             <img src="${imageUrl}" class="card-img-top" alt="${show.title}">
             <div class="card-body">
               <h5 class="card-title">${show.title}</h5>
               <p class="card-text">위치: ${show.location}</p>
-              <a href="/views/shows/${show.id}" class="btn btn-primary">상세보기</a>
             </div>
           </div>
         </div>
       `;
       })
       .join('');
+
+    // 카드 클릭 시 상세 페이지로 이동
+    document.querySelectorAll('.card').forEach((card) => {
+      card.addEventListener('click', function () {
+        const showId = this.dataset.showId;
+        window.location.href = `/views/shows/${showId}`;
+      });
+    });
   }
 
   // 페이지네이션 렌더링

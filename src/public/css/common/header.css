@@ -1,11 +1,12 @@
 header {
   background-color: #e3f2fd;
   padding-left: 10%;
-  padding-right: 14%;
+  padding-right: 10%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.dropdown-menu > li {
-  width: 180px;
+.navbar {
+  padding: 0.5rem 1rem;
 }
 
 .navbar-expand-lg {
@@ -13,53 +14,93 @@ header {
   background-color: #e3f2fd;
 }
 
-.justify-content-center {
-  width: 50%;
+.navbar-brand img {
+  width: 50px;
+  height: auto;
 }
 
-.justify-content-end {
-  width: 220px;
+.navbar-toggler {
+  border: none;
 }
 
-.nav-item > a {
-  color: gray;
+.navbar-toggler-icon {
+  color: #000;
 }
 
-.nav {
-  --bs-nav-link-hover-color: var(--bs-navbar-hover-color);
+.navbar-collapse {
+  justify-content: space-between;
 }
 
-#logo {
-  width: 100%;
+.navbar-nav {
+  align-items: center;
 }
 
-.navbar-brand {
-  width: 6%;
-  margin-right: 3%;
+.nav-link {
+  font-size: 1rem;
+  color: #555;
+  padding: 0.5rem 1rem;
+  transition: color 0.3s ease-in-out;
+}
+
+.nav-link:hover {
+  color: #000000;
+}
+
+#adminTab .nav-item {
+  color: #555;
+  font-size: 1rem;
 }
 
 #adminTab {
-  display: none;
+  display: flex;
+  margin-left: 1rem;
 }
 
-#logo {
-  width: 100%;
-}
-
-.navbar-brand {
-  width: 6%;
-  margin-right: 3%;
-}
-
-#adminTab {
-  display: none;
+#headerSearchForm {
+  max-width: 500px;
+  display: flex;
+  align-items: center;
 }
 
 #headerSearchInput {
   height: 40px;
   text-align: center;
+  border-radius: 20px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
 }
 
 #headerSearchButton {
   width: 80px;
+  margin-left: 10px;
+  height: 40px;
+  border-radius: 20px;
+  font-size: 1rem;
+}
+
+#sign-in-before .nav-link,
+#sign-in-after .nav-link {
+  font-size: 1rem;
+  color: #555;
+}
+
+#sign-in-before .nav-link:hover,
+#sign-in-after .nav-link:hover {
+  color: #000000;
+}
+
+#sign-in-after {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-collapse ul {
+  margin: 0;
+  padding: 0;
+}
+
+#adminTab {
+  display: none;
 }

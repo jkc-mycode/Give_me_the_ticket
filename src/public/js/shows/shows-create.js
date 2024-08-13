@@ -190,8 +190,8 @@ document.addEventListener('DOMContentLoaded', function () {
               <input type="time" class="form-control mb-2" name="scheduleTime" required>
             </div>
           `;
-          //공연 생성 후 공연 목록 페이지로 이동
-          window.location.href = `/views/shows/list`;
+          //공연 생성 후 메인 페이지로 이동
+          window.location.href = `/views`;
         } else {
           alert('공연 생성에 실패했습니다.');
         }
