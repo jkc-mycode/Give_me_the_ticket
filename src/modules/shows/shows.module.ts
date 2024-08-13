@@ -11,23 +11,20 @@ import { ConfigModule } from '@nestjs/config';
 import { ShowsController } from './shows.controller';
 import { ShowsService } from './shows.service';
 import { ImagesService } from '../images/images.service';
-import { BullModule } from '@nestjs/bullmq';
-import { ShowsConsumer } from './shows.consumer';
-import { QUEUES } from 'src/commons/constants/queue.constant';
-import { TicketQueueEvents } from 'src/queue-events/ticket.queue-event';
+
 import { PointLog } from 'src/entities/users/point-log.entity';
+import { RedisModule } from '../redis/redis.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    BullModule.registerQueue({
-      name: QUEUES.TICKET_QUEUE,
-    }),
     TypeOrmModule.forFeature([Show, User, Ticket, Bookmark, Schedule, Image, PointLog]),
     SearchModule,
+    RedisModule,
   ],
   controllers: [ShowsController],
 
-  providers: [ShowsService, ShowsConsumer, TicketQueueEvents, ImagesService],
+  providers: [ShowsService, ImagesService],
   exports: [TypeOrmModule],
 })
 export class ShowsModule {}

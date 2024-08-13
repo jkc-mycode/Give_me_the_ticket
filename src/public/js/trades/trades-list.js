@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const token = window.localStorage.getItem('accessToken');
   const numberbtns = document.querySelectorAll('.numberbtn');
   const tradeListContainer = document.querySelector('#tradeList');
+  const previousPage = document.querySelector(`#previousPage`);
+  const nextPage = document.querySelector(`#nextPage`);
 
   //page값을 알아내는 함수
   function getPageFromParam() {
@@ -48,20 +50,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  const previousPage = document.querySelector(`#previousPage`);
-  const nextPage = document.querySelector(`#nextPage`);
+  function MovePreviewNext() {
+    previousPage.addEventListener('click', function (e) {
+      const previousPageNumber = parseInt(page, 10) - 1;
 
-  previousPage.addEventListener('click', function (e) {
-    const previousPageNumber = parseInt(page, 10) - 1;
-    if (previousPageNumber > 0) {
-      window.location.href = `/views/trades/page/${previousPageNumber}`;
-    }
-  });
+      //페이지 이동
+      if (previousPageNumber > 0) {
+        window.location.href = `/views/trades/page/${previousPageNumber}`;
+      }
+      nextPage.addEventListener('click', function (e) {
+        const nextPageNumber = parseInt(page, 10) + 1;
 
-  nextPage.addEventListener('click', function (e) {
-    const nextPageNumber = parseInt(page, 10) + 1;
-    window.location.href = `/views/trades/page/${nextPageNumber}`;
-  });
+        //페이지 이동
+        window.location.href = `/views/trades/page/${nextPageNumber}`;
+      });
+    });
+  }
 
   //데이터 가져오기
   async function fetchTradesList(page) {
@@ -104,6 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const result = await fetchTradesList(page);
 
   if (result) {
+    MovePreviewNext();
     showTradeList(result);
     pagination();
     activeBtn(page);

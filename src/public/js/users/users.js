@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const tradeLogContent = document.querySelector('#tradeLogContent');
   const tradeLogContainer = document.getElementById('tradeLogContainer');
 
+  const pointLogDropdownItems = document.querySelectorAll('.dropdown-item');
   const chargeBtn = document.querySelector('#chargeBtn');
   const updateBtn = document.querySelector('#updateBtn');
   const deleteBtn = document.querySelector('#deleteBtn');
@@ -96,6 +97,15 @@ document.addEventListener('DOMContentLoaded', function () {
     getPointLog();
   });
 
+  pointLogDropdownItems.forEach((item) => {
+    item.addEventListener('click', function (e) {
+      e.preventDefault();
+
+      const description = this.textContent.trim();
+      filterPointLog(description);
+    });
+  });
+
   async function getPointLog() {
     try {
       // 보유 포인트 조회를 위한 백엔드 사용자 프로필 조회 API 호출
@@ -169,6 +179,59 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     } catch (err) {
       // 사용자 포인트 내역 조회 실패 시 에러 처리
+      console.log(err.response.data);
+    }
+  }
+
+  async function filterPointLog(description) {
+    try {
+      const queryString = new URLSearchParams({ description }).toString();
+      const response = await axios.get(`/users/me/point?${queryString}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const pointLog = response.data.getPointLog;
+
+      if (pointLog.length === 0) {
+        pointLogContainer.innerHTML = '';
+        return;
+      }
+
+      pointLogContainer.innerHTML = '';
+
+      pointLog.forEach((log) => {
+        const logElement = document.createElement('div');
+        logElement.classList.add('point-log');
+
+        const createdAtElement = document.createElement('p');
+        createdAtElement.textContent = `포인트 변경 일자 : ${log.createdAt}`;
+        logElement.appendChild(createdAtElement);
+
+        const priceElement = document.createElement('p');
+        priceElement.textContent = `포인트 금액 : ${log.price}`;
+        logElement.appendChild(priceElement);
+
+        const descriptionElement = document.createElement('p');
+        descriptionElement.textContent = `설명 : ${log.description}`;
+        logElement.appendChild(descriptionElement);
+
+        const typeElement = document.createElement('p');
+        let typeText = log.type;
+
+        if (log.type === 'DEPOSIT') {
+          typeText = '입금';
+        } else if (log.type === 'WITHDRAW') {
+          typeText = '출금';
+        }
+
+        typeElement.textContent = `유형 : ${typeText}`;
+        logElement.appendChild(typeElement);
+
+        pointLogContainer.appendChild(logElement);
+      });
+    } catch (err) {
       console.log(err.response.data);
     }
   }
@@ -452,7 +515,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // 수정 버튼에 이벤트 추가
         updateTradeBtn.addEventListener('click', () => {
           window.sessionStorage.setItem('trade', JSON.stringify(log));
-          window.location.href = `/views/trades/${log.id}/edit`;
+          window.location.href = `/views/trades/${log.tradeId}/edit`;
         });
         logElement.appendChild(updateTradeBtn);
 

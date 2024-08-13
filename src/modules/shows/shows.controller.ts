@@ -146,6 +146,7 @@ export class ShowsController {
   /**
    * 공연 찜하기 생성
    * @param showId
+   * @param req
    * @returns
    */
   @ApiBearerAuth()
@@ -184,6 +185,7 @@ export class ShowsController {
    * 티켓 예매
    * @param showId
    * @param createTicketDto
+   * @param req
    * @returns
    */
   @ApiBearerAuth()
