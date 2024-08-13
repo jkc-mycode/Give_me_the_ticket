@@ -11,6 +11,7 @@ import {
   ValidationPipe,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 
 import { TradesService } from './trades.service';
@@ -158,8 +159,8 @@ export class TradesController {
     description: SWAGGER.TRADES.GET_TRADE_LIST.API_OPERATION.DESCRIPTION,
   })
   @ApiOkResponse({ description: '' })
-  async getList(@Param(`page`, ParseIntPipe) page) {
-    if (!page) throw new BadRequestException('이동하고자 하는 페이지를 입력해 주십시오!');
+  async getList(@Param('page', ParseIntPipe) page: number) {
+    if (!page) throw new BadRequestException('이동하고자 하는 페이지와 범위를 입력해 주십시오!');
     return await this.tradesService.getList(page);
   }
 
