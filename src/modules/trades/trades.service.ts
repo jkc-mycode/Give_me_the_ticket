@@ -169,8 +169,9 @@ export class TradesService {
   //=========ConvenienceFunction======================
 
   //<1> 중고 거래 목록 보기//완료 (검증 대부분 완료)
-  async getList(page: number) {
-    const limit = 2;
+  async getList(getTradeListDto: GetTradeListDto) {
+    const { page, limit } = getTradeListDto;
+
     const total_count = await this.tradeRepository.count();
 
     const skip: number = (page - 1) * limit;
