@@ -40,7 +40,7 @@ export class ImagesService {
       // 생성된 명령을 S3에 전달하여 이미지 업로드
       await this.s3.send(command);
       // 업로드된 이미지의 URL을 반환
-      return `https://s3.${process.env.AWS_S3_REGION}.amazonaws.com/${process.env.AWS_BUCKET}/${fileName}`;
+      return `${process.env.AWS_CLOUDFRONT_URL}/${fileName}`;
     } catch (err) {
       console.error(err);
       throw new InternalServerErrorException(IMAGE_MESSAGE.UPLOAD_TO_S3.INTERNAL_SERVER_ERROR);
