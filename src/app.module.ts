@@ -19,6 +19,8 @@ import { AuthViewsController } from './views/auth/auth.view.controller';
 import { UsersViewsController } from './views/users/users.view.controller';
 import { ShowsViewsController } from './views/shows/shows.view.controller';
 import { TradeViewsController } from './views/trades/trades.view.controller';
+import { ShowReviewsModule } from './modules/show-reviews/show-reviews.module';
+import { ShowReviewsController } from './modules/show-reviews/show-reviews.controller';
 
 @Module({
   imports: [
@@ -47,6 +49,7 @@ import { TradeViewsController } from './views/trades/trades.view.controller';
     RedisModule,
     SearchModule,
     PaymentsModule,
+    ShowReviewsModule,
   ],
   controllers: [
     AppController,
@@ -55,6 +58,7 @@ import { TradeViewsController } from './views/trades/trades.view.controller';
     UsersViewsController,
     ShowsViewsController,
     TradeViewsController,
+    ShowReviewsController,
   ],
   providers: [AppService],
 })
