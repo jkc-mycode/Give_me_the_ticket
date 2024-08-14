@@ -19,6 +19,7 @@ import { USER_CONSTANT } from 'src/commons/constants/users/user.constant';
 import { USER_MESSAGES } from 'src/commons/constants/users/user-message.constant';
 import { Factory } from 'nestjs-seeder';
 import { Provider } from 'src/commons/types/users/provider.type';
+import { ShowReview } from '../show-reviews/show-reviews.entity';
 
 @Entity('users')
 export class User {
@@ -117,4 +118,8 @@ export class User {
   // Relation - [users] 1 : N [trades]
   @OneToMany(() => Trade, (trade) => trade.user, { cascade: true })
   trades: Trade[];
+
+  // Relation - [users] 1 : N [show_reviews]
+  @OneToMany(() => ShowReview, (showReviews) => showReviews.user, { cascade: true })
+  showReviews: ShowReview[];
 }

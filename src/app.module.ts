@@ -5,6 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { configModuleValidationSchema } from 'src/configs/env-validation.config';
 import { typeOrmModuleOptions } from 'src/configs/database.config';
+
+//modules
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ShowsModule } from './modules/shows/shows.module';
@@ -14,11 +16,16 @@ import { RedisModule } from './modules/redis/redis.module';
 import { BullModule } from '@nestjs/bullmq';
 import { SearchModule } from './modules/shows/search/search.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { RedlockModule } from './modules/redis/redlock.module';
+
+//controllers
 import { ViewsController } from './views/main/main.view.controller';
 import { AuthViewsController } from './views/auth/auth.view.controller';
 import { UsersViewsController } from './views/users/users.view.controller';
 import { ShowsViewsController } from './views/shows/shows.view.controller';
 import { TradeViewsController } from './views/trades/trades.view.controller';
+import { ShowReviewsModule } from './modules/show-reviews/show-reviews.module';
+import { ShowReviewsController } from './modules/show-reviews/show-reviews.controller';
 
 @Module({
   imports: [
@@ -47,6 +54,8 @@ import { TradeViewsController } from './views/trades/trades.view.controller';
     RedisModule,
     SearchModule,
     PaymentsModule,
+    RedlockModule,
+    ShowReviewsModule,
   ],
   controllers: [
     AppController,
@@ -55,6 +64,7 @@ import { TradeViewsController } from './views/trades/trades.view.controller';
     UsersViewsController,
     ShowsViewsController,
     TradeViewsController,
+    ShowReviewsController,
   ],
   providers: [AppService],
 })
