@@ -31,6 +31,7 @@ import { addHours, startOfDay, subDays, subHours } from 'date-fns';
 import { PointLog } from 'src/entities/users/point-log.entity';
 import { PointType } from 'src/commons/types/users/point.type';
 import Redis from 'ioredis';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class ShowsService {
@@ -179,53 +180,111 @@ export class ShowsService {
   // 공연 상세 조회 시 조회 수 증가
   async increaseViews(showId: number): Promise<void> {
     try {
+      const date = new Date();
+      const timestamp = this.getFormattedTimestamp(date);
+      const key = `show:views:${timestamp}`;
+
       // 조회수 증가
-      await this.redisClient.zincrby('show:views', 1, String(showId));
+      await this.redisClient.zincrby(key, 1, String(showId));
+
+      // TTL 1시간 설정
+      await this.redisClient.expire(key, 3600);
     } catch (error) {
-      console.error('Redis 조회수 증가 에러:', error);
+      throw new InternalServerErrorException('Redis 조회수 증가 에러');
     }
+  }
+
+  //10분마다 스케줄링
+  @Cron('0 */10 * * * *')
+  async handleCronJob() {
+    const limit = 10;
+    await this.getHourlyRankedShows(limit);
+  }
+
+  async getHourlyRankedShows(limit: number): Promise<string[]> {
+    try {
+      const date = new Date();
+      const currentTimestamp = this.getFormattedTimestamp(date);
+
+      const keys = [];
+      for (let i = 0; i <= 6; i++) {
+        const pastTimestamp = this.getFormattedTimestamp(new Date(date.getTime() - i * 600000));
+        const key = `show:views:${pastTimestamp}`;
+
+        // 키가 실제로 존재하는지 확인
+        const keyExists = await this.redisClient.exists(key);
+        if (keyExists) {
+          keys.push(key);
+        }
+      }
+
+      if (keys.length === 0) {
+        return []; // 합칠 키가 없으면 빈 배열 반환
+      }
+
+      const unionKey = `show:views:union:${currentTimestamp}`;
+
+      console.log('합칠 키들:', keys); // 확인용 로그
+      console.log('합쳐질 키:', unionKey); // 확인용 로그
+
+      // 여러 Sorted Set을 합쳐 하나의 Sorted Set 생성
+      const unionResult = await this.redisClient.zunionstore(unionKey, keys.length, ...keys);
+
+      console.log('zunionstore 결과:', unionResult); // unionKey에 저장된 요소 수 확인
+
+      // unionKey에 1시간 TTL 설정
+      await this.redisClient.expire(unionKey, 3600);
+
+      // 상위 N개의 쇼 ID를 조회
+      const topShows = await this.redisClient.zrevrange(unionKey, 0, limit - 1);
+
+      console.log('상위 쇼들:', topShows); // 최종 결과 확인
+
+      return topShows;
+    } catch (error) {
+      console.error('Redis 랭킹 조회 에러:', error);
+      throw new InternalServerErrorException('Redis 랭킹 조회 에러');
+    }
+  }
+
+  // 타임스탬프를 'YYYYMMDDHHmm' 형식으로 변환
+  private getFormattedTimestamp(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(Math.floor(date.getMinutes() / 10) * 10).padStart(2, '0'); // 10분 단위로 자르기
+
+    return `${year}${month}${day}${hours}${minutes}`;
   }
 
   /* 공연 인기별 조회 */
   async getRankedShows(limit: number, sortBy: 'views' | 'bookings'): Promise<Show[]> {
-    const key = sortBy === 'views' ? 'show:views' : 'show:bookings';
+    const date = new Date();
+    const currentTimestamp = this.getFormattedTimestamp(date);
 
-    // 역순으로 랭킹 값 가져오기
-    const showIds = await this.redisClient.zrevrange(key, 0, limit - 1);
+    const key = sortBy === 'views' ? `show:views:union:${currentTimestamp}` : 'show:bookings';
 
+    // Redis에서 역순으로 랭킹 값 가져오기
+    const ranking = await this.redisClient.zrevrange(key, 0, limit - 1);
+
+    // 가져온 랭킹 값이 없으면 빈 배열 반환
+    if (ranking.length === 0) {
+      return [];
+    }
+
+    // 가져온 id 배열을 숫자로 변환 및 검증
+    const showIds = ranking.map((id) => parseInt(id, 10)).filter((id) => !isNaN(id));
+
+    // 유효한 ID가 없으면 빈 배열 반환
     if (showIds.length === 0) {
       return [];
     }
 
-    // 가져온 id 배열을 숫자로 변환
-    const numericShowIds = showIds
-      .map((id) => {
-        const parsedId = parseInt(id, 10);
-        if (isNaN(parsedId)) {
-          return null;
-        }
-        return parsedId;
-      })
-      .filter((id): id is number => id !== null);
-
-    if (numericShowIds.length === 0) {
-      return [];
-    }
-
-    try {
-      // 숫자로 변환된 id를 DB에서 찾아 조회하기
-      const shows = await this.showRepository.find({
-        where: {
-          id: In(numericShowIds),
-        },
-      });
-
-      return shows;
-    } catch (error) {
-      // DB 쿼리 중 발생한 에러를 로그로 출력
-      console.error('쿼리 실패:', error);
-      throw error;
-    }
+    // 숫자로 변환된 ID를 DB에서 조회
+    return await this.showRepository.find({
+      where: { id: In(showIds) },
+    });
   }
 
   /*공연 수정 */
