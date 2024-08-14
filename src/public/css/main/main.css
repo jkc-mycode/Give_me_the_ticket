@@ -44,6 +44,7 @@ main {
   display: flex;
   flex-direction: column;
   height: 100%;
+  margin: 15px;
 }
 
 .card-img-top {
@@ -57,21 +58,18 @@ main {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.card-title {
   text-align: center;
 }
 
-.card-title,
 .card-text {
-  margin-bottom: 1rem;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  border: none;
-  margin-top: auto;
+  text-align: left;
 }
 
 .pagination {
+  margin-top: 20px;
   display: flex;
   justify-content: center;
 }

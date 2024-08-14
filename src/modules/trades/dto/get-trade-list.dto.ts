@@ -1,8 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min, MinLength } from 'class-validator';
-import { SHOW_MESSAGES } from 'src/commons/constants/shows/show-messages.constant';
-import { MIN_SHOW_SEARCH_LENGTH } from 'src/commons/constants/shows/shows.constant';
-import { ShowCategory } from 'src/commons/types/shows/show-category.type';
+import { IsInt, Max, Min } from 'class-validator';
 
 export class GetTradeListDto {
   /**

@@ -23,8 +23,17 @@ document.addEventListener('DOMContentLoaded', () => {
       ticketStatusText = '중고 거래 완료';
     }
 
-    if (ticket.status !== 'USEABLE') {
-      alert('중고 거래가능한 상태가 아닙니다.');
+    if (ticket.status === 'TRADING') {
+      alert('이미 중고 거래중인 티켓입니다.');
+      window.location.href = '/views/users/me';
+    } else if (ticket.status === 'REFUNDED') {
+      alert('환불 처리가 완료된 티켓입니다.');
+      window.location.href = '/views/users/me';
+    } else if (ticket.status === 'EXPIRED') {
+      alert('공연 일자가 만료된 티켓입니다.');
+      window.location.href = '/views/users/me';
+    } else if (ticket.status === 'SOLD') {
+      alert('이미 중고 거래가 완료된 티켓입니다.');
       window.location.href = '/views/users/me';
     }
 
