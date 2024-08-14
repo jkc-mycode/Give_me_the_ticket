@@ -31,10 +31,6 @@ export class ShowReview {
   @Column({ type: 'int', unsigned: true })
   totalRate: number;
 
-  /**
-   * 닉네임
-   * @example "성이름"
-   */
   @Column({ type: 'varchar' })
   nickname: string;
 
