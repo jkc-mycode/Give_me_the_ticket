@@ -74,7 +74,6 @@ export class ShowReviewsService {
       ...showReview,
       rate,
       postscript,
-      // 업데이트할 데이터
     });
 
     return updateShowReview;
