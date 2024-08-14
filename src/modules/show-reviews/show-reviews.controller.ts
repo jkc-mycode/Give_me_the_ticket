@@ -49,11 +49,14 @@ export class ShowReviewsController {
     return { status: HttpStatus.CREATED, message: '리뷰 작성에 성공했습니다', data: showReview };
   }
 
+  //공연별 리뷰 조회
   @Get()
   async findShowReviewList(@Param('showId') showId: number) {
     const showReviews = await this.showReviewsService.findShowReviewList(showId);
     return showReviews;
   }
+
+  //공연 리뷰 수정
   @ApiBearerAuth()
   @Roles(Role.USER)
   @UseGuards(RolesGuard)
@@ -78,8 +81,26 @@ export class ShowReviewsController {
     };
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.showReviewsService.remove(+id);
+  //공연 리뷰 삭제
+  @ApiBearerAuth()
+  @Roles(Role.USER)
+  @UseGuards(RolesGuard)
+  @HttpCode(HttpStatus.OK)
+  @Delete(':reviewId')
+  async deleteShowReview(
+    @Param('showId') showId: number,
+    @Param('reviewId') reviewId: number,
+    @Req() req: any
+  ) {
+    await this.showReviewsService.deleteShowReview(
+      reviewId,
+      showId,
+
+      req.user
+    );
+    return {
+      status: HttpStatus.OK,
+      message: '리뷰 삭제가 완료되었습니다.',
+    };
   }
 }

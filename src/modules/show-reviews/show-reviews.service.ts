@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateShowReviewDto } from './dto/create-show-review.dto';
 import { UpdateShowReviewDto } from './dto/update-show-review.dto';
 import { User } from 'src/entities/users/user.entity';
@@ -62,7 +67,7 @@ export class ShowReviewsService {
       where: { id: reviewId, showId },
     });
     if (!showReview) {
-      throw new NotFoundException('수정할 공연이 존재하지 않습니다');
+      throw new NotFoundException('수정할 리뷰가 존재하지 않습니다');
     }
 
     // 본인의 리뷰만 수정할 수 있게 합니다.
@@ -79,7 +84,24 @@ export class ShowReviewsService {
     return updateShowReview;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} showreview`;
+  async deleteShowReview(reviewId: number, showId: number, user: User) {
+    const showReview = await this.showReviewRepository.findOne({
+      where: { id: reviewId, showId },
+    });
+    if (!showReview) {
+      throw new NotFoundException('삭제할 리뷰가 존재하지 않습니다');
+    }
+
+    // 이미 삭제된 리뷰시 에러 메시지 발생
+    if (showReview.deletedAt) {
+      throw new ConflictException('이미 삭제된 리뷰입니다');
+    }
+    // 본인의 리뷰만 삭제할 수 있게 합니다.
+    if (showReview.userId !== user.id) {
+      throw new ForbiddenException('이 리뷰를 삭제할 권한이 없습니다');
+    }
+    // 리뷰 삭제
+    showReview.deletedAt = new Date();
+    return await this.showReviewRepository.save(showReview);
   }
 }
