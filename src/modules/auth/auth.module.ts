@@ -12,6 +12,7 @@ import { User } from 'src/entities/users/user.entity';
 import { RefreshTokenStrategy } from './strategies/refresh-token.strategy';
 import { KakaoStrategy } from './strategies/kakao.strategy';
 import { ACCESS_TOKEN, AUTH_ENV, AUTH_STRATEGY } from 'src/commons/constants/auth/auth.constant';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ACCESS_TOKEN, AUTH_ENV, AUTH_STRATEGY } from 'src/commons/constants/aut
       inject: [ConfigService],
     }),
     UsersModule,
+    RedisModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, LocalStrategy, JwtStrategy, RefreshTokenStrategy, KakaoStrategy],

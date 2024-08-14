@@ -4,6 +4,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Strategy } from 'passport-kakao';
 import { AUTH_ENV, AUTH_STRATEGY } from 'src/commons/constants/auth/auth.constant';
+import { Provider } from 'src/commons/types/users/provider.type';
 import { User } from 'src/entities/users/user.entity';
 import { Repository } from 'typeorm';
 
@@ -31,7 +32,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
         userName + new Date().getTime().toString(AUTH_STRATEGY.KAKAO.RANDOM_NICKNAME.NUMBER); // 랜덤 닉네임 생성
 
       // 기존에 가입한 사용자인지 확인
-      let user = await this.usersRepository.findOne({ where: { email } });
+      let user = await this.usersRepository.findOne({ where: { email }, withDeleted: true });
       // 없는 사용자면 데이터베이스에 사용자 정보 추가
       if (!user) {
         user = await this.usersRepository.save({
@@ -40,6 +41,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
           // PassportStrategy에서 비밀번호로 빈 문자열을 받지 못하게 되어 있어서
           password: '',
           nickname,
+          provider: Provider.KAKAO,
         });
       }
 
