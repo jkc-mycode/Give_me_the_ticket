@@ -11,28 +11,36 @@ import { ShowReview } from 'src/entities/show-reviews/show-reviews.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Show } from 'src/entities/shows/show.entity';
+import { Ticket } from 'src/entities/shows/ticket.entity';
 
 @Injectable()
 export class ShowReviewsService {
   constructor(
     @InjectRepository(ShowReview) private showReviewRepository: Repository<ShowReview>,
-    @InjectRepository(Show) private showRepository: Repository<Show>
+    @InjectRepository(Show) private showRepository: Repository<Show>,
+    @InjectRepository(Ticket) private ticketRepository: Repository<Ticket>
   ) {}
 
   //공연 리뷰 생성 api
-  async createShowReview(createShowReviewDto: CreateShowReviewDto, showId: number, user: User) {
+  async createShowReview(createShowReviewDto: CreateShowReviewDto, ticketId: number, user: User) {
     const { rate, postscript } = createShowReviewDto;
 
-    const show = await this.showRepository.findOne({
-      where: { id: showId },
+    const ticket = await this.ticketRepository.findOne({
+      where: { id: ticketId },
     });
-    if (!show) {
+    if (!ticket) {
       throw new NotFoundException('리뷰를 작성할 공연을 찾을 수 없습니다');
+    }
+
+    // 본인의 리뷰만 수정할 수 있게 합니다.
+    if (ticket.userId !== user.id) {
+      throw new ForbiddenException('이 리뷰를 수정할 권한이 없습니다');
     }
 
     const showReview = this.showReviewRepository.create({
       userId: user.id,
-      showId: show.id,
+      showId: ticket.showId,
+
       rate,
       postscript,
       nickname: user.nickname,
