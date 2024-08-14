@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { ShowReviewsService } from './show-reviews.service';
 import { CreateShowReviewDto } from './dto/create-show-review.dto';
@@ -35,7 +36,7 @@ export class ShowReviewsController {
   @Roles(Role.USER)
   @UseGuards(RolesGuard)
   @HttpCode(HttpStatus.CREATED)
-  @Post()
+  @Post('/:ticketId')
   async createShowReview(
     @Param('ticketId') ticketId: number,
     @Body() createShowreviewDto: CreateShowReviewDto,
@@ -51,7 +52,7 @@ export class ShowReviewsController {
 
   //공연별 리뷰 조회
   @Get()
-  async findShowReviewList(@Param('showId') showId: number) {
+  async findShowReviewList(@Query('showId') showId: number) {
     const showReviews = await this.showReviewsService.findShowReviewList(showId);
     return showReviews;
   }

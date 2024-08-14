@@ -32,15 +32,14 @@ export class ShowReviewsService {
       throw new NotFoundException('리뷰를 작성할 공연을 찾을 수 없습니다');
     }
 
-    // 본인의 리뷰만 수정할 수 있게 합니다.
     if (ticket.userId !== user.id) {
-      throw new ForbiddenException('이 리뷰를 수정할 권한이 없습니다');
+      throw new ForbiddenException('티켓 인증에 실패하였습니다');
     }
 
     const showReview = this.showReviewRepository.create({
       userId: user.id,
       showId: ticket.showId,
-
+      ticketId,
       rate,
       postscript,
       nickname: user.nickname,
