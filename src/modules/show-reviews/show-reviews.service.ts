@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateShowReviewDto } from './dto/create-show-review.dto';
 import { UpdateShowReviewDto } from './dto/update-show-review.dto';
 import { User } from 'src/entities/users/user.entity';
@@ -16,7 +16,7 @@ export class ShowReviewsService {
 
   //공연 리뷰 생성 api
   async createShowReview(createShowReviewDto: CreateShowReviewDto, showId: number, user: User) {
-    const { totalRate, postscript } = createShowReviewDto;
+    const { rate, postscript } = createShowReviewDto;
 
     const show = await this.showRepository.findOne({
       where: { id: showId },
@@ -28,7 +28,7 @@ export class ShowReviewsService {
     const showReview = this.showReviewRepository.create({
       userId: user.id,
       showId: show.id,
-      totalRate,
+      rate,
       postscript,
       nickname: user.nickname,
     });
@@ -39,18 +39,44 @@ export class ShowReviewsService {
 
   //공연별 리뷰 조회 목록 api
   async findShowReviewList(showId: number) {
+    //최신 순으로 정렬
     const showReviews = await this.showReviewRepository.find({
       where: { showId },
+      order: { createdAt: 'DESC' },
     });
     if (!showReviews) {
-      throw new NotFoundException('공연이 존재하지 않습니다');
+      throw new NotFoundException('리뷰를 조회할 공연이 존재하지 않습니다');
     }
 
     return showReviews;
   }
 
-  update(id: number, updateShowreviewDto: UpdateShowReviewDto) {
-    return `This action updates a #${id} showreview`;
+  async updateShowReview(
+    reviewId: number,
+    showId: number,
+    updateShowReviewDto: UpdateShowReviewDto,
+    user: User
+  ) {
+    const { rate, postscript } = updateShowReviewDto;
+    const showReview = await this.showReviewRepository.findOne({
+      where: { id: reviewId, showId },
+    });
+    if (!showReview) {
+      throw new NotFoundException('수정할 공연이 존재하지 않습니다');
+    }
+
+    // 본인의 리뷰만 수정할 수 있게 합니다.
+    if (showReview.userId !== user.id) {
+      throw new ForbiddenException('이 리뷰를 수정할 권한이 없습니다');
+    }
+
+    const updateShowReview = this.showReviewRepository.save({
+      ...showReview,
+      rate,
+      postscript,
+    });
+
+    return updateShowReview;
   }
 
   remove(id: number) {

@@ -54,10 +54,28 @@ export class ShowReviewsController {
     const showReviews = await this.showReviewsService.findShowReviewList(showId);
     return showReviews;
   }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateShowreviewDto: UpdateShowReviewDto) {
-    return this.showReviewsService.update(+id, updateShowreviewDto);
+  @ApiBearerAuth()
+  @Roles(Role.USER)
+  @UseGuards(RolesGuard)
+  @HttpCode(HttpStatus.OK)
+  @Patch(':reviewId')
+  async updateShowReview(
+    @Param('showId') showId: number,
+    @Param('reviewId') reviewId: number,
+    @Body() updateShowreviewDto: UpdateShowReviewDto,
+    @Req() req: any
+  ) {
+    const updateShowReview = await this.showReviewsService.updateShowReview(
+      reviewId,
+      showId,
+      updateShowreviewDto,
+      req.user
+    );
+    return {
+      status: HttpStatus.OK,
+      message: '리뷰 수정이 완료되었습니다.',
+      data: updateShowReview,
+    };
   }
 
   @Delete(':id')

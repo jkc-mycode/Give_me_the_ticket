@@ -29,7 +29,7 @@ export class ShowReview {
    * @example 5
    */
   @Column({ type: 'int', unsigned: true })
-  totalRate: number;
+  rate: number;
 
   @Column({ type: 'varchar' })
   nickname: string;
