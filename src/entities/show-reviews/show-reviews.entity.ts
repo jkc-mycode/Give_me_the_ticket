@@ -26,7 +26,7 @@ export class ShowReview {
   @Column({ name: 'show_id', type: 'int', unsigned: true })
   showId: number;
 
-  @Column({ name: 'ticket_id', type: 'int', unsigned: true })
+  @Column({ name: 'ticket_id', type: 'int', unsigned: true, unique: true })
   ticketId: number;
 
   /**
