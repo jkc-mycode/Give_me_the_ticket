@@ -97,7 +97,7 @@ export class ShowsController {
   @Get(':showId')
   async getShow(@Param('showId') showId: number) {
     // 조회수 증가
-    await this.showsService.increaseViews(showId);
+    await this.showsService.increaseRanking(showId, 'views');
 
     const show = await this.showsService.getShow(showId);
     return {
@@ -202,7 +202,7 @@ export class ShowsController {
     const ticket = await this.showsService.createTicket(showId, createTicketDto, req.user);
 
     // 예매수 증가
-    await this.showsService.increaseBookings(showId);
+    await this.showsService.increaseRanking(showId, 'bookings');
 
     return {
       status: HttpStatus.CREATED,

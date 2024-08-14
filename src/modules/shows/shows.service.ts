@@ -177,93 +177,59 @@ export class ShowsService {
     };
   }
 
-  // 공연 상세 조회 시 조회 수 증가
-  async increaseViews(showId: number): Promise<void> {
+  // 랭킹 증가 (조회수 및 예매수)
+  async increaseRanking(showId: number, type: 'views' | 'bookings'): Promise<void> {
     try {
       const date = new Date();
       const timestamp = this.getFormattedTimestamp(date);
-      const key = `show:views:${timestamp}`;
+      const key = `show:${type}:${timestamp}`;
 
-      // 조회수 증가
+      // 조회수 또는 예매수 증가
       await this.redisClient.zincrby(key, 1, String(showId));
 
       // TTL 1시간 설정
       await this.redisClient.expire(key, 3600);
+
+      await this.updateHourlyRanked(key, type);
     } catch (error) {
-      throw new InternalServerErrorException('Redis 조회수 증가 에러');
+      console.log(`레디스 ${type}증가 오류 :`, error);
     }
   }
 
-  //10분마다 스케줄링
-  @Cron('0 */10 * * * *')
-  async handleCronJob() {
-    const limit = 10;
-    await this.getHourlyRankedShows(limit);
-  }
-
-  async getHourlyRankedShows(limit: number): Promise<string[]> {
+  // 최신 1시간 union 테이블 업데이트
+  async updateHourlyRanked(newKey: string, type: 'views' | 'bookings'): Promise<void> {
     try {
       const date = new Date();
-      const currentTimestamp = this.getFormattedTimestamp(date);
+      const currentTimestamp = this.getFormattedHourTimestamp(date);
 
-      const keys = [];
-      for (let i = 0; i <= 6; i++) {
-        const pastTimestamp = this.getFormattedTimestamp(new Date(date.getTime() - i * 600000));
-        const key = `show:views:${pastTimestamp}`;
+      const unionKey = `show:${type}:union:${currentTimestamp}`;
 
-        // 키가 실제로 존재하는지 확인
-        const keyExists = await this.redisClient.exists(key);
-        if (keyExists) {
-          keys.push(key);
-        }
+      // unionKey가 존재하는지 확인
+      const unionKeyExists = await this.redisClient.exists(unionKey);
+
+      if (unionKeyExists) {
+        // 기존 union 테이블에 새로운 조회수 테이블 추가
+        await this.redisClient.zunionstore(unionKey, 2, unionKey, newKey);
+      } else {
+        // 새로운 union 테이블 생성
+        await this.redisClient.zunionstore(unionKey, 1, newKey);
+        // TTL 1시간 설정
+        await this.redisClient.expire(unionKey, 3600);
       }
-
-      if (keys.length === 0) {
-        return []; // 합칠 키가 없으면 빈 배열 반환
-      }
-
-      const unionKey = `show:views:union:${currentTimestamp}`;
-
-      console.log('합칠 키들:', keys); // 확인용 로그
-      console.log('합쳐질 키:', unionKey); // 확인용 로그
-
-      // 여러 Sorted Set을 합쳐 하나의 Sorted Set 생성
-      const unionResult = await this.redisClient.zunionstore(unionKey, keys.length, ...keys);
-
-      console.log('zunionstore 결과:', unionResult); // unionKey에 저장된 요소 수 확인
-
-      // unionKey에 1시간 TTL 설정
-      await this.redisClient.expire(unionKey, 3600);
-
-      // 상위 N개의 쇼 ID를 조회
-      const topShows = await this.redisClient.zrevrange(unionKey, 0, limit - 1);
-
-      console.log('상위 쇼들:', topShows); // 최종 결과 확인
-
-      return topShows;
     } catch (error) {
-      console.error('Redis 랭킹 조회 에러:', error);
-      throw new InternalServerErrorException('Redis 랭킹 조회 에러');
+      throw new InternalServerErrorException(`Redis ${type} union 테이블 업데이트 에러`);
     }
-  }
-
-  // 타임스탬프를 'YYYYMMDDHHmm' 형식으로 변환
-  private getFormattedTimestamp(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(Math.floor(date.getMinutes() / 10) * 10).padStart(2, '0'); // 10분 단위로 자르기
-
-    return `${year}${month}${day}${hours}${minutes}`;
   }
 
   /* 공연 인기별 조회 */
   async getRankedShows(limit: number, sortBy: 'views' | 'bookings'): Promise<Show[]> {
     const date = new Date();
-    const currentTimestamp = this.getFormattedTimestamp(date);
+    const currentTimestamp = this.getFormattedHourTimestamp(date);
 
-    const key = sortBy === 'views' ? `show:views:union:${currentTimestamp}` : 'show:bookings';
+    const key =
+      sortBy === 'views'
+        ? `show:views:union:${currentTimestamp}`
+        : `show:bookings:union:${currentTimestamp}`;
 
     // Redis에서 역순으로 랭킹 값 가져오기
     const ranking = await this.redisClient.zrevrange(key, 0, limit - 1);
@@ -285,6 +251,27 @@ export class ShowsService {
     return await this.showRepository.find({
       where: { id: In(showIds) },
     });
+  }
+
+  // 타임스탬프를 'YYYYMMDDHHmm' 형식으로 변환 (10분 단위)
+  private getFormattedTimestamp(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(Math.floor(date.getMinutes() / 10) * 10).padStart(2, '0');
+
+    return `${year}${month}${day}${hours}${minutes}`;
+  }
+
+  // 타임스탬프를 'YYYYMMDDHH' 형식으로 변환 (1시간 단위)
+  private getFormattedHourTimestamp(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+
+    return `${year}${month}${day}${hours}`;
   }
 
   /*공연 수정 */
@@ -587,15 +574,6 @@ export class ShowsService {
       await queryRunner.release();
       await lock.release();
       throw error;
-    }
-  }
-
-  //(랭킹)공연 예매 시 예매 수 증가
-  async increaseBookings(showId: number): Promise<void> {
-    try {
-      await this.redisClient.zincrby('show:bookings', 1, String(showId));
-    } catch (error) {
-      console.log('레디스 예매 수 증가 오류 :', error);
     }
   }
 
