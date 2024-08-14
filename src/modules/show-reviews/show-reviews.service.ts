@@ -65,13 +65,11 @@ export class ShowReviewsService {
       throw new NotFoundException('수정할 공연이 존재하지 않습니다');
     }
 
-    // 리뷰 작성자와 요청한 사용자가 동일한지 확인
+    // 본인의 리뷰만 수정할 수 있게 합니다.
     if (showReview.userId !== user.id) {
       throw new ForbiddenException('이 리뷰를 수정할 권한이 없습니다');
     }
-    console.log(user);
-    console.log(showReview.userId);
-    console.log(user.id);
+
     const updateShowReview = this.showReviewRepository.save({
       ...showReview,
       rate,
