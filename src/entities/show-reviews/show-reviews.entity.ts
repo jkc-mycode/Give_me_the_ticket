@@ -3,6 +3,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -10,6 +11,7 @@ import {
 } from 'typeorm';
 import { User } from '../users/user.entity';
 import { Show } from '../shows/show.entity';
+import { Ticket } from '../shows/ticket.entity';
 
 @Entity({ name: 'show_reviews' })
 export class ShowReview {
@@ -17,10 +19,12 @@ export class ShowReview {
   id: number;
 
   // 유저 엔티티 외래키 설정
+  @Index()
   @Column({ name: 'user_id', type: 'int', unsigned: true })
   userId: number;
 
   // 공연 엔티티 외래키 설정
+  @Index()
   @Column({ name: 'show_id', type: 'int', unsigned: true })
   showId: number;
 
@@ -59,4 +63,9 @@ export class ShowReview {
   @ManyToOne(() => Show, (show) => show.showReviews, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'show_id', referencedColumnName: 'id' })
   show: Show;
+
+  // Relation - [show_reviews] N : 1 [shows]
+  @ManyToOne(() => Ticket, (ticket) => ticket.showReviews, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'ticket_id', referencedColumnName: 'id' })
+  ticket: Ticket;
 }
