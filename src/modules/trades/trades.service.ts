@@ -310,7 +310,7 @@ export class TradesService {
     }
 
     if (ticket.status !== TicketStatus.USEABLE) {
-      throw new BadRequestException('해당 티켓은 사용할 수 없습니다!');
+      throw new BadRequestException(MESSAGES.TRADES.UNABLE.TICKET);
     }
 
     //검증 타일 END==================================================
@@ -347,8 +347,8 @@ export class TradesService {
       await queryRunner.rollbackTransaction();
       return { message: MESSAGES.TRADES.CAN_NOT_CREATE.TRADE };
     } finally {
-      await lock.release();
       await queryRunner.release();
+      await lock.release();
     }
 
     //=======Redlock End===========//

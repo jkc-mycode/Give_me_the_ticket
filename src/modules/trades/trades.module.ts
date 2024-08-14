@@ -31,3 +31,4 @@ import { Image } from 'src/entities/images/image.entity';
   exports: [TypeOrmModule],
 })
 export class TradesModule {}
+//Redlock모듈은 굳이 필요 없어 보임, import로 적용하면 되기 때문에?

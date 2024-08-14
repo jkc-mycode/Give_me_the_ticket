@@ -22,6 +22,9 @@ export const MESSAGES = {
     NOT_ENOUGH: {
       MONEY: '금액이 충분하지 않습니다',
     },
+    UNABLE: {
+      TICKET: '해당 티켓은 사용할 수 없습니다!',
+    },
     ALREADY_EXISTS: {
       IN_TRADE_TICKET: '해당 티켓은 이미 중고로 올라왔습니다.',
     },
