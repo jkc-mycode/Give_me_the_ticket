@@ -31,6 +31,7 @@ import { addHours, startOfDay, subDays, subHours } from 'date-fns';
 import { PointLog } from 'src/entities/users/point-log.entity';
 import { PointType } from 'src/commons/types/users/point.type';
 import Redis from 'ioredis';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class ShowsService {
@@ -176,59 +177,101 @@ export class ShowsService {
     };
   }
 
-  // 공연 상세 조회 시 조회 수 증가
-  async increaseViews(showId: number): Promise<void> {
+  // 랭킹 증가 (조회수 및 예매수)
+  async increaseRanking(showId: number, type: 'views' | 'bookings'): Promise<void> {
     try {
-      // 조회수 증가
-      await this.redisClient.zincrby('show:views', 1, String(showId));
+      const date = new Date();
+      const timestamp = this.getFormattedTimestamp(date);
+      const key = `show:${type}:${timestamp}`;
 
-      // TTL 설정 (1시간)
-      const ttl = await this.redisClient.ttl('show:views');
+      // 조회수 또는 예매수 증가
+      await this.redisClient.zincrby(key, 1, String(showId));
 
-      if (ttl === -1) {
-        // TTL이 설정되어 있지 않으면 설정
-        await this.redisClient.expire('show:views', 3600);
+      // TTL 1시간 설정
+      await this.redisClient.expire(key, 3600);
+
+      await this.updateHourlyRanked(key, type);
+    } catch (error) {
+      console.log(`레디스 ${type}증가 오류 :`, error);
+    }
+  }
+
+  // 최신 1시간 union 테이블 업데이트
+  async updateHourlyRanked(newKey: string, type: 'views' | 'bookings'): Promise<void> {
+    try {
+      const date = new Date();
+      const currentTimestamp = this.getFormattedHourTimestamp(date);
+
+      const unionKey = `show:${type}:union:${currentTimestamp}`;
+
+      // unionKey가 존재하는지 확인
+      const unionKeyExists = await this.redisClient.exists(unionKey);
+
+      if (unionKeyExists) {
+        // 기존 union 테이블에 새로운 조회수 테이블 추가
+        await this.redisClient.zunionstore(unionKey, 2, unionKey, newKey);
+      } else {
+        // 새로운 union 테이블 생성
+        await this.redisClient.zunionstore(unionKey, 1, newKey);
+        // TTL 1시간 설정
+        await this.redisClient.expire(unionKey, 3600);
       }
     } catch (error) {
-      console.error('Redis 조회수 증가 에러:', error);
+      throw new InternalServerErrorException(`Redis ${type} union 테이블 업데이트 에러`);
     }
   }
 
   /* 공연 인기별 조회 */
   async getRankedShows(limit: number, sortBy: 'views' | 'bookings'): Promise<Show[]> {
-    const key = sortBy === 'views' ? 'show:views' : 'show:bookings';
-    //역순으로 랭킹 값 가져오기
-    const showIds = await this.redisClient.zrevrange(key, 0, limit - 1);
+    const date = new Date();
+    const currentTimestamp = this.getFormattedHourTimestamp(date);
 
+    const key =
+      sortBy === 'views'
+        ? `show:views:union:${currentTimestamp}`
+        : `show:bookings:union:${currentTimestamp}`;
+
+    // Redis에서 역순으로 랭킹 값 가져오기
+    const ranking = await this.redisClient.zrevrange(key, 0, limit - 1);
+
+    // 가져온 랭킹 값이 없으면 빈 배열 반환
+    if (ranking.length === 0) {
+      return [];
+    }
+
+    // 가져온 id 배열을 숫자로 변환 및 검증
+    const showIds = ranking.map((id) => parseInt(id, 10)).filter((id) => !isNaN(id));
+
+    // 유효한 ID가 없으면 빈 배열 반환
     if (showIds.length === 0) {
       return [];
     }
 
-    //가져온 id배열을 숫자로 변환
-    const numericShowIds = showIds
-      .map((id) => {
-        const parsedId = parseInt(id, 10);
-        if (isNaN(parsedId)) {
-          console.error(`Invalid ID encountered: ${id}`);
-          return null;
-        }
-        return parsedId;
-      })
-      .filter((id): id is number => id !== null);
-
-    if (numericShowIds.length === 0) {
-      console.log('No valid numeric IDs after filtering.');
-      return [];
-    }
-
-    // 숫자로 변환된 id를 db에서 찾아 조회하기
-    const shows = await this.showRepository.find({
-      where: {
-        id: In(numericShowIds),
-      },
+    // 숫자로 변환된 ID를 DB에서 조회
+    return await this.showRepository.find({
+      where: { id: In(showIds) },
     });
+  }
 
-    return shows;
+  // 타임스탬프를 'YYYYMMDDHHmm' 형식으로 변환 (10분 단위)
+  private getFormattedTimestamp(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(Math.floor(date.getMinutes() / 10) * 10).padStart(2, '0');
+
+    return `${year}${month}${day}${hours}${minutes}`;
+  }
+
+  // 타임스탬프를 'YYYYMMDDHH' 형식으로 변환 (1시간 단위)
+  private getFormattedHourTimestamp(date: Date): string {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+
+    return `${year}${month}${day}${hours}`;
   }
 
   /*공연 수정 */
@@ -531,23 +574,6 @@ export class ShowsService {
       await queryRunner.release();
       await lock.release();
       throw error;
-    }
-  }
-
-  //(랭킹)공연 예매 시 예매 수 증가
-  async increaseBookings(showId: number): Promise<void> {
-    try {
-      await this.redisClient.zincrby('show:bookings', 1, String(showId));
-
-      // TTL 설정 (1시간)
-      const ttl = await this.redisClient.ttl('show:bookings');
-
-      if (ttl === -1) {
-        // TTL이 설정되어 있지 않으면 설정
-        await this.redisClient.expire('show:bookings', 3600);
-      }
-    } catch (error) {
-      console.log('레디스 예매 수 증가 오류 :', error);
     }
   }
 
