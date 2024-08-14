@@ -92,7 +92,7 @@ export class SearchService {
     }
   }
 
-  // //전체 show 동기화
+  //전체 show 동기화
   // private async syncAllShows() {
   //   try {
   //     const allShows = await this.showRepository.find();

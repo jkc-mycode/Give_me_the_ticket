@@ -18,15 +18,16 @@ import { Bookmark } from '../users/bookmark.entity';
 import { Ticket } from './ticket.entity';
 import { Factory } from 'nestjs-seeder';
 import { SHOW_TICKETS } from 'src/commons/constants/shows/show-tickets.constant';
+import { ShowReview } from '../show-reviews/show-reviews.entity';
 
 @Entity({ name: 'shows' })
-@Index([SHOW_TICKETS.COMMON.INDEX.USER, 'id'])
 export class Show {
   @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
   @Factory((faker) => faker.number.int({ min: 1, max: 20 }))
   //유저 엔티티 외래키 설정
+  @Index('shows_user_id_IDX')
   @Column({ type: 'int', name: 'user_id', unsigned: true })
   userId: number;
 
@@ -118,4 +119,8 @@ export class Show {
   // Relation - [shows] 1 : N [tickets]
   @OneToMany((type) => Ticket, (ticket) => ticket.show, { cascade: true })
   tickets: Ticket[];
+
+  // Relation - [shows] 1 : N [show_reviews]
+  @OneToMany((type) => ShowReview, (showReviews) => showReviews.show, { cascade: true })
+  showReviews: ShowReview[];
 }

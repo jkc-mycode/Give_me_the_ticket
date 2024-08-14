@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   //돌아가기 버튼
   backBtn.addEventListener('click', function (e) {
     e.preventDefault();
-    window.location.href = `/views`;
+    window.location.href = `/views/trades/list`;
   });
 
   function getTradeIdFromParam() {
@@ -53,13 +53,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             alt="이미지 파일 존재하지 않습니다"
           />
         </div>
-        <div class="title">제목: ${result.title}</div>
-        <div class="price">가격: ${result.price}</div>
-        <div class="location">장소: ${result.location}</div>
-        <div class="description">설명: ${result.content}</div>
-        <div class="closedAt">만료 시한: ${result.closedAt}</div>
-        <div class="createdAt">생성 시간:${result.createdAt}</div>
-        <div class="updatedAt">마지막으로 수정한 시간:${result.updatedAt}</div>`;
+        <div class="title">공연명: ${result.title}</div>
+        <div class="description">공연내용: ${result.content}</div>
+        <div class="price"><b>판매가격: ${result.price}</b></div>
+        <div class="location">위치: ${result.location}</div>
+        <div class="closedAt">공연 날짜 및 시간: ${result.closedAt}</div>
+        <div class="createdAt">거래 생성 날짜 및 시간:${result.createdAt}</div>
+        <div class="updatedAt">게시글 수정 날짜 및 시간:${result.updatedAt}</div>`;
   PurchaseBtn.addEventListener('click', async (e) => {
     e.preventDefault();
     try {
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       );
       alert('거래에 성공했습니다!');
-      window.location.href = '/views/trades/page/1';
+      window.location.href = '/views/trades/list';
     } catch (err) {
       console.error('중고 거래 구매에 실패했습니다.', err);
       alert('중고 거래 구매에 실패했습니다.');

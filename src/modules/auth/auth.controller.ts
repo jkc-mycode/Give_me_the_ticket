@@ -5,6 +5,7 @@ import { SignInDto } from './dto/sign-in.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { KakaoAuthGuard } from './utils/kakao.guard';
+import { Provider } from 'src/commons/types/users/provider.type';
 
 @ApiTags('인증')
 @Controller('auth')
@@ -29,7 +30,7 @@ export class AuthController {
   @UseGuards(AuthGuard('local'))
   @Post('/sign-in')
   async signIn(@Req() req: any, @Body() signInDto: SignInDto) {
-    return await this.authService.signIn(req.user);
+    return await this.authService.signIn(req.user, Provider.LOCAL);
   }
 
   /**
@@ -40,7 +41,11 @@ export class AuthController {
   @UseGuards(KakaoAuthGuard)
   @Get('/kakao')
   async kakaoSignIn(@Req() req: any, @Res() res: any) {
-    const { accessToken, refreshToken } = await this.authService.signIn(req.user);
+    const { accessToken, refreshToken } = await this.authService.signIn(
+      req.user,
+      Provider.KAKAO,
+      true
+    );
     res.redirect(
       `${process.env.HOST_NAME}/views/auth/kakao/process?accessToken=${accessToken}&refreshToken=${refreshToken}`
     );

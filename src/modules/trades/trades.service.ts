@@ -1,23 +1,11 @@
 //others
-
-//dfs
-import { addHours, startOfDay, subDays, subHours } from 'date-fns';
-
 //Dto
 import { CreateTradeDto } from './dto/create-trade.dto';
 import { UpdateTradeDto } from './dto/update-trade.dto';
 import { GetTradeListDto } from './dto/get-trade-list.dto';
 
 //error Type
-import {
-  Catch,
-  ArgumentsHost,
-  HttpException,
-  HttpStatus,
-  BadRequestException,
-  ConflictException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 //DIP
 import { Injectable, Inject } from '@nestjs/common';
@@ -26,22 +14,19 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Repository } from 'typeorm';
 
 //constants
-import { SERVER } from '../../commons/constants/server.constants';
 import { MESSAGES } from 'src/commons/constants/trades/messages';
 
 //transaction
 import { Redis } from 'ioredis';
 import { Queue } from 'bullmq';
-import { DataSource, Like } from 'typeorm';
-import redlock from 'redlock';
+import Redlock from 'redlock';
+import { DataSource } from 'typeorm';
 
 //types
 import { QUEUES } from 'src/commons/constants/queue.constant';
 import { Role } from 'src/commons/types/users/user-role.type';
 import { TicketStatus } from 'src/commons/types/shows/ticket.type';
 import { FLAG } from 'src/commons/types/flag/flag-type';
-import { number } from 'joi';
-
 //entities
 import { Trade } from 'src/entities/trades/trade.entity';
 import { TradeLog } from 'src/entities/trades/trade-log.entity';
@@ -50,6 +35,7 @@ import { Schedule } from 'src/entities/shows/schedule.entity';
 import { Ticket } from 'src/entities/shows/ticket.entity';
 import { User } from 'src/entities/users/user.entity';
 import { Image } from 'src/entities/images/image.entity';
+import { orderBy } from 'lodash';
 
 //DataSource File
 
@@ -93,7 +79,8 @@ export class TradesService {
     @InjectQueue(QUEUES.TRADE_QUEUE) private ticketQueue: Queue,
 
     private dataSource: DataSource,
-    @Inject('REDIS_CLIENT') private redisClient: Redis
+    @Inject('REDIS_CLIENT') private redisClient: Redis,
+    @Inject('REDLOCK') private readonly redlock: Redlock
   ) {}
 
   combineDateAndTime(dateStr: string, timeStr: string) {
@@ -173,8 +160,11 @@ export class TradesService {
   async getList(getTradeListDto: GetTradeListDto) {
     const { page, limit } = getTradeListDto;
 
-    const total_count = await this.tradeRepository.count();
+    const total_count = await this.tradeRepository.count({
+      where: { flag: FLAG.ACTIVATION },
+    });
 
+    //페이지네이션 계산
     const skip: number = (page - 1) * limit;
 
     let trade_list = await this.tradeRepository.find({
@@ -182,6 +172,7 @@ export class TradesService {
       select: { id: true, ticketId: true, createdAt: true, closedAt: true },
       skip: skip,
       take: limit,
+      order: { id: 'DESC' },
     });
 
     //중고 거래 목록 조회 //테스트 완료
@@ -198,6 +189,10 @@ export class TradesService {
             where: { showId: ticket.showId },
           });
 
+          if (!ticket || !image) {
+            return null;
+          }
+
           //시간이 맞지 않는 티켓이 있다면 삭제 (가장 최근에 추가한 로직)
           if (
             new Date().getTime() >=
@@ -209,11 +204,13 @@ export class TradesService {
 
           if (ticket) {
             //show에서 장소와 이름을 추가,schedule에서 날짜와 시간을 추가
-            trade['imageurl'] = image.imageUrl;
-            trade['title'] = ticket.title;
-            trade['price'] = ticket.price;
-            trade['date'] = ticket.date;
-            trade['time'] = ticket.time;
+            if (image) trade['imageUrl'] = image.imageUrl;
+            if (ticket) {
+              trade['title'] = ticket.title;
+              trade['price'] = ticket.price;
+              trade['date'] = ticket.date;
+              trade['time'] = ticket.time;
+            }
             delete trade.ticketId;
           }
           return trade;
@@ -230,69 +227,13 @@ export class TradesService {
       return { message: MESSAGES.TRADES.NOT_EXISTS.TRADE_LIST };
     }
 
-    return trade_list;
+    return {
+      page,
+      limit,
+      total_count,
+      trade_list,
+    };
   }
-
-  //수정 전 버전
-  // //<1> 중고 거래 목록 보기//완료 (검증 대부분 완료)
-  // async getList(page: number) {
-  //   const limit = 2;
-
-  //   const total_count = await this.tradeRepository.count();
-
-  //   const skip: number = (page - 1) * limit;
-
-  //   let trade_list = await this.tradeRepository.find({
-  //     where: { flag: FLAG.ACTIVATION },
-  //     select: { id: true, ticketId: true, createdAt: true, closedAt: true },
-  //     skip: skip,
-  //     take: limit,
-  //   });
-
-  //   //중고 거래 목록 조회 //테스트 완료
-  //   //trade_list에 공연에서 가져온 주소값을 병합
-  //   trade_list = await Promise.all(
-  //     trade_list.map(async (trade) => {
-  //       //스케쥴을 조회
-  //       const ticket = await this.ticketRepository.findOne({
-  //         where: { id: trade.ticketId },
-  //       });
-
-  //       const image = await this.imageRepository.findOne({
-  //         where: { showId: ticket.showId },
-  //       });
-
-  //       //시간이 맞지 않는 티켓이 있다면 삭제 (가장 최근에 추가한 로직)
-  //       if (
-  //         new Date().getTime() >=
-  //         this.combineDateAndTime(String(ticket.date), ticket.time).getTime() - 60 * 1000 * 60 * 2
-  //       ) {
-  //         await this.tradeRepository.update({ id: trade.id }, { flag: FLAG.INACTIVE });
-  //         return null;
-  //       }
-
-  //       if (ticket) {
-  //         //show에서 장소와 이름을 추가,schedule에서 날짜와 시간을 추가
-  //         if (!image) return null;
-  //         trade['imageurl'] = image.imageUrl;
-  //         trade['title'] = ticket.title;
-  //         trade['price'] = ticket.price;
-  //         trade['date'] = ticket.date;
-  //         trade['time'] = ticket.time;
-  //         delete trade.ticketId;
-  //       }
-  //       return trade;
-  //     })
-  //   );
-
-  //   trade_list = trade_list.filter((trade) => trade !== null);
-
-  //   if (!trade_list.length) {
-  //     return { message: MESSAGES.TRADES.NOT_EXISTS.TRADE_LIST };
-  //   }
-
-  //   return trade_list;
-  // }
 
   //<2> 중고 거래 상세 보기 //수정 필요 리스트가 아님 (검증 대부분 완료) //테스트 완료
   async getTradeDetail(tradeId: number) {
@@ -322,10 +263,6 @@ export class TradesService {
   //<3> 중고거래 생성 함수 //완료(검증 대부분 완료) 테스트 완료
   async createTrade(createTradeDto: CreateTradeDto, sellerId: number) {
     const { ticketId, price } = createTradeDto;
-
-    //Redlock생성==================//
-
-    //=======Redlock End===========//
 
     //1.데이터 베이스 검증
 
@@ -381,6 +318,9 @@ export class TradesService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
+    //Redlock생성==================//
+    let lock = await this.redlock.acquire(['TradeLockKey'], 1000);
+
     try {
       //정책에 따라 티켓의 가격을 중고거래 게시된 시점의 가격으로 고정
       await queryRunner.manager.save(Ticket, {
@@ -407,8 +347,11 @@ export class TradesService {
       await queryRunner.rollbackTransaction();
       return { message: MESSAGES.TRADES.CAN_NOT_CREATE.TRADE };
     } finally {
-      queryRunner.release();
+      await lock.release();
+      await queryRunner.release();
     }
+
+    //=======Redlock End===========//
     return { message: MESSAGES.TRADES.SUCCESSFULLY_CREATE.TRADE };
   }
 
