@@ -13,6 +13,8 @@ export class ShowReviewsService {
     @InjectRepository(ShowReview) private showReviewRepository: Repository<ShowReview>,
     @InjectRepository(Show) private showRepository: Repository<Show>
   ) {}
+
+  //공연 리뷰 생성 api
   async createShowReview(createShowReviewDto: CreateShowReviewDto, showId: number, user: User) {
     const { totalRate, postscript } = createShowReviewDto;
 
@@ -35,12 +37,16 @@ export class ShowReviewsService {
     return showReview;
   }
 
-  findAll() {
-    return `This action returns all showreviews`;
-  }
+  //공연별 리뷰 조회 목록 api
+  async findShowReviewList(showId: number) {
+    const showReviews = await this.showReviewRepository.find({
+      where: { showId },
+    });
+    if (!showReviews) {
+      throw new NotFoundException('공연이 존재하지 않습니다');
+    }
 
-  findOne(id: number) {
-    return `This action returns a #${id} showreview`;
+    return showReviews;
   }
 
   update(id: number, updateShowreviewDto: UpdateShowReviewDto) {
