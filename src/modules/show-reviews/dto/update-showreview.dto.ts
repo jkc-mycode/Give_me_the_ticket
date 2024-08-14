@@ -1,4 +1,10 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateShowreviewDto } from './create-showreview.dto';
+import { PickType } from '@nestjs/swagger';
+import { IsNotEmpty, IsNumber, IsString, Max, Min } from 'class-validator';
+import { ShowReview } from 'src/entities/show-reviews/show-reviews.entity';
+export class UpdateShowreviewDto extends PickType(ShowReview, ['totalRate', 'postscript']) {
+  @Min(1)
+  @Max(5, { message: '평점은 최대 5점까지 입력이 가능합니다.' })
+  totalRate: number;
 
-export class UpdateShowreviewDto extends PartialType(CreateShowreviewDto) {}
+  postscript: string;
+}
