@@ -20,7 +20,7 @@ import { RolesGuard } from '../auth/utils/roles.guard';
 import { Role } from 'src/commons/types/users/user-role.type';
 
 @ApiTags('공연 리뷰')
-@Controller('shows/reviews')
+@Controller('shows/:showId/reviews')
 export class ShowReviewsController {
   constructor(private readonly showReviewsService: ShowReviewsService) {}
 
@@ -35,7 +35,7 @@ export class ShowReviewsController {
   @Roles(Role.USER)
   @UseGuards(RolesGuard)
   @HttpCode(HttpStatus.CREATED)
-  @Post('/:showId')
+  @Post()
   async createShowReview(
     @Param('showId') showId: number,
     @Body() createShowreviewDto: CreateShowReviewDto,
@@ -50,13 +50,9 @@ export class ShowReviewsController {
   }
 
   @Get()
-  findAll() {
-    return this.showReviewsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.showReviewsService.findOne(+id);
+  async findShowReviewList(@Param('showId') showId: number) {
+    const showReviews = await this.showReviewsService.findShowReviewList(showId);
+    return showReviews;
   }
 
   @Patch(':id')
