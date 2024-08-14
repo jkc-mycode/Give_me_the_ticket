@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/users/user.entity';
 import { ShowReview } from 'src/entities/show-reviews/show-reviews.entity';
 import { Show } from 'src/entities/shows/show.entity';
+import { Ticket } from 'src/entities/shows/ticket.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, ShowReview, Show])],
+  imports: [TypeOrmModule.forFeature([User, ShowReview, Show, Ticket])],
   controllers: [ShowReviewsController],
   providers: [ShowReviewsService],
   exports: [ShowReviewsService],

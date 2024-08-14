@@ -21,7 +21,7 @@ export class Schedule {
   id: number;
 
   //공연 엔티티 외래키 설정
-  @Index()
+
   @Factory((faker) => faker.number.int({ min: 1, max: 20 }))
   @Column({ type: 'int', name: 'show_id', unsigned: true })
   showId: number;

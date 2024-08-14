@@ -20,7 +20,7 @@ import { RolesGuard } from '../auth/utils/roles.guard';
 import { Role } from 'src/commons/types/users/user-role.type';
 
 @ApiTags('공연 리뷰')
-@Controller('shows/:showId/reviews')
+@Controller('reviews')
 export class ShowReviewsController {
   constructor(private readonly showReviewsService: ShowReviewsService) {}
 
@@ -37,13 +37,13 @@ export class ShowReviewsController {
   @HttpCode(HttpStatus.CREATED)
   @Post()
   async createShowReview(
-    @Param('showId') showId: number,
+    @Param('ticketId') ticketId: number,
     @Body() createShowreviewDto: CreateShowReviewDto,
     @Req() req: any
   ) {
     const showReview = await this.showReviewsService.createShowReview(
       createShowreviewDto,
-      showId,
+      ticketId,
       req.user
     );
     return { status: HttpStatus.CREATED, message: '리뷰 작성에 성공했습니다', data: showReview };
