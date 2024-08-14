@@ -30,6 +30,7 @@ import { RedisService } from '../redis/redis.service';
 import { addHours, startOfDay, subDays, subHours } from 'date-fns';
 import { PointLog } from 'src/entities/users/point-log.entity';
 import { PointType } from 'src/commons/types/users/point.type';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import Redis from 'ioredis';
 
 @Injectable()
@@ -42,6 +43,7 @@ export class ShowsService {
     private dataSource: DataSource,
     private readonly imagesService: ImagesService,
     private readonly searchService: SearchService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly redisService: RedisService,
     @Inject('REDIS_CLIENT') private redisClient: Redis
   ) {
@@ -131,14 +133,26 @@ export class ShowsService {
   /*공연 목록 조회 */
   async getShowList(getShowListDto: GetShowListDto) {
     const { category, search, page, limit } = getShowListDto;
+
+    const cacheKey = `showList:${category}:${search}:${page}:${limit}`;
+    const cachedData = await this.cacheManager.get(cacheKey);
+
+    if (cachedData) {
+      return cachedData;
+    }
+
     const { results, total } = await this.searchService.searchShows(category, search, page, limit);
 
-    return {
+    const response = {
       results,
       total,
       page,
       totalPages: Math.ceil(total / limit),
     };
+
+    await this.cacheManager.set(cacheKey, response, 60);
+
+    return response;
   }
 
   /*공연 상세 조회 */

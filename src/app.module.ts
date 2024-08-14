@@ -19,6 +19,8 @@ import { AuthViewsController } from './views/auth/auth.view.controller';
 import { UsersViewsController } from './views/users/users.view.controller';
 import { ShowsViewsController } from './views/shows/shows.view.controller';
 import { TradeViewsController } from './views/trades/trades.view.controller';
+import { CacheModule } from '@nestjs/cache-manager';
+import * as redisStore from 'cache-manager-redis-store';
 
 @Module({
   imports: [
@@ -38,6 +40,18 @@ import { TradeViewsController } from './views/trades/trades.view.controller';
         },
       }),
     }),
+
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        store: redisStore,
+        host: configService.get<string>('REDIS_HOST'),
+        port: configService.get<number>('REDIS_PORT'),
+        ttl: 60,
+      }),
+    }),
+
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
     AuthModule,
     UsersModule,
