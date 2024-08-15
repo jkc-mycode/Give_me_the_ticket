@@ -19,14 +19,15 @@ export class ShowReview {
   id: number;
 
   // 유저 엔티티 외래키 설정
-  @Index()
   @Column({ name: 'user_id', type: 'int', unsigned: true })
   userId: number;
 
   // 공연 엔티티 외래키 설정
-  @Index()
   @Column({ name: 'show_id', type: 'int', unsigned: true })
   showId: number;
+
+  @Column({ name: 'ticket_id', type: 'int', unsigned: true, unique: true })
+  ticketId: number;
 
   /**
    * 공연 평점

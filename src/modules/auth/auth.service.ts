@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -15,14 +16,18 @@ import { JwtService } from '@nestjs/jwt';
 import _ from 'lodash';
 import { AUTH_MESSAGE } from 'src/commons/constants/auth/auth-message.constant';
 import { HASH_SALT, REFRESH_TOKEN } from 'src/commons/constants/auth/auth.constant';
-import { Provider } from 'src/commons/types/users/provider.type';
+import { v4 as uuidv4 } from 'uuid';
+import Redis from 'ioredis';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
-    private readonly jwtService: JwtService
-  ) {}
+    private readonly jwtService: JwtService,
+    @Inject('REDIS_CLIENT') private redisClient: Redis
+  ) {
+    this.redisClient = redisClient;
+  }
 
   // 회원가입
   async signUp(signUpDto: SignUpDto) {
@@ -92,34 +97,23 @@ export class AuthService {
   }
 
   // 토큰 발급
-  async generateTokens(user: User, provider: Provider, isSocial: boolean) {
+  async generateTokens(userId: number) {
     // 토큰 발급
-    const accessToken = this.jwtService.sign({ id: user.id });
+    const accessToken = this.jwtService.sign({ id: userId });
     const refreshToken = this.jwtService.sign(
-      { id: user.id },
+      { id: userId },
       { secret: process.env.REFRESH_SECRET_KEY, expiresIn: REFRESH_TOKEN.EXPIRES_IN }
     );
 
-    // 소셜 로그인일 때
-    if (isSocial) {
-      // 리프레시 토큰 저장
-      await this.usersRepository.update({ id: user.id }, { refreshToken, provider });
-    }
-
     // 리프레시 토큰 저장
-    await this.usersRepository.update({ id: user.id }, { refreshToken });
+    await this.usersRepository.update({ id: userId }, { refreshToken });
 
     return { accessToken, refreshToken };
   }
 
   // 로그인
-  async signIn(user: User, provider = Provider.LOCAL, isSocial = false) {
-    try {
-      return await this.generateTokens(user, provider, isSocial);
-    } catch (err) {
-      console.log(err);
-      throw err;
-    }
+  async signIn(userId: number) {
+    return await this.generateTokens(userId);
   }
 
   // 로그아웃
@@ -139,7 +133,21 @@ export class AuthService {
   }
 
   // 토큰 재발급
-  async reissue(user: User) {
-    return await this.generateTokens(user, Provider.LOCAL, false);
+  async reissue(userId: number) {
+    return await this.generateTokens(userId);
+  }
+
+  // 소셜 로그인 코드 발급
+  async createCode(userId: number) {
+    const code = uuidv4();
+
+    // 레디스에 코드 - 사용자 ID 형태로 저장
+    await this.redisClient.set(code, userId, 'EX', 20);
+    return code;
+  }
+
+  // 레디스에서 사용자 ID 가져오기
+  async getRedisUserId(code: string) {
+    return await this.redisClient.get(code);
   }
 }

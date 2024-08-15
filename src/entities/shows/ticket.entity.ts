@@ -27,7 +27,7 @@ export class Ticket {
   id: number;
 
   // 유저 엔티티 외래키 설정
-  @Index('user_id')
+
   @Column({ name: 'user_id', type: 'int', unsigned: true })
   userId: number;
 
