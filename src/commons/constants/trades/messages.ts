@@ -53,6 +53,7 @@ export const MESSAGES = {
     },
     FAILED: {
       CREATE_TRADE: '거래 생성에 실패했습니다',
+      CREATE_INDEX: `트레이드 인덱스 생성에 실패했습니다`,
       PURCHASE: '구매에 실패했습니다',
     },
   },

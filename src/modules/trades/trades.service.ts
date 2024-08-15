@@ -155,8 +155,9 @@ export class TradesService {
   }
 
   //=========ConvenienceFunction======================
-
-  //<1> 중고 거래 목록 보기//완료 (검증 대부분 완료)
+  //<1> 중고 거래 검색
+  async searchTradeList() {}
+  //<2> 중고 거래 목록 보기//완료 (검증 대부분 완료)
   async getList(getTradeListDto: GetTradeListDto) {
     const { page, limit } = getTradeListDto;
 
@@ -235,7 +236,7 @@ export class TradesService {
     };
   }
 
-  //<2> 중고 거래 상세 보기 //수정 필요 리스트가 아님 (검증 대부분 완료) //테스트 완료
+  //<3> 중고 거래 상세 보기 //수정 필요 리스트가 아님 (검증 대부분 완료) //테스트 완료
   async getTradeDetail(tradeId: number) {
     const trade = await this.tradeRepository.findOne({ where: { id: tradeId } });
     if (!trade) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE);
@@ -260,7 +261,7 @@ export class TradesService {
     return trade;
   }
 
-  //<3> 중고거래 생성 함수 //완료(검증 대부분 완료) 테스트 완료
+  //<4> 중고거래 생성 함수 //완료(검증 대부분 완료) 테스트 완료
   async createTrade(createTradeDto: CreateTradeDto, sellerId: number) {
     const { ticketId, price } = createTradeDto;
 
@@ -355,7 +356,7 @@ export class TradesService {
     return { message: MESSAGES.TRADES.SUCCESSFULLY_CREATE.TRADE };
   }
 
-  //<4> 중고 거래 수정 메서드 //완료(검증 대부분 완료)  //테스트 완료
+  //<5> 중고 거래 수정 메서드 //완료(검증 대부분 완료)  //테스트 완료
   async updateTrade(tradeId, updateTradeDto: UpdateTradeDto, userId: number) {
     const { price } = updateTradeDto;
 
@@ -380,7 +381,7 @@ export class TradesService {
     return afterTrade;
   }
 
-  //<5> 중고 거래 삭제 메서드  //완료(검증 대부분 완료)
+  //<6> 중고 거래 삭제 메서드  //완료(검증 대부분 완료)
   async deleteTrade(tradeId: number, userId: number) {
     const trade = await this.tradeRepository.findOne({ where: { id: tradeId } });
     if (!trade) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE);
@@ -394,7 +395,7 @@ export class TradesService {
     return await this.tradeRepository.update({ id: tradeId }, { flag: FLAG.INACTIVE });
   }
 
-  //<6> 티켓 구매 메서드 (buyerId는 기존의 userId와 같다) (현재 수정중)
+  //<7> 티켓 구매 메서드 (buyerId는 기존의 userId와 같다) (현재 수정중)
   async createTicket(tradeId: number, buyerId: number) {
     //해당 거래 존재 확인
 
@@ -501,7 +502,7 @@ export class TradesService {
     return { message: '성공적으로 티켓을 구매하였습니다.' };
   }
 
-  //<7>중고 거래 로그 조회
+  //<8>중고 거래 로그 조회
   async getLogs(userId: number) {
     const buyLogs = await this.tradeLogRepository.find({
       where: { buyerId: userId },

@@ -4,6 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Trade } from 'src/entities/trades/trade.entity';
 import { SearchService } from './search.service';
+//삭제 예정
+import { LifecycleExpiration } from '@aws-sdk/client-s3';
 
 @Module({
   imports: [
