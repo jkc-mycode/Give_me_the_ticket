@@ -62,10 +62,7 @@ export class ShowsController {
     return {
       status: HttpStatus.OK,
       message: SHOW_MESSAGES.GET_LIST.SUCCEED,
-      data: result.results,
-      total: result.total,
-      page: result.page,
-      totalPages: result.totalPages,
+      data: result,
     };
   }
 
