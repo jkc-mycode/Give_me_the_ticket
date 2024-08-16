@@ -18,6 +18,7 @@ import { Bookmark } from '../users/bookmark.entity';
 import { Ticket } from './ticket.entity';
 import { Factory } from 'nestjs-seeder';
 import { ShowReview } from '../show-reviews/show-reviews.entity';
+import { Trade } from '../trades/trade.entity';
 
 @Entity({ name: 'shows' })
 export class Show {
@@ -121,4 +122,8 @@ export class Show {
   // Relation - [shows] 1 : N [show_reviews]
   @OneToMany((type) => ShowReview, (showReviews) => showReviews.show, { cascade: true })
   showReviews: ShowReview[];
+
+  // //Relation -[shows] 1 : N [trades]
+  // @OneToMany((trade) => Trade, (trade) => trade.show, { cascade: true })
+  // trades: Trade[];
 }

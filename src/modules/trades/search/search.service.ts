@@ -46,6 +46,16 @@ export class SearchService {
                 },
               },
             },
+            mappings: {
+              properties: {
+                title: {
+                  type: 'text',
+                  analyzer: 'my_ngram_analyzer',
+                },
+                id: { type: 'long' },
+                showName: { type: 'text' },
+              },
+            },
           },
         });
       }

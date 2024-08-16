@@ -1,12 +1,11 @@
-window.onload = () => {
+window.onload = async () => {
   const urlParams = new URLSearchParams(window.location.search);
-  const accessToken = urlParams.get('accessToken');
-  const refreshToken = urlParams.get('refreshToken');
+  const code = urlParams.get('code');
 
-  if (accessToken && refreshToken) {
-    window.localStorage.setItem('accessToken', accessToken);
-    window.localStorage.setItem('refreshToken', refreshToken);
-    // 로그인 완료 후 메인 페이지로 이동
-    window.location.href = '/views';
-  }
+  const response = await axios.get(`/auth/kakao/token?code=${code}`);
+
+  window.localStorage.setItem('accessToken', response.data.accessToken);
+  window.localStorage.setItem('refreshToken', response.data.refreshToken);
+
+  window.location.href = '/views';
 };

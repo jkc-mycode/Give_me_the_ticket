@@ -71,7 +71,7 @@ export class TradesController {
   @Roles(Role.USER)
   async test(@Body() testDto: TestDto) {
     console.log('AAAAAAAAAAAAAAAAA');
-    return await this.tradesService.test();
+    return await this.tradesService.test(testDto);
   }
 
   @Get('/change-role')

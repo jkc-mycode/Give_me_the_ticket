@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (error) {
     alert(error); // 에러 메시지 알림
+    window.location.href = '/views/auth/sign';
   }
 
   //----------- sign up ---------------------

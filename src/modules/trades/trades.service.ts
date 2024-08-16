@@ -3,6 +3,7 @@
 import { CreateTradeDto } from './dto/create-trade.dto';
 import { UpdateTradeDto } from './dto/update-trade.dto';
 import { GetTradeListDto } from './dto/get-trade-list.dto';
+import { TestDto } from './dto/test-dto';
 
 //error Type
 import { BadRequestException, NotFoundException } from '@nestjs/common';
@@ -27,6 +28,7 @@ import { QUEUES } from 'src/commons/constants/queue.constant';
 import { Role } from 'src/commons/types/users/user-role.type';
 import { TicketStatus } from 'src/commons/types/shows/ticket.type';
 import { FLAG } from 'src/commons/types/flag/flag-type';
+
 //entities
 import { Trade } from 'src/entities/trades/trade.entity';
 import { TradeLog } from 'src/entities/trades/trade-log.entity';
@@ -526,8 +528,9 @@ export class TradesService {
     return await this.userRepository.findOne({ where: { id: userId } });
   }
 
-  async test() {
-    console.log('bbbbbbbbbbbbbbbbbbbbbbbb');
+  async test(testDto: TestDto) {
+    const { id } = testDto;
+    return await this.tradeRepository.findOne({ where: { id: id }, relations: { ticket: true } });
     // return {
     //   PORT: process.env.SERVER_PORT,
     //   HOST: process.env.DB_HOST,

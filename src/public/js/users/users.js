@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function () {
       console.log(err.response.data);
       const errorMessage = err.response.data.message;
       alert(errorMessage);
+      window.location.href = '/views';
     }
   }
 

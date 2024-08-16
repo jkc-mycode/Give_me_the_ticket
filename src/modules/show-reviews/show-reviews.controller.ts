@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { ShowReviewsService } from './show-reviews.service';
 import { CreateShowReviewDto } from './dto/create-show-review.dto';
@@ -18,6 +19,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../auth/utils/roles.decorator';
 import { RolesGuard } from '../auth/utils/roles.guard';
 import { Role } from 'src/commons/types/users/user-role.type';
+import { SHOW_REVIEWS_MESSAGES } from 'src/commons/constants/show-reviews/show-reviews-message.constant';
 
 @ApiTags('공연 리뷰')
 @Controller('reviews')
@@ -35,7 +37,7 @@ export class ShowReviewsController {
   @Roles(Role.USER)
   @UseGuards(RolesGuard)
   @HttpCode(HttpStatus.CREATED)
-  @Post()
+  @Post('/:ticketId')
   async createShowReview(
     @Param('ticketId') ticketId: number,
     @Body() createShowreviewDto: CreateShowReviewDto,
@@ -46,13 +48,13 @@ export class ShowReviewsController {
       ticketId,
       req.user
     );
-    return { status: HttpStatus.CREATED, message: '리뷰 작성에 성공했습니다', data: showReview };
+    return { status: HttpStatus.CREATED, message: SHOW_REVIEWS_MESSAGES.CREATED, data: showReview };
   }
 
   //공연별 리뷰 조회
   @Get()
-  async findShowReviewList(@Param('showId') showId: number) {
-    const showReviews = await this.showReviewsService.findShowReviewList(showId);
+  async getShowReviewList(@Query('showId') showId: number, @Query('page') page: number = 1) {
+    const showReviews = await this.showReviewsService.getShowReviewList(showId, page);
     return showReviews;
   }
 
@@ -61,22 +63,20 @@ export class ShowReviewsController {
   @Roles(Role.USER)
   @UseGuards(RolesGuard)
   @HttpCode(HttpStatus.OK)
-  @Patch(':reviewId')
+  @Patch('/:reviewId')
   async updateShowReview(
-    @Param('showId') showId: number,
     @Param('reviewId') reviewId: number,
     @Body() updateShowreviewDto: UpdateShowReviewDto,
     @Req() req: any
   ) {
     const updateShowReview = await this.showReviewsService.updateShowReview(
       reviewId,
-      showId,
       updateShowreviewDto,
       req.user
     );
     return {
       status: HttpStatus.OK,
-      message: '리뷰 수정이 완료되었습니다.',
+      message: SHOW_REVIEWS_MESSAGES.UPDATED,
       data: updateShowReview,
     };
   }
@@ -86,21 +86,12 @@ export class ShowReviewsController {
   @Roles(Role.USER)
   @UseGuards(RolesGuard)
   @HttpCode(HttpStatus.OK)
-  @Delete(':reviewId')
-  async deleteShowReview(
-    @Param('showId') showId: number,
-    @Param('reviewId') reviewId: number,
-    @Req() req: any
-  ) {
-    await this.showReviewsService.deleteShowReview(
-      reviewId,
-      showId,
-
-      req.user
-    );
+  @Delete('/:reviewId')
+  async deleteShowReview(@Param('reviewId') reviewId: number, @Req() req: any) {
+    await this.showReviewsService.deleteShowReview(reviewId, req.user);
     return {
       status: HttpStatus.OK,
-      message: '리뷰 삭제가 완료되었습니다.',
+      message: SHOW_REVIEWS_MESSAGES.DELETED,
     };
   }
 }
