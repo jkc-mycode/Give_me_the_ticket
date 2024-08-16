@@ -142,7 +142,28 @@ export class ShowsService {
       return cachedData;
     }
 
-    const { results, total } = await this.searchService.searchShows(category, search, page, limit);
+    const queryBuilder = this.showRepository.createQueryBuilder('show');
+
+    if (category) {
+      queryBuilder.andWhere('show.category = :category', { category });
+    }
+
+    if (search) {
+      queryBuilder.andWhere('show.title LIKE :search', { search: `%${search}%` });
+    }
+
+    // queryBuilder.skip((page - 1) * limit).take(limit);
+
+    // queryBuilder.orderBy('show.id', 'DESC');
+
+    // const [results, total] = await queryBuilder.getManyAndCount();
+    // // const { results, total } = await this.searchService.searchShows(category, search, page, limit);
+
+    const [results, total] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .orderBy('show.id', 'DESC')
+      .getManyAndCount();
 
     const response = {
       results,
