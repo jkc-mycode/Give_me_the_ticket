@@ -9,6 +9,7 @@ export const SHOW_REVIEWS_MESSAGES = {
         NOT_FOUND: '티켓 인증에 실패하였습니다.',
         NOT_OWNER: '해당 티켓의 소유자가 아닙니다',
       },
+      FINSHED: '공연이 끝난 후에 리뷰 작성이 가능합니다.',
     },
     FORBIDDEN: {
       UPDATE: '이 리뷰를 수정할 권한이 없습니다.',
