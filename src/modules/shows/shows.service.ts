@@ -135,35 +135,59 @@ export class ShowsService {
   async getShowList(getShowListDto: GetShowListDto) {
     const { category, search, page, limit } = getShowListDto;
 
-    const cacheKey = `showList:${category}:${search}:${page}:${limit}`;
+    // 1. search 있는 경우, Elastic Search 로.
+    if (search) {
+      const { results, total } = await this.searchService.searchShows(
+        category,
+        search,
+        page,
+        limit
+      );
+
+      const response = {
+        results,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      };
+
+      console.log('Elastic Search: ', response);
+
+      return response;
+    }
+
+    // 2. search 없는 경우
+    // 2-1. 캐시에서 조회
+    const cacheKey = `showList:${category}:${page}:${limit}`;
     const cachedData = await this.cacheManager.get(cacheKey);
 
     if (cachedData) {
       return cachedData;
     }
 
-    const queryBuilder = this.showRepository.createQueryBuilder('show');
+    // 2-2. 캐시 없는 경우, DB에서 조회
+    const queryBuilder = this.showRepository
+      .createQueryBuilder('show')
+      .leftJoinAndSelect('show.images', 'image');
 
     if (category) {
       queryBuilder.andWhere('show.category = :category', { category });
     }
 
-    if (search) {
-      queryBuilder.andWhere('show.title LIKE :search', { search: `%${search}%` });
-    }
-
-    // queryBuilder.skip((page - 1) * limit).take(limit);
-
-    // queryBuilder.orderBy('show.id', 'DESC');
-
-    // const [results, total] = await queryBuilder.getManyAndCount();
-    // // const { results, total } = await this.searchService.searchShows(category, search, page, limit);
-
-    const [results, total] = await queryBuilder
+    const [shows, total] = await queryBuilder
       .skip((page - 1) * limit)
       .take(limit)
       .orderBy('show.id', 'DESC')
       .getManyAndCount();
+
+    // response 형태 변환: Elastic Search response에 맞게
+    const results = shows.map((show) => ({
+      id: show.id,
+      title: show.title,
+      category: show.category,
+      location: show.location,
+      imageUrl: show.images.map((image) => image.imageUrl),
+    }));
 
     const response = {
       results,
@@ -173,6 +197,8 @@ export class ShowsService {
     };
 
     await this.cacheManager.set(cacheKey, response, 60);
+
+    console.log('DB response: ', response);
 
     return response;
   }
