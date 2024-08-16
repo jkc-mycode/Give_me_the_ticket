@@ -6,7 +6,11 @@ import { GetTradeListDto } from './dto/get-trade-list.dto';
 import { TestDto } from './dto/test-dto';
 
 //error Type
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 
 //DIP
 import { Injectable, Inject } from '@nestjs/common';
@@ -22,6 +26,9 @@ import { Redis } from 'ioredis';
 import { Queue } from 'bullmq';
 import Redlock from 'redlock';
 import { DataSource } from 'typeorm';
+
+//Service
+import { SearchService } from './search/search.service';
 
 //types
 import { QUEUES } from 'src/commons/constants/queue.constant';
@@ -39,31 +46,10 @@ import { User } from 'src/entities/users/user.entity';
 import { Image } from 'src/entities/images/image.entity';
 import { orderBy } from 'lodash';
 
-//DataSource File
-
-// const AppDataSource = new DataSource({
-//   type: 'mysql',
-//   host: SERVER.HOST,
-//   port: +SERVER.PORT,
-//   username: SERVER.USER,
-//   password: SERVER.PASSWORD,
-//   database: SERVER.DATABASE,
-//   entities: [Trade, TradeLog, Show, Schedule, Ticket, User],
-//   synchronize: true,
-//   logging: false,
-// });
-
-// AppDataSource.initialize()
-//   .then(() => {
-//     console.log('Data Source has been initialized!');
-//   })
-//   .catch((err) => {
-//     console.error(`Error during Data Source initialization:`, err);
-//   });
-
 @Injectable()
 export class TradesService {
   constructor(
+    //Repository
     @InjectRepository(Trade)
     private tradeRepository: Repository<Trade>,
     @InjectRepository(TradeLog)
@@ -78,8 +64,14 @@ export class TradesService {
     private userRepository: Repository<User>,
     @InjectRepository(Image)
     private imageRepository: Repository<Image>,
+
+    //Queue
     @InjectQueue(QUEUES.TRADE_QUEUE) private ticketQueue: Queue,
 
+    //Service
+    private readonly searchService: SearchService,
+
+    //Redis
     private dataSource: DataSource,
     @Inject('REDIS_CLIENT') private redisClient: Redis,
     @Inject('REDLOCK') private readonly redlock: Redlock
@@ -159,9 +151,10 @@ export class TradesService {
   //=========ConvenienceFunction======================
   //<1> 중고 거래 검색
   async searchTradeList() {}
+
   //<2> 중고 거래 목록 보기//완료 (검증 대부분 완료)
-  async getList(getTradeListDto: GetTradeListDto) {
-    const { page, limit } = getTradeListDto;
+  async getTradeList(getTradeListDto: GetTradeListDto) {
+    const { search, page, limit } = getTradeListDto;
 
     const total_count = await this.tradeRepository.count({
       where: { flag: FLAG.ACTIVATION },
@@ -196,7 +189,7 @@ export class TradesService {
             return null;
           }
 
-          //시간이 맞지 않는 티켓이 있다면 삭제 (가장 최근에 추가한 로직)
+          //시간이 맞지 않는 티켓이 있다면 삭제
           if (
             new Date().getTime() >=
             this.combineDateAndTime(String(ticket.date), ticket.time).getTime() - 60 * 1000 * 60 * 2
@@ -340,6 +333,9 @@ export class TradesService {
         price,
         closedAt,
       });
+
+      //Elasticsearch 인덱싱 (가장 최근에 추가한 로직)
+      await this.searchService.createTradeIndex(trade);
 
       //트레이드 로그에 기록
       const log = { tradeId: trade.id, sellerId };
@@ -529,8 +525,15 @@ export class TradesService {
   }
 
   async test(testDto: TestDto) {
-    const { id } = testDto;
-    return await this.tradeRepository.findOne({ where: { id: id }, relations: { ticket: true } });
+    const { search } = testDto;
+    const tradeData = 0;
+    try {
+      const result = await this.searchService.searchTrades(search);
+      return result;
+    } catch (err) {
+      console.error(`테스트 오류:`, err);
+    }
+
     // return {
     //   PORT: process.env.SERVER_PORT,
     //   HOST: process.env.DB_HOST,
@@ -538,6 +541,7 @@ export class TradesService {
     //   PASSWORD: process.env.DB_PASSWORD,
     //   DATABASE: process.env.DB_NAME,
     // };
+    return { message: `코드 실행 성공` };
   }
 
   async changeRole(userId: number) {

@@ -6,6 +6,7 @@ import { Trade } from 'src/entities/trades/trade.entity';
 import { SearchService } from './search.service';
 //삭제 예정
 import { LifecycleExpiration } from '@aws-sdk/client-s3';
+import { Show } from 'src/entities/shows/show.entity';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { LifecycleExpiration } from '@aws-sdk/client-s3';
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Trade]),
+    TypeOrmModule.forFeature([Trade, Show]),
   ],
   providers: [SearchService],
   exports: [SearchService],

@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { QUEUES } from 'src/commons/constants/queue.constant';
 import { RedlockModule } from '../redis/redlock.module';
+import { SearchModule } from './search/search.module';
 
 //entities
 import { Trade } from '../../entities/trades/trade.entity';
@@ -24,6 +25,7 @@ import { Image } from 'src/entities/images/image.entity';
       name: 'tradeQueue',
     }),
     RedlockModule,
+    SearchModule,
     TypeOrmModule.forFeature([Trade, TradeLog, Show, Schedule, Ticket, User, TradeLog, Image]),
   ],
   controllers: [TradesController],

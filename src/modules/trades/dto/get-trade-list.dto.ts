@@ -1,7 +1,17 @@
 import { Type } from 'class-transformer';
-import { IsInt, Max, Min } from 'class-validator';
+import { IsInt, IsOptional, IsString, Max, Min, MinLength } from 'class-validator';
+import { MESSAGES } from 'src/commons/constants/trades/messages';
 
 export class GetTradeListDto {
+  /**
+   * 검색 키워드
+   * @example `들려`
+   */
+  @IsOptional()
+  @MinLength(2, { message: MESSAGES.TRADES.MIN_LENGTH.SEARCH_KEYWORD })
+  @IsString()
+  search?: string;
+
   /**
    * 페이지 번호
    * @example 1

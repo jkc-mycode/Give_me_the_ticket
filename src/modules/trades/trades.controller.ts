@@ -70,7 +70,7 @@ export class TradesController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.USER)
   async test(@Body() testDto: TestDto) {
-    console.log('AAAAAAAAAAAAAAAAA');
+    console.log('테스트를 시작합니다.');
     return await this.tradesService.test(testDto);
   }
 
@@ -134,8 +134,8 @@ export class TradesController {
     description: SWAGGER.TRADES.GET_TRADE_LIST.API_OPERATION.DESCRIPTION,
   })
   @ApiOkResponse({ description: '' })
-  async getList(@Query() getTradeListDto: GetTradeListDto) {
-    return await this.tradesService.getList(getTradeListDto);
+  async getTradeList(@Query() getTradeListDto: GetTradeListDto) {
+    return await this.tradesService.getTradeList(getTradeListDto);
   }
 
   //<3>중고 거래 생성
