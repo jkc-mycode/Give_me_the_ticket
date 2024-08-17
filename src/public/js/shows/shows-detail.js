@@ -1,12 +1,13 @@
 document.addEventListener('DOMContentLoaded', function () {
   const bookingBtn = document.querySelector('.booking__btn');
   const updateBtn = document.querySelector('.update__btn');
-  const backBtn = document.querySelector('.back__btn');
   const deleteBtn = document.querySelector('.delete__btn');
   const token = window.localStorage.getItem('accessToken');
   const scheduleDropdownMenu = document.querySelector('#scheduleDropdownMenu');
   const scheduleDropdown = document.querySelector('#scheduleDropdown');
-
+  const bookmarkBtn = document.getElementById('bookmarkBtn');
+  const separator = document.querySelector('.separator');
+  const reviewContainer = document.querySelector('.text-bg-warning');
   // 전역 변수 설정
   window.selectedScheduleId = null;
   let isBookmarked = false;
@@ -153,13 +154,6 @@ document.addEventListener('DOMContentLoaded', function () {
     window.location.href = `/views/shows/${showId}/edit`;
   });
 
-  backBtn.addEventListener('click', function (e) {
-    e.preventDefault();
-
-    // 기존 페이지로 이동
-    window.history.back();
-  });
-
   scheduleDropdownMenu.addEventListener('click', function (e) {
     if (e.target && e.target.matches('a.dropdown-item')) {
       e.preventDefault(); //스크롤링 제거
@@ -175,7 +169,6 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   function updateBookmarkButton() {
-    const bookmarkBtn = document.getElementById('bookmarkBtn');
     if (isBookmarked) {
       bookmarkBtn.classList.add('bookmarked');
       bookmarkBtn.innerHTML = `
@@ -241,15 +234,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (userRole === 'ADMIN') {
           // 관리자일 경우 버튼 표시
+
+          bookmarkBtn.style.display = 'none';
+          bookingBtn.style.display = 'none';
           deleteBtn.style.display = 'block';
           updateBtn.style.display = 'block';
+          separator.style.display = 'block';
         } else {
           // 관리자 아닐 경우 버튼 숨기기
+
           deleteBtn.style.display = 'none';
           updateBtn.style.display = 'none';
+          separator.style.display = 'none';
         }
       } else {
         // 토큰이 없는 경우 버튼 숨기기
+
         deleteBtn.style.display = 'none';
         updateBtn.style.display = 'none';
       }
@@ -288,4 +288,134 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     }
   });
+  async function fetchAndRenderReview(showId, page = 1, limit = 5) {
+    if (!showId) {
+      console.error('Show ID가 없습니다.');
+      return;
+    }
+
+    try {
+      const response = await axios.get(`/reviews?showId=${showId}&page=${page}&limit=${limit}`);
+      if (response.status === 200 && response.data) {
+        const reviewData = response.data;
+        console.log('서버에서 받은 데이터:', reviewData);
+
+        // 리뷰 리스트 렌더링
+        if (reviewData.data) {
+          renderReviews(reviewData.data);
+        }
+
+        // 페이지네이션 버튼 렌더링
+        if (reviewData.totalShowReviews !== undefined) {
+          renderPagination(reviewData.totalShowReviews, page, limit);
+
+          // Update review count
+          if (reviewContainer) {
+            reviewContainer.textContent = `총 리뷰 수: ${reviewData.totalShowReviews}`;
+            console.log(reviewData.totalShowReviews); // Log the correct variable
+          } else {
+            console.error('Review count element not found.');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('리뷰 정보를 가져오는 중 오류 발생:', error);
+    }
+  }
+
+  function renderReviews(reviews) {
+    const reviewsContainer = document.getElementById('reviews-container');
+    reviewsContainer.innerHTML = ''; // 기존 내용을 비웁니다.
+
+    reviews.forEach((review) => {
+      const card = document.createElement('div');
+      card.className = 'card mb-3';
+
+      card.innerHTML = `
+  <div class="card-header">${review.nickname}</div>
+  <div class="card-body">
+    <blockquote class="blockquote mb-0">
+      <p>${review.postscript}</p>
+      <footer class="blockquote-footer">
+        ${review.rate !== undefined ? renderStars(review.rate) : '별점 없음'}
+      </footer>
+    </blockquote>
+    <div class="badge-container mt-3">
+    </div>
+  </div>
+`;
+
+      reviewsContainer.appendChild(card);
+    });
+  }
+
+  function renderPagination(totalReviews, currentPage, limit) {
+    const paginationContainer = document.getElementById('pagination');
+    paginationContainer.innerHTML = ''; // 기존 페이지네이션 초기화
+
+    const totalPages = Math.ceil(totalReviews / limit);
+
+    // "Previous" 버튼
+    const prevButton = document.createElement('li');
+    prevButton.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+    prevButton.innerHTML = '<a class="page-link" href="#">Previous</a>';
+    prevButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (currentPage > 1) {
+        fetchAndRenderReview(showId, currentPage - 1, limit);
+      }
+    });
+    paginationContainer.appendChild(prevButton);
+
+    // 페이지 번호 버튼
+    for (let page = 1; page <= totalPages; page++) {
+      const pageItem = document.createElement('li');
+      pageItem.className = `page-item ${page === currentPage ? 'active' : ''}`;
+
+      const pageLink = document.createElement('a');
+      pageLink.className = 'page-link';
+      pageLink.href = '#';
+      pageLink.textContent = page;
+      pageLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        fetchAndRenderReview(showId, page, limit);
+      });
+
+      pageItem.appendChild(pageLink);
+      paginationContainer.appendChild(pageItem);
+    }
+
+    // "Next" 버튼
+    const nextButton = document.createElement('li');
+    nextButton.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+    nextButton.innerHTML = '<a class="page-link" href="#">Next</a>';
+    nextButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (currentPage < totalPages) {
+        fetchAndRenderReview(showId, currentPage + 1, limit);
+      }
+    });
+    paginationContainer.appendChild(nextButton);
+  }
+
+  fetchAndRenderReview(showId, 1, 5); // 첫 페이지와 페이지당 리뷰 수로 초기 호출
+
+  function renderStars(rate) {
+    const fullStar = '<span class="star"></span>';
+    const emptyStar = '<span class="star empty"></span>';
+
+    let stars = '';
+
+    for (let i = 0; i < 5; i++) {
+      if (i < Math.floor(rate)) {
+        stars += fullStar;
+      } else if (i < rate) {
+        stars += fullStar; // 반별 구현은 복잡할 수 있으므로 단순히 전체 별로 대체
+      } else {
+        stars += emptyStar;
+      }
+    }
+
+    return stars;
+  }
 });

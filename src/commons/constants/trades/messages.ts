@@ -1,6 +1,10 @@
+import { OPTION } from './option.constant';
 export const MESSAGES = {
   TRADES: {
     IS_EXPIRED: { TICKET: '해당 티켓은 만료되었습니다.' },
+    MIN_LENGTH: {
+      SEARCH_KEYWORD: `검색어는 ${OPTION.TRADE.SEARCH.MIN_INDEX_LENGTH} 이하로 입력해야 합니다.`,
+    },
     NOT_INPUT: { TICKET_ID: '티켓의 ID를 입력해주십시오.', PRICE: '가격을 입력해주십시오' },
     EQUAL: { BUYER_AND_SELLER: '구매자와 판매자가 동일합니다!' },
     NOT_EQUAL: {},
@@ -21,6 +25,9 @@ export const MESSAGES = {
     },
     NOT_ENOUGH: {
       MONEY: '금액이 충분하지 않습니다',
+    },
+    UNABLE: {
+      TICKET: '해당 티켓은 사용할 수 없습니다!',
     },
     ALREADY_EXISTS: {
       IN_TRADE_TICKET: '해당 티켓은 이미 중고로 올라왔습니다.',
@@ -50,6 +57,7 @@ export const MESSAGES = {
     },
     FAILED: {
       CREATE_TRADE: '거래 생성에 실패했습니다',
+      CREATE_INDEX: `트레이드 인덱스 생성에 실패했습니다`,
       PURCHASE: '구매에 실패했습니다',
     },
   },

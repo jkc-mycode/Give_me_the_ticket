@@ -13,12 +13,12 @@ import { UsersModule } from './modules/users/users.module';
 import { ShowsModule } from './modules/shows/shows.module';
 import { TradesModule } from './modules/trades/trades.module';
 import { ImagesModule } from './modules/images/images.module';
+import { ShowReviewsModule } from './modules/show-reviews/show-reviews.module';
 import { RedisModule } from './modules/redis/redis.module';
 import { BullModule } from '@nestjs/bullmq';
 import { SearchModule } from './modules/shows/search/search.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { RedlockModule } from './modules/redis/redlock.module';
-import { ShowReviewsModule } from './modules/show-reviews/show-reviews.module';
 import { CacheModule } from '@nestjs/cache-manager';
 
 //controllers
@@ -27,7 +27,7 @@ import { AuthViewsController } from './views/auth/auth.view.controller';
 import { UsersViewsController } from './views/users/users.view.controller';
 import { ShowsViewsController } from './views/shows/shows.view.controller';
 import { TradeViewsController } from './views/trades/trades.view.controller';
-import { ShowReviewsController } from './modules/show-reviews/show-reviews.controller';
+import { ShowReviewsViewsController } from './views/show-reviews/show-reviews.controller';
 
 @Module({
   imports: [
@@ -79,7 +79,7 @@ import { ShowReviewsController } from './modules/show-reviews/show-reviews.contr
     UsersViewsController,
     ShowsViewsController,
     TradeViewsController,
-    ShowReviewsController,
+    ShowReviewsViewsController,
   ],
   providers: [AppService],
 })

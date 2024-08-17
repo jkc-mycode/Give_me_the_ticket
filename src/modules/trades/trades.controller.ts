@@ -70,8 +70,8 @@ export class TradesController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.USER)
   async test(@Body() testDto: TestDto) {
-    console.log('AAAAAAAAAAAAAAAAA');
-    return await this.tradesService.test();
+    console.log('테스트를 시작합니다.');
+    return await this.tradesService.test(testDto);
   }
 
   @Get('/change-role')
@@ -118,8 +118,15 @@ export class TradesController {
     const user = req.user;
     return await this.tradesService.getLogs(user.id);
   }
+  //<2>중고 거래 검색
+  @ApiBearerAuth()
+  @Get('/list/search')
+  @ApiOkResponse({ description: '' })
+  async searchTradeList() {
+    return await this.tradesService.searchTradeList();
+  }
 
-  //<2>중고 거래 목록 조회
+  //<3>중고 거래 목록 조회
   @ApiBearerAuth()
   @Get('/list')
   @ApiOperation({
@@ -127,8 +134,8 @@ export class TradesController {
     description: SWAGGER.TRADES.GET_TRADE_LIST.API_OPERATION.DESCRIPTION,
   })
   @ApiOkResponse({ description: '' })
-  async getList(@Query() getTradeListDto: GetTradeListDto) {
-    return await this.tradesService.getList(getTradeListDto);
+  async getTradeList(@Query() getTradeListDto: GetTradeListDto) {
+    return await this.tradesService.getTradeList(getTradeListDto);
   }
 
   //<3>중고 거래 생성
@@ -149,7 +156,7 @@ export class TradesController {
     return await this.tradesService.createTrade(createTradeDto, user.id);
   }
 
-  //<4>중고 거래 상세 조회
+  //<5>중고 거래 상세 조회
   @ApiBearerAuth()
   @Get('/:tradeId')
   @ApiOperation({
@@ -165,7 +172,7 @@ export class TradesController {
   }
   //첫 주솟값을 param으로 받는 콘트롤러 메서드
 
-  //<5>중고 거래 수정
+  //<6>중고 거래 수정
   @ApiBearerAuth()
   @Patch('/:tradeId')
   @ApiOperation({
@@ -187,7 +194,7 @@ export class TradesController {
     return await this.tradesService.updateTrade(tradeId, updateTradeDto, user.id);
   }
 
-  //<6>중고 거래 삭제
+  //<7>중고 거래 삭제
   @ApiBearerAuth()
   @Delete('/:tradeId')
   @ApiOperation({
@@ -206,7 +213,7 @@ export class TradesController {
     return { message: MESSAGES.TRADES.SUCCESSFULLY_DELETE.TRADE };
   }
 
-  //<7>중고 거래 구매
+  //<8>중고 거래 구매
   @ApiBearerAuth()
   @Post('/:tradeId')
   @ApiOperation({

@@ -44,6 +44,9 @@
   <body>
     <%- include('../common/header.view.ejs') %>
     <main>
+
+
+
       <div class="container">
         <button
           id="bookmarkBtn"
@@ -97,17 +100,32 @@
         <!-- update button -->
         <button class="btn-custom btn btn-warning update__btn">수정하기</button>
 
+        
         <!-- separator -->
         <div class="separator">
           <p>OR</p>
         </div>
 
-        <!-- back button -->
-        <button class="btn-custom btn btn-secondary back__btn">뒤로가기</button>
-
         <!-- delete button -->
         <button class="btn-custom btn btn-info delete__btn">삭제하기</button>
       </div>
+
+<div class="divider"></div>
+
+      <!-- 공연 리뷰 보기  -->
+ 
+  <div class="review_container">
+    <span class="badge text-bg-warning">총 리뷰 수</span>
+</div>
+
+<div id="reviews-container" class="row">
+    <!-- 리뷰들 -->
+</div>
+
+<nav aria-label="Page navigation example">
+    <ul id="pagination" class="pagination">
+        <!-- 페이지네이션  -->
+    </ul>
     </main>
     <footer></footer>
   </body>

@@ -10,9 +10,10 @@ import { User } from 'src/entities/users/user.entity';
 import { ShowReview } from 'src/entities/show-reviews/show-reviews.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-
 import { Ticket } from 'src/entities/shows/ticket.entity';
 import { SHOW_REVIEWS_MESSAGES } from 'src/commons/constants/show-reviews/show-reviews-message.constant';
+import { addMinutes } from 'date-fns';
+import { SHOW_REVIEW_TAKE } from 'src/commons/constants/show-reviews/show-reviews.constant';
 
 @Injectable()
 export class ShowReviewsService {
@@ -36,6 +37,16 @@ export class ShowReviewsService {
       throw new ForbiddenException(SHOW_REVIEWS_MESSAGES.COMMON.SHOW.TICKET.NOT_OWNER);
     }
 
+    const showTime = `${String(ticket.date)}T${String(ticket.time)}.000Z`;
+
+    //공연이 끝난 후에 리뷰를 작성하게 합니다.
+    const runtimeAfterShowTime = addMinutes(showTime, ticket.runtime);
+
+    const nowDate = new Date();
+    if (runtimeAfterShowTime > nowDate) {
+      throw new ConflictException(SHOW_REVIEWS_MESSAGES.COMMON.SHOW.FINSHED);
+    }
+
     const showReview = this.showReviewRepository.create({
       userId: user.id,
       showId: ticket.showId,
@@ -52,7 +63,7 @@ export class ShowReviewsService {
   //공연별 리뷰 조회 목록 api
   async getShowReviewList(showId: number, page: number = 1): Promise<any> {
     //최신 순으로 정렬 및 페이지네이션 구현
-    const take = 5;
+    const take = SHOW_REVIEW_TAKE;
     const [showReviews, totalShowReviews] = await this.showReviewRepository.findAndCount({
       where: { showId },
       order: { createdAt: 'DESC' },

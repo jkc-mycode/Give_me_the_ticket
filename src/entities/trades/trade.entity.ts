@@ -8,12 +8,16 @@ import {
   DeleteDateColumn,
   ManyToOne,
   JoinColumn,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 
+//Entities
 import { Ticket } from '../shows/ticket.entity';
 import { User } from '../users/user.entity';
 import { TradeLog } from './trade-log.entity';
 import { FLAG } from 'src/commons/types/flag/flag-type';
+import { Show } from '../shows/show.entity';
 
 @Entity('trades')
 export class Trade {
@@ -28,7 +32,7 @@ export class Trade {
   @Column({ name: 'ticket_id', type: 'int', nullable: false, unsigned: true })
   ticketId: number;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ name: 'show_id', type: 'int', nullable: false })
   showId: number;
 
   @Column({ type: 'int', nullable: false })
@@ -62,4 +66,9 @@ export class Trade {
   @ManyToOne(() => User, (user) => user.trades, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'seller_id' })
   user: User;
+
+  // Relation - [trades] N : 1 [shows]
+  // @ManyToOne(()=>Show,(show)=>show.trades, {onDelete:'CASCADE'})
+  // @JoinColumn({name:'show_id'})
+  // show:Show;
 }
