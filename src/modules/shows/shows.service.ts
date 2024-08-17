@@ -151,8 +151,6 @@ export class ShowsService {
         totalPages: Math.ceil(total / limit),
       };
 
-      console.log('Elastic Search: ', response);
-
       return response;
     }
 
@@ -197,8 +195,6 @@ export class ShowsService {
     };
 
     await this.cacheManager.set(cacheKey, response, 60);
-
-    console.log('DB response: ', response);
 
     return response;
   }
