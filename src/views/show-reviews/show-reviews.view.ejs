@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>리뷰 페이지 - GIVE ME THE TICKET</title>
+    <link
+      rel="shortcut icon"
+      type="image/x-icon"
+      href="https://cdn-icons-png.flaticon.com/128/432/432312.png"
+    />
+
+    <!-- Bootstrap CSS CDN -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
+      crossorigin="anonymous"
+    />
+
+    <!-- Bootstrap JS CDN -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+      integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
+      integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Custom CSS and JS -->
+    <link rel="stylesheet" href="/css/show-reviews/show-reviews.css" />
+    <script type="module" src="/js/show-reviews/show-reviews.js" defer></script>
+  </head>
+  <body>
+    <!-- Include header -->
+    <%- include('../common/header.view.ejs') %>
+
+    <main>
+      <div id="shows">
+        <h4 class="alert-heading"></h4>
+        <hr />
+        <p>여러분의 소중한 리뷰는 큰 힘이 됩니다.</p>
+        <p>리뷰 작성 시 유의사항:</p>
+        <ul>
+          <li>관람한 공연과 공연에 출연한 배우, 가수에 대한 비방 및 욕설은 삼가주세요.</li>
+          <li>
+            공연을 관람한 후 느낀 점을 자세하게 적어 주세요. 무대의 연출, 음악, 조명, 그리고 배우의
+            연기 등을 포함해 주세요.
+          </li>
+          <li>
+            개인정보나 특정 인물에 대한 정보를 포함하지 말아 주세요. 예를 들어, 다른 관객의
+            개인정보를 언급하지 말아 주세요.
+          </li>
+          <li>
+            리뷰는 솔직하게 작성 해 주세요. 리뷰를 통해 다른 관객들에게 도움이 되는 리뷰를
+            제공합시다.
+          </li>
+          <li>본인이 작성한 리뷰는 본인이 관람한 공연 상세페이지에서 볼 수 있습니다.</li>
+        </ul>
+      </div>
+      <form class="create-ticket">
+        <div class="mb-3">
+          <label for="postscript" class="form-label">리뷰 작성</label>
+          <textarea
+            class="form-control"
+            id="postscript"
+            placeholder="리뷰를 입력해 주세요."
+            aria-describedby="postscriptFeedback"
+          ></textarea>
+          <div id="postscriptFeedback" class="invalid-feedback"></div>
+        </div>
+        <div class="mb-3">
+          <label for="rate" class="form-label">평점</label>
+          <select
+            class="form-select"
+            id="rate"
+            required
+            aria-label="Select rating"
+            aria-describedby="rateFeedback"
+          >
+            <option value="" disabled selected>평점을 선택해 주세요</option>
+            <option value="1">⭐</option>
+            <option value="2">⭐ ⭐</option>
+            <option value="3">⭐ ⭐ ⭐</option>
+            <option value="4">⭐ ⭐ ⭐ ⭐</option>
+            <option value="5">⭐ ⭐ ⭐ ⭐ ⭐</option>
+          </select>
+          <div id="rateFeedback" class="invalid-feedback"></div>
+        </div>
+
+        <div class="mb-3">
+          <button class="btn btn-dark rounded-pill px-3" type="button" id="submitReviewButton">
+            작성하기
+          </button>
+        </div>
+      </form>
+    </main>
+    <footer></footer>
+  </body>
+</html>

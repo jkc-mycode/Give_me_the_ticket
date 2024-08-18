@@ -25,7 +25,8 @@ import { UsersViewsController } from './views/users/users.view.controller';
 import { ShowsViewsController } from './views/shows/shows.view.controller';
 import { TradeViewsController } from './views/trades/trades.view.controller';
 import { ShowReviewsModule } from './modules/show-reviews/show-reviews.module';
-import { ShowReviewsController } from './modules/show-reviews/show-reviews.controller';
+
+import { ShowReviewsViewsController } from './views/show-reviews/show-reviews.controller';
 
 @Module({
   imports: [
@@ -64,7 +65,7 @@ import { ShowReviewsController } from './modules/show-reviews/show-reviews.contr
     UsersViewsController,
     ShowsViewsController,
     TradeViewsController,
-    ShowReviewsController,
+    ShowReviewsViewsController,
   ],
   providers: [AppService],
 })

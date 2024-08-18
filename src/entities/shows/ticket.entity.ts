@@ -51,7 +51,7 @@ export class Ticket {
   @IsMilitaryTime()
   time: string;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', unsigned: true })
   runtime: number;
 
   @Column({ type: 'date' })
@@ -61,7 +61,7 @@ export class Ticket {
   location: string;
 
   // 원가
-  @Column({ type: 'int' })
+  @Column({ type: 'int', unsigned: true })
   price: number;
 
   @Column({

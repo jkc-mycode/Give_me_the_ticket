@@ -3,9 +3,14 @@
 import { CreateTradeDto } from './dto/create-trade.dto';
 import { UpdateTradeDto } from './dto/update-trade.dto';
 import { GetTradeListDto } from './dto/get-trade-list.dto';
+import { TestDto } from './dto/test-dto';
 
 //error Type
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 
 //DIP
 import { Injectable, Inject } from '@nestjs/common';
@@ -22,11 +27,15 @@ import { Queue } from 'bullmq';
 import Redlock from 'redlock';
 import { DataSource } from 'typeorm';
 
+//Service
+import { SearchService } from './search/search.service';
+
 //types
 import { QUEUES } from 'src/commons/constants/queue.constant';
 import { Role } from 'src/commons/types/users/user-role.type';
 import { TicketStatus } from 'src/commons/types/shows/ticket.type';
 import { FLAG } from 'src/commons/types/flag/flag-type';
+
 //entities
 import { Trade } from 'src/entities/trades/trade.entity';
 import { TradeLog } from 'src/entities/trades/trade-log.entity';
@@ -37,31 +46,10 @@ import { User } from 'src/entities/users/user.entity';
 import { Image } from 'src/entities/images/image.entity';
 import { orderBy } from 'lodash';
 
-//DataSource File
-
-// const AppDataSource = new DataSource({
-//   type: 'mysql',
-//   host: SERVER.HOST,
-//   port: +SERVER.PORT,
-//   username: SERVER.USER,
-//   password: SERVER.PASSWORD,
-//   database: SERVER.DATABASE,
-//   entities: [Trade, TradeLog, Show, Schedule, Ticket, User],
-//   synchronize: true,
-//   logging: false,
-// });
-
-// AppDataSource.initialize()
-//   .then(() => {
-//     console.log('Data Source has been initialized!');
-//   })
-//   .catch((err) => {
-//     console.error(`Error during Data Source initialization:`, err);
-//   });
-
 @Injectable()
 export class TradesService {
   constructor(
+    //Repository
     @InjectRepository(Trade)
     private tradeRepository: Repository<Trade>,
     @InjectRepository(TradeLog)
@@ -76,8 +64,14 @@ export class TradesService {
     private userRepository: Repository<User>,
     @InjectRepository(Image)
     private imageRepository: Repository<Image>,
+
+    //Queue
     @InjectQueue(QUEUES.TRADE_QUEUE) private ticketQueue: Queue,
 
+    //Service
+    private readonly searchService: SearchService,
+
+    //Redis
     private dataSource: DataSource,
     @Inject('REDIS_CLIENT') private redisClient: Redis,
     @Inject('REDLOCK') private readonly redlock: Redlock
@@ -155,10 +149,12 @@ export class TradesService {
   }
 
   //=========ConvenienceFunction======================
+  //<1> 중고 거래 검색
+  async searchTradeList() {}
 
-  //<1> 중고 거래 목록 보기//완료 (검증 대부분 완료)
-  async getList(getTradeListDto: GetTradeListDto) {
-    const { page, limit } = getTradeListDto;
+  //<2> 중고 거래 목록 보기//완료 (검증 대부분 완료)
+  async getTradeList(getTradeListDto: GetTradeListDto) {
+    const { search, page, limit } = getTradeListDto;
 
     const total_count = await this.tradeRepository.count({
       where: { flag: FLAG.ACTIVATION },
@@ -193,7 +189,7 @@ export class TradesService {
             return null;
           }
 
-          //시간이 맞지 않는 티켓이 있다면 삭제 (가장 최근에 추가한 로직)
+          //시간이 맞지 않는 티켓이 있다면 삭제
           if (
             new Date().getTime() >=
             this.combineDateAndTime(String(ticket.date), ticket.time).getTime() - 60 * 1000 * 60 * 2
@@ -235,7 +231,7 @@ export class TradesService {
     };
   }
 
-  //<2> 중고 거래 상세 보기 //수정 필요 리스트가 아님 (검증 대부분 완료) //테스트 완료
+  //<3> 중고 거래 상세 보기 //수정 필요 리스트가 아님 (검증 대부분 완료) //테스트 완료
   async getTradeDetail(tradeId: number) {
     const trade = await this.tradeRepository.findOne({ where: { id: tradeId } });
     if (!trade) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE);
@@ -260,7 +256,7 @@ export class TradesService {
     return trade;
   }
 
-  //<3> 중고거래 생성 함수 //완료(검증 대부분 완료) 테스트 완료
+  //<4> 중고거래 생성 함수 //완료(검증 대부분 완료) 테스트 완료
   async createTrade(createTradeDto: CreateTradeDto, sellerId: number) {
     const { ticketId, price } = createTradeDto;
 
@@ -310,7 +306,7 @@ export class TradesService {
     }
 
     if (ticket.status !== TicketStatus.USEABLE) {
-      throw new BadRequestException('해당 티켓은 사용할 수 없습니다!');
+      throw new BadRequestException(MESSAGES.TRADES.UNABLE.TICKET);
     }
 
     //검증 타일 END==================================================
@@ -338,6 +334,9 @@ export class TradesService {
         closedAt,
       });
 
+      //Elasticsearch 인덱싱 (가장 최근에 추가한 로직)
+      await this.searchService.createTradeIndex(trade);
+
       //트레이드 로그에 기록
       const log = { tradeId: trade.id, sellerId };
       await queryRunner.manager.save(TradeLog, log);
@@ -347,15 +346,15 @@ export class TradesService {
       await queryRunner.rollbackTransaction();
       return { message: MESSAGES.TRADES.CAN_NOT_CREATE.TRADE };
     } finally {
-      await lock.release();
       await queryRunner.release();
+      await lock.release();
     }
 
     //=======Redlock End===========//
     return { message: MESSAGES.TRADES.SUCCESSFULLY_CREATE.TRADE };
   }
 
-  //<4> 중고 거래 수정 메서드 //완료(검증 대부분 완료)  //테스트 완료
+  //<5> 중고 거래 수정 메서드 //완료(검증 대부분 완료)  //테스트 완료
   async updateTrade(tradeId, updateTradeDto: UpdateTradeDto, userId: number) {
     const { price } = updateTradeDto;
 
@@ -380,7 +379,7 @@ export class TradesService {
     return afterTrade;
   }
 
-  //<5> 중고 거래 삭제 메서드  //완료(검증 대부분 완료)
+  //<6> 중고 거래 삭제 메서드  //완료(검증 대부분 완료)
   async deleteTrade(tradeId: number, userId: number) {
     const trade = await this.tradeRepository.findOne({ where: { id: tradeId } });
     if (!trade) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE);
@@ -394,7 +393,7 @@ export class TradesService {
     return await this.tradeRepository.update({ id: tradeId }, { flag: FLAG.INACTIVE });
   }
 
-  //<6> 티켓 구매 메서드 (buyerId는 기존의 userId와 같다) (현재 수정중)
+  //<7> 티켓 구매 메서드 (buyerId는 기존의 userId와 같다) (현재 수정중)
   async createTicket(tradeId: number, buyerId: number) {
     //해당 거래 존재 확인
 
@@ -501,7 +500,7 @@ export class TradesService {
     return { message: '성공적으로 티켓을 구매하였습니다.' };
   }
 
-  //<7>중고 거래 로그 조회
+  //<8>중고 거래 로그 조회
   async getLogs(userId: number) {
     const buyLogs = await this.tradeLogRepository.find({
       where: { buyerId: userId },
@@ -525,8 +524,16 @@ export class TradesService {
     return await this.userRepository.findOne({ where: { id: userId } });
   }
 
-  async test() {
-    console.log('bbbbbbbbbbbbbbbbbbbbbbbb');
+  async test(testDto: TestDto) {
+    const { search } = testDto;
+    const tradeData = 0;
+    try {
+      const result = await this.searchService.searchTrades(search);
+      return result;
+    } catch (err) {
+      console.error(`테스트 오류:`, err);
+    }
+
     // return {
     //   PORT: process.env.SERVER_PORT,
     //   HOST: process.env.DB_HOST,
@@ -534,6 +541,7 @@ export class TradesService {
     //   PASSWORD: process.env.DB_PASSWORD,
     //   DATABASE: process.env.DB_NAME,
     // };
+    return { message: `코드 실행 성공` };
   }
 
   async changeRole(userId: number) {
