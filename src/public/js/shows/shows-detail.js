@@ -340,6 +340,8 @@ document.addEventListener('DOMContentLoaded', function () {
         ${review.rate !== undefined ? renderStars(review.rate) : '별점 없음'}
       </footer>
     </blockquote>
+    <span class="badge text-bg-success">Success</span>
+<span class="badge text-bg-danger">Danger</span>
     <div class="badge-container mt-3">
     </div>
   </div>
