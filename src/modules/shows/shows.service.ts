@@ -30,6 +30,7 @@ import { RedisService } from '../redis/redis.service';
 import { addHours, startOfDay, subDays, subHours } from 'date-fns';
 import { PointLog } from 'src/entities/users/point-log.entity';
 import { PointType } from 'src/commons/types/users/point.type';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import Redis from 'ioredis';
 
 @Injectable()
@@ -42,6 +43,7 @@ export class ShowsService {
     private dataSource: DataSource,
     private readonly imagesService: ImagesService,
     private readonly searchService: SearchService,
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly redisService: RedisService,
     @Inject('REDIS_CLIENT') private redisClient: Redis
   ) {
@@ -129,16 +131,71 @@ export class ShowsService {
   }
 
   /*공연 목록 조회 */
-  async getShowList(getShowListDto: GetShowListDto) {
+  async getShowList(getShowListDto: GetShowListDto): Promise<any> {
     const { category, search, page, limit } = getShowListDto;
-    const { results, total } = await this.searchService.searchShows(category, search, page, limit);
 
-    return {
+    // 1. search 있는 경우, Elastic Search 로.
+    if (search) {
+      const { results, total } = await this.searchService.searchShows(
+        category,
+        search,
+        page,
+        limit
+      );
+
+      const response = {
+        results,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+      };
+
+      return response;
+    }
+
+    // 2. search 없는 경우
+    // 2-1. 캐시에서 조회
+    const cacheKey = `showList:${category}:${page}:${limit}`;
+    const cachedData = await this.cacheManager.get(cacheKey);
+
+    if (cachedData) {
+      return cachedData;
+    }
+
+    // 2-2. 캐시 없는 경우, DB에서 조회
+    const queryBuilder = this.showRepository
+      .createQueryBuilder('show')
+      .leftJoinAndSelect('show.images', 'image');
+
+    if (category) {
+      queryBuilder.andWhere('show.category = :category', { category });
+    }
+
+    const [shows, total] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .orderBy('show.id', 'DESC')
+      .getManyAndCount();
+
+    // response 형태 변환: Elastic Search response에 맞게
+    const results = shows.map((show) => ({
+      id: show.id,
+      title: show.title,
+      category: show.category,
+      location: show.location,
+      imageUrl: show.images.map((image) => image.imageUrl),
+    }));
+
+    const response = {
       results,
       total,
       page,
       totalPages: Math.ceil(total / limit),
     };
+
+    await this.cacheManager.set(cacheKey, response, 300);
+
+    return response;
   }
 
   /*공연 상세 조회 */
