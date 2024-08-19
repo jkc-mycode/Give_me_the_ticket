@@ -665,12 +665,15 @@ export class ShowsService {
       const nowTime = new Date();
       // 티켓 예매 시점 확인 (티켓의 생성 시점)
       const bookingTime = new Date(ticket.createdAt);
-      // 공연 시작 3일 전, 10일 전 시간 계산
+      // 공연 시작 3일 전,  10일 전 시간 계산
+
+      const tenDaysBeforeShow = subDays(showTime, SHOW_TICKETS.COMMON.TICKET.HOURS.BEFORE_TEN_DAYS);
+
       const threeDaysBeforeShow = subDays(
         showTime,
         SHOW_TICKETS.COMMON.TICKET.HOURS.BEFORE_THREE_DAYS
       );
-      const tenDaysBeforeShow = subDays(showTime, SHOW_TICKETS.COMMON.TICKET.HOURS.BEFORE_TEN_DAYS);
+
       // 공연 시작 최대 24시간 이내
       const oneDayAfterBooking = addHours(
         bookingTime,
@@ -682,9 +685,6 @@ export class ShowsService {
       // 환불 정책에 따른 비율 계산
       let refundPoint = 0;
 
-      console.log(nowTime);
-      console.log(oneHoursBeforeShowTime);
-      console.log(earlyTime);
       // 공연 시간이 현재 시간 기준으로 1시간 이전일 경우 환불하기 어렵다는 메시지 전달
       if (nowTime >= oneHoursBeforeShowTime) {
         throw new ConflictException(SHOW_TICKET_MESSAGES.COMMON.REFUND.EXPIRED);
@@ -702,6 +702,11 @@ export class ShowsService {
         } else {
           refundPoint = Math.floor(ticket.price * SHOW_TICKETS.COMMON.TICKET.PERCENT.FIFTY);
         }
+      }
+
+      //공연 시작 3일 전~ 공연 날짜의 00시까지는 30퍼센트 환불
+      else if (threeDaysBeforeShow < nowTime && nowTime <= earlyTime) {
+        refundPoint = Math.floor(ticket.price * SHOW_TICKETS.COMMON.TICKET.PERCENT.THIRTY);
       }
 
       // 현재 시간이 공연 날짜의 00시부터 공연 시작 전 1시간 사이면 10퍼센트 환불
