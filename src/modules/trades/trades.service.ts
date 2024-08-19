@@ -250,6 +250,7 @@ export class TradesService {
     trade['content'] = show.content;
     trade['imageUrl'] = image.imageUrl;
     trade['title'] = show.title;
+    trade['runtime'] = show.runtime;
     trade['origin_price'] = show.price;
     trade['location'] = ticket.location;
     trade['date'] = ticket.date;
@@ -551,6 +552,7 @@ export class TradesService {
       //티켓 변경 로직 END========================
 
       //거래 삭제
+      console.log(tradeId);
       await queryRunner.manager.update(Trade, { id: tradeId }, { flag: FLAG.COMPLETED });
       await queryRunner.manager.update(TradeLog, { tradeId: tradeId }, { buyerId: buyer.id });
 
