@@ -549,17 +549,19 @@ document.addEventListener('DOMContentLoaded', function () {
         tradeLogCreatedAtElement.textContent = `거래 내역 일자 : ${log.tradeLogCreatedAt}`;
         logElement.appendChild(tradeLogCreatedAtElement);
 
-        // 수정
-        const updateTradeBtn = document.createElement('button');
-        updateTradeBtn.textContent = '수정';
-        updateTradeBtn.classList.add('btn-custom', 'btn-update');
+        if (log.tradeStatus === 'ACTIVATION') {
+          // 수정
+          const updateTradeBtn = document.createElement('button');
+          updateTradeBtn.textContent = '수정';
+          updateTradeBtn.classList.add('btn-custom', 'btn-update');
 
-        // 수정 버튼에 이벤트 추가
-        updateTradeBtn.addEventListener('click', () => {
-          window.sessionStorage.setItem('trade', JSON.stringify(log));
-          window.location.href = `/views/trades/${log.tradeId}/edit`;
-        });
-        logElement.appendChild(updateTradeBtn);
+          // 수정 버튼에 이벤트 추가
+          updateTradeBtn.addEventListener('click', () => {
+            window.sessionStorage.setItem('trade', JSON.stringify(log));
+            window.location.href = `/views/trades/${log.tradeId}/edit`;
+          });
+          logElement.appendChild(updateTradeBtn);
+        }
 
         // 삭제
         const deleteTradeBtn = document.createElement('button');
