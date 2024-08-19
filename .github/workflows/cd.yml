@@ -35,4 +35,9 @@ jobs:
           SSH_HOST: ${{ secrets.AWS_EC2_HOST }}
 
       - name: Deploy to EC2
-        run: ssh ec2 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
+        run: | 
+          INSTANCES=("15.164.143.126", "3.39.217.52", "3.35.183.61")
+          for HOST in "${INSTANCE[@]}"; do
+            echo "Deploying to $HOST"
+            ssh -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
+          done
