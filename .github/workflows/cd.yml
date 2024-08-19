@@ -36,3 +36,45 @@ jobs:
 
       - name: Deploy to EC2
         run: ssh ec2 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
+
+      # SSH 접속 후 명령을 통해서 배포 진행
+      - name: Configure SSH_2
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY2" > ~/.ssh/ec2.key
+          chmod 400 ~/.ssh/ec2.key
+          cat >>~/.ssh/config <<END
+          Host ec2
+            HostName $SSH_HOST2
+            User $SSH_USER2
+            IdentityFile ~/.ssh/ec2.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER2: ${{ secrets.AWS_EC2_USERNAME }}
+          SSH_KEY2: ${{ secrets.AWS_EC2_PEM_KEY }}
+          SSH_HOST2: ${{ secrets.AWS_EC2_HOST_2 }}
+
+      - name: Deploy to EC2_2
+        run: ssh ec2 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
+
+      # SSH 접속 후 명령을 통해서 배포 진행
+      - name: Configure SSH_3
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY3" > ~/.ssh/ec2.key
+          chmod 400 ~/.ssh/ec2.key
+          cat >>~/.ssh/config <<END
+          Host ec2
+            HostName $SSH_HOST3
+            User $SSH_USER3
+            IdentityFile ~/.ssh/ec2.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER3: ${{ secrets.AWS_EC2_USERNAME }}
+          SSH_KEY3: ${{ secrets.AWS_EC2_PEM_KEY }}
+          SSH_HOST3: ${{ secrets.AWS_EC2_HOST_3 }}
+
+      - name: Deploy to EC2_3
+        run: ssh ec2 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
