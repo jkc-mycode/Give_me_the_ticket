@@ -36,7 +36,7 @@ jobs:
         run: |
           HOST="15.164.143.126"
           echo "Deploying to $HOST"
-          ssh -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
+          ssh ec2 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
 
       - name: Configure SSH for Instance 2
         run: |
@@ -58,7 +58,7 @@ jobs:
         run: |
           HOST="3.39.217.52"
           echo "Deploying to $HOST"
-          ssh -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
+          ssh ec2 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
 
       - name: Configure SSH for Instance 3
         run: |
@@ -80,5 +80,5 @@ jobs:
         run: |
           HOST="3.35.183.61"
           echo "Deploying to $HOST"
-          ssh -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
+          ssh ec2 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
 
