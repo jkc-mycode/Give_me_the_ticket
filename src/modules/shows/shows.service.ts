@@ -157,7 +157,7 @@ export class ShowsService {
     // 2. search 없는 경우
     // 2-1. 캐시에서 조회
     const cacheKey = `showList:${category}:${page}:${limit}`;
-    const cachedData = await this.cacheManager.get(cacheKey);
+    const cachedData = await this.redisClient.get(cacheKey);
 
     if (cachedData) {
       return cachedData;
@@ -194,7 +194,7 @@ export class ShowsService {
       totalPages: Math.ceil(total / limit),
     };
 
-    await this.cacheManager.set(cacheKey, response, 300);
+    await this.redisClient.set(cacheKey, JSON.stringify(response), 'EX', 300);
 
     return response;
   }
