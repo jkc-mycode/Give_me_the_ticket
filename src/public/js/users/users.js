@@ -346,6 +346,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         logElement.appendChild(resaleButton);
 
+        // 리뷰 작성
+        const reviewButton = document.createElement('button');
+        reviewButton.textContent = '리뷰 작성';
+        reviewButton.classList.add('btn-custom', 'btn-review');
+        // 리뷰 작성 버튼에 이벤트 추가
+        reviewButton.addEventListener('click', () => {
+          window.location.href = `/views/reviews/${log.id}`;
+        });
+        logElement.appendChild(reviewButton);
+
         ticketListContainer.appendChild(logElement);
 
         if (index < ticketList.length - 1) {
