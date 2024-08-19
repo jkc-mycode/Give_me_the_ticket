@@ -159,10 +159,10 @@ export class ShowsService {
     // 2. search 없는 경우
     // 2-1. 캐시에서 조회
     const cacheKey = `showList:${category}:${page}:${limit}:${date}`;
-    const cachedData = await this.cacheManager.get(cacheKey);
+    const cachedData = await this.redisClient.get(cacheKey);
 
     if (cachedData) {
-      return cachedData;
+      return JSON.parse(cachedData);
     }
 
     // 2-2. 캐시 없는 경우, DB에서 조회
@@ -202,7 +202,7 @@ export class ShowsService {
       totalPages: Math.ceil(total / limit),
     };
 
-    await this.cacheManager.set(cacheKey, response, 300);
+    await this.redisClient.set(cacheKey, JSON.stringify(response), 'EX', 300);
 
     return response;
   }
@@ -746,12 +746,15 @@ export class ShowsService {
       const nowTime = new Date();
       // 티켓 예매 시점 확인 (티켓의 생성 시점)
       const bookingTime = new Date(ticket.createdAt);
-      // 공연 시작 3일 전, 10일 전 시간 계산
+      // 공연 시작 3일 전,  10일 전 시간 계산
+
+      const tenDaysBeforeShow = subDays(showTime, SHOW_TICKETS.COMMON.TICKET.HOURS.BEFORE_TEN_DAYS);
+
       const threeDaysBeforeShow = subDays(
         showTime,
         SHOW_TICKETS.COMMON.TICKET.HOURS.BEFORE_THREE_DAYS
       );
-      const tenDaysBeforeShow = subDays(showTime, SHOW_TICKETS.COMMON.TICKET.HOURS.BEFORE_TEN_DAYS);
+
       // 공연 시작 최대 24시간 이내
       const oneDayAfterBooking = addHours(
         bookingTime,
@@ -767,7 +770,6 @@ export class ShowsService {
       if (nowTime >= oneHoursBeforeShowTime) {
         throw new ConflictException(SHOW_TICKET_MESSAGES.COMMON.REFUND.EXPIRED);
       }
-
       // 공연 시작 10일 전까지(마지노선) 전액 환불
       if (nowTime <= tenDaysBeforeShow) {
         refundPoint = ticket.price;
@@ -781,6 +783,11 @@ export class ShowsService {
         } else {
           refundPoint = Math.floor(ticket.price * SHOW_TICKETS.COMMON.TICKET.PERCENT.FIFTY);
         }
+      }
+
+      //공연 시작 3일 전~ 공연 날짜의 00시까지는 30퍼센트 환불
+      else if (threeDaysBeforeShow < nowTime && nowTime <= earlyTime) {
+        refundPoint = Math.floor(ticket.price * SHOW_TICKETS.COMMON.TICKET.PERCENT.THIRTY);
       }
 
       // 현재 시간이 공연 날짜의 00시부터 공연 시작 전 1시간 사이면 10퍼센트 환불
@@ -823,6 +830,7 @@ export class ShowsService {
       await queryRunner.manager.save(Schedule, schedule);
 
       await queryRunner.commitTransaction();
+      await queryRunner.release();
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();

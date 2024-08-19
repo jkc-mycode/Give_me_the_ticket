@@ -48,13 +48,6 @@ document.addEventListener('DOMContentLoaded', function () {
           return;
         }
 
-        // 예매 확인창 추가
-        const isConfirmed = confirm('이 공연을 예매하시겠습니까?');
-        if (!isConfirmed) {
-          window.history.back(); // 사용자가 취소를 클릭한 경우, 이전 페이지로 이동
-          return;
-        }
-
         const showsContainer = document.querySelector('#shows');
 
         showsContainer.innerHTML = `
@@ -89,6 +82,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const createTicketDto = {
       scheduleId: Number(selectedScheduleId),
     };
+
+    // 예매 확인창 추가
+    const isConfirmed = confirm('이 공연을 예매하시겠습니까?');
+    if (!isConfirmed) {
+      window.history.back(); // 사용자가 취소를 클릭한 경우, 이전 페이지로 이동
+      return;
+    }
 
     try {
       const response = await axios.post(`/shows/${showId}/ticket`, createTicketDto, {

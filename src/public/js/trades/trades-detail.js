@@ -63,17 +63,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   PurchaseBtn.addEventListener('click', async (e) => {
     e.preventDefault();
     try {
-      const data = await axios.post(
-        `/trades/${tradeId}`,
-        {}, // 서버로 보낼 데이터 (없다면 빈 객체)
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // 인증 헤더에 토큰 추가
-          },
-        }
-      );
-      alert('거래에 성공했습니다!');
-      window.location.href = '/views/trades/list';
+      if (confirm('본 공연을 구매하시겠습니까?')) {
+        const data = await axios.post(
+          `/trades/${tradeId}`,
+          {}, // 서버로 보낼 데이터 (없다면 빈 객체)
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // 인증 헤더에 토큰 추가
+            },
+          }
+        );
+        alert('거래에 성공했습니다!');
+      }
+      window.location.href = '/views/users/me?tab=tradeLog';
     } catch (err) {
       console.error('중고 거래 구매에 실패했습니다.', err);
       alert('중고 거래 구매에 실패했습니다.');

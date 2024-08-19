@@ -17,6 +17,7 @@ import { Ticket } from 'src/entities/shows/ticket.entity';
 import { User } from 'src/entities/users/user.entity';
 import { TicketProcessor } from './ticket.process';
 import { Image } from 'src/entities/images/image.entity';
+import { PointLog } from 'src/entities/users/point-log.entity';
 
 @Module({
   imports: [
@@ -26,11 +27,20 @@ import { Image } from 'src/entities/images/image.entity';
     }),
     RedlockModule,
     SearchModule,
-    TypeOrmModule.forFeature([Trade, TradeLog, Show, Schedule, Ticket, User, TradeLog, Image]),
+    TypeOrmModule.forFeature([
+      Trade,
+      TradeLog,
+      Show,
+      Schedule,
+      Ticket,
+      User,
+      TradeLog,
+      Image,
+      PointLog,
+    ]),
   ],
   controllers: [TradesController],
   providers: [TradesService, TicketProcessor],
   exports: [TypeOrmModule],
 })
 export class TradesModule {}
-//Redlock모듈은 굳이 필요 없어 보임, import로 적용하면 되기 때문에?

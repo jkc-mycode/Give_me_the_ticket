@@ -31,6 +31,7 @@ export const SHOW_TICKETS = {
       PERCENT: {
         TEN: 0.1,
         FIFTY: 0.5,
+        THIRTY: 0.3,
       },
 
       COUNT: {
