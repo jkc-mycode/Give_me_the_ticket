@@ -360,7 +360,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // "Previous" 버튼
     const prevButton = document.createElement('li');
     prevButton.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-    prevButton.innerHTML = '<a class="page-link" href="#">Previous</a>';
+    prevButton.innerHTML = '<a class="page-link" href="#">이전</a>';
     prevButton.addEventListener('click', (e) => {
       e.preventDefault();
       if (currentPage > 1) {
@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // "Next" 버튼
     const nextButton = document.createElement('li');
     nextButton.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
-    nextButton.innerHTML = '<a class="page-link" href="#">Next</a>';
+    nextButton.innerHTML = '<a class="page-link" href="#">다음</a>';
     nextButton.addEventListener('click', (e) => {
       e.preventDefault();
       if (currentPage < totalPages) {

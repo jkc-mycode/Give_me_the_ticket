@@ -14,6 +14,7 @@ import { Bookmark } from 'src/entities/users/bookmark.entity';
 import { Schedule } from 'src/entities/shows/schedule.entity';
 import { Ticket } from 'src/entities/shows/ticket.entity';
 import { Image } from 'src/entities/images/image.entity';
+import { ShowRanking } from 'src/entities/shows/showRanking.entity';
 import { CreateShowDto } from './dto/create-show.dto';
 import { GetShowListDto } from './dto/get-show-list.dto';
 import { UpdateShowDto } from './dto/update-show.dto';
@@ -40,6 +41,7 @@ export class ShowsService {
     @InjectRepository(Bookmark) private bookmarkRepository: Repository<Bookmark>,
     @InjectRepository(Ticket) private ticketRepository: Repository<Ticket>,
     @InjectRepository(Image) private imagesRepository: Repository<Image>,
+    @InjectRepository(ShowRanking) private showRankingRepository: Repository<ShowRanking>,
     private dataSource: DataSource,
     private readonly imagesService: ImagesService,
     private readonly searchService: SearchService,
@@ -132,7 +134,7 @@ export class ShowsService {
 
   /*공연 목록 조회 */
   async getShowList(getShowListDto: GetShowListDto): Promise<any> {
-    const { category, search, page, limit } = getShowListDto;
+    const { category, search, page, limit, date } = getShowListDto;
 
     // 1. search 있는 경우, Elastic Search 로.
     if (search) {
@@ -140,7 +142,8 @@ export class ShowsService {
         category,
         search,
         page,
-        limit
+        limit,
+        date
       );
 
       const response = {
@@ -155,7 +158,7 @@ export class ShowsService {
 
     // 2. search 없는 경우
     // 2-1. 캐시에서 조회
-    const cacheKey = `showList:${category}:${page}:${limit}`;
+    const cacheKey = `showList:${category}:${page}:${limit}:${date}`;
     const cachedData = await this.cacheManager.get(cacheKey);
 
     if (cachedData) {
@@ -165,10 +168,15 @@ export class ShowsService {
     // 2-2. 캐시 없는 경우, DB에서 조회
     const queryBuilder = this.showRepository
       .createQueryBuilder('show')
-      .leftJoinAndSelect('show.images', 'image');
+      .leftJoinAndSelect('show.images', 'image')
+      .leftJoinAndSelect('show.schedules', 'schedule');
 
     if (category) {
       queryBuilder.andWhere('show.category = :category', { category });
+    }
+
+    if (date) {
+      queryBuilder.andWhere('schedule.date = :date', { date });
     }
 
     const [shows, total] = await queryBuilder
@@ -184,6 +192,7 @@ export class ShowsService {
       category: show.category,
       location: show.location,
       imageUrl: show.images.map((image) => image.imageUrl),
+      showDate: show.schedules.map((schedule) => schedule.date),
     }));
 
     const response = {
@@ -260,9 +269,15 @@ export class ShowsService {
     let keys: string[] = [];
 
     do {
-      const result = await this.redisClient.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
-      cursor = result[0];
-      keys = keys.concat(result[1]);
+      const [newCursor, foundKeys] = await this.redisClient.scan(
+        cursor,
+        'MATCH',
+        pattern,
+        'COUNT',
+        100
+      );
+      cursor = newCursor;
+      keys.push(...foundKeys);
     } while (cursor !== '0');
 
     return keys;
@@ -282,17 +297,74 @@ export class ShowsService {
       await this.redisClient.zincrby(minKey, 1, String(showId));
       await this.redisClient.expire(minKey, 3600);
 
-      // 현재 시간대의 minkey 찾기
+      //unionKey 생성
       const keys = await this.getKeys(`show:${type}:${hourTimestamp}*`);
-
       if (keys.length > 0) {
         //union key 생성
         await this.redisClient.zunionstore(unionKey, keys.length, ...keys);
       }
       await this.redisClient.expire(unionKey, 3600);
+
+      // 이전 UnionKey를 찾아 DB에 저장
+      const previousHourTimestamp = this.getHourTimestamp(
+        new Date(date.getTime() - 60 * 60 * 1000)
+      );
+      const previousUnionKey = `show:${type}:union:${previousHourTimestamp}`;
+      await this.updateRanking(type, previousUnionKey);
     } catch (error) {
       console.log(`레디스 ${type} 증가 오류:`, error);
     }
+  }
+
+  // DB에 랭킹 데이터 저장
+  async updateRanking(type: 'views' | 'bookings', unionKey: string) {
+    const redisData = await this.redisClient.zrange(unionKey, 0, -1, 'WITHSCORES');
+    if (redisData.length === 0) return;
+
+    const today = new Date().toISOString().slice(0, 10);
+    const rankingData = new Map<number, any>();
+
+    // Redis에서 랭킹 데이터 가져오기
+    for (let i = 0; i < redisData.length; i += 2) {
+      const showId = parseInt(redisData[i], 10);
+      const count = parseInt(redisData[i + 1], 10);
+
+      // Map에서 기존 데이터 확인
+      if (rankingData.has(showId)) {
+        const existingEntry = rankingData.get(showId);
+        if (type === 'views') {
+          existingEntry.views += count;
+        } else {
+          existingEntry.bookings += count;
+        }
+      } else {
+        // DB에서 기존 데이터 조회
+        const existingData = await this.showRankingRepository.findOne({
+          where: { date: today, showId },
+        });
+
+        if (existingData) {
+          // 기존 데이터가 있으면 누적 합산
+          if (type === 'views') {
+            existingData.views += count;
+          } else {
+            existingData.bookings += count;
+          }
+          rankingData.set(showId, existingData);
+        } else {
+          // 기존 데이터가 없으면 새로운 데이터 생성
+          const newDateRanking = this.showRankingRepository.create({
+            date: today,
+            showId,
+            views: type === 'views' ? count : 0,
+            bookings: type === 'bookings' ? count : 0,
+          });
+          rankingData.set(showId, newDateRanking);
+        }
+      }
+    }
+
+    await this.showRankingRepository.save(Array.from(rankingData.values()));
   }
 
   // 최신 unionKey 찾기
@@ -301,12 +373,7 @@ export class ShowsService {
       // 모든 union 키를 검색
       const keys = await this.getKeys(`show:${type}:union:*`);
 
-      if (keys.length === 0) {
-        return null;
-      }
-
-      //최신 union 키 반환
-      return keys.sort().reverse()[0];
+      return keys.length > 0 ? keys.sort().reverse()[0] : null;
     } catch (error) {
       console.log(`Redis ${type} union key 검색 오류:`, error);
       return null;
@@ -317,7 +384,6 @@ export class ShowsService {
   async getRankedShows(limit: number, sortBy: 'views' | 'bookings'): Promise<Show[]> {
     // 최근 union key 찾기
     const key = await this.getUnionKey(sortBy);
-
     if (!key) {
       return [];
     }
@@ -339,6 +405,7 @@ export class ShowsService {
     // 숫자로 변환된 ID를 DB에서 조회
     const shows = await this.showRepository.find({
       where: { id: In(showIds) },
+      relations: ['images', 'schedules'],
     });
 
     // Redis에서 가져온 순서대로 정렬

@@ -72,7 +72,7 @@ export class SearchService {
     try {
       const showData = await this.showRepository.findOne({
         where: { id: show.id },
-        relations: { images: true },
+        relations: ['images', 'schedules'],
       });
 
       await this.eService.index({
@@ -84,6 +84,7 @@ export class SearchService {
           category: showData.category,
           location: showData.location,
           imageUrl: showData.images.map((image) => image.imageUrl),
+          showDate: showData.schedules.map((schedule) => schedule.date),
         },
       });
     } catch (error) {
@@ -138,7 +139,7 @@ export class SearchService {
   }
 
   // show 검색 기능
-  async searchShows(category: string, search: string, page: number, limit: number) {
+  async searchShows(category: string, search: string, page: number, limit: number, date: string) {
     const mustQueries = [];
 
     if (category) {
@@ -155,6 +156,10 @@ export class SearchService {
           },
         },
       });
+    }
+
+    if (date) {
+      mustQueries.push({ match: { 'schedules.date': date } });
     }
 
     const queryBody = {

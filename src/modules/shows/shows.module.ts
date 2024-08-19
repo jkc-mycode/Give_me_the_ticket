@@ -15,11 +15,21 @@ import { PointLog } from 'src/entities/users/point-log.entity';
 import { ShowsController } from './shows.controller';
 import { ShowsService } from './shows.service';
 import { ImagesService } from '../images/images.service';
+import { ShowRanking } from 'src/entities/shows/showRanking.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    TypeOrmModule.forFeature([Show, User, Ticket, Bookmark, Schedule, Image, PointLog]),
+    TypeOrmModule.forFeature([
+      Show,
+      User,
+      Ticket,
+      Bookmark,
+      Schedule,
+      Image,
+      PointLog,
+      ShowRanking,
+    ]),
     SearchModule,
     RedisModule,
     CacheModule.register(),
