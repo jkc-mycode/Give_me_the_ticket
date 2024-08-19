@@ -35,6 +35,7 @@ import { QUEUES } from 'src/commons/constants/queue.constant';
 import { Role } from 'src/commons/types/users/user-role.type';
 import { TicketStatus } from 'src/commons/types/shows/ticket.type';
 import { FLAG } from 'src/commons/types/flag/flag-type';
+import { PointType } from 'src/commons/types/users/point.type';
 
 //entities
 import { Trade } from 'src/entities/trades/trade.entity';
@@ -44,6 +45,8 @@ import { Schedule } from 'src/entities/shows/schedule.entity';
 import { Ticket } from 'src/entities/shows/ticket.entity';
 import { User } from 'src/entities/users/user.entity';
 import { Image } from 'src/entities/images/image.entity';
+import { PointLog } from 'src/entities/users/point-log.entity';
+
 import { orderBy } from 'lodash';
 
 @Injectable()
@@ -64,6 +67,8 @@ export class TradesService {
     private userRepository: Repository<User>,
     @InjectRepository(Image)
     private imageRepository: Repository<Image>,
+    @InjectRepository(PointLog)
+    private pointLogRepository: Repository<PointLog>,
 
     //Queue
     @InjectQueue(QUEUES.TRADE_QUEUE) private ticketQueue: Queue,
@@ -194,7 +199,7 @@ export class TradesService {
             new Date().getTime() >=
             this.combineDateAndTime(String(ticket.date), ticket.time).getTime() - 60 * 1000 * 60 * 2
           ) {
-            await this.tradeRepository.update({ id: trade.id }, { flag: FLAG.INACTIVE });
+            await this.tradeRepository.update({ id: trade.id }, { flag: FLAG.EXPIRED });
             return null;
           }
 
@@ -245,6 +250,7 @@ export class TradesService {
     trade['content'] = show.content;
     trade['imageUrl'] = image.imageUrl;
     trade['title'] = show.title;
+    trade['runtime'] = show.runtime;
     trade['origin_price'] = show.price;
     trade['location'] = ticket.location;
     trade['date'] = ticket.date;
@@ -305,6 +311,7 @@ export class TradesService {
       throw new BadRequestException(MESSAGES.TRADES.NOT_HAVE.TICKET);
     }
 
+    //티켓이 사용 가능한지 검증
     if (ticket.status !== TicketStatus.USEABLE) {
       throw new BadRequestException(MESSAGES.TRADES.UNABLE.TICKET);
     }
@@ -393,13 +400,7 @@ export class TradesService {
       await queryRunner.release();
     }
 
-    // await this.tradeRepository.update({ id: tradeId }, { price: price });
-    // await this.ticketRepository.update({ id: trade.ticketId }, { price: price });
-
     const afterTrade = await this.tradeRepository.findOne({ where: { id: tradeId } });
-
-    // // Elasticsearch 인덱스 업데이트 (업데이트)
-    // await this.searchService.indexTradeData(afterTrade);
 
     return afterTrade;
   }
@@ -421,7 +422,7 @@ export class TradesService {
     await queryRunner.startTransaction();
 
     try {
-      await queryRunner.manager.update(Trade, { id: tradeId }, { flag: FLAG.INACTIVE });
+      await queryRunner.manager.update(Trade, { id: tradeId }, { flag: FLAG.DELETED });
       await queryRunner.commitTransaction();
 
       //Elasticsearch 인덱스 삭제 (삭제)
@@ -433,14 +434,6 @@ export class TradesService {
     } finally {
       queryRunner.release();
     }
-
-    // const deletedTrade = await this.tradeRepository.update(
-    //   { id: tradeId },
-    //   { flag: FLAG.INACTIVE }
-    // );
-
-    // //Elasticsearch 인덱스 삭제
-    // await this.searchService.deleteTradeIndex(tradeId);
 
     return { message: `삭제 완료` };
   }
@@ -455,6 +448,13 @@ export class TradesService {
     //해당 티켓 존재 확인
     const ticket = await this.ticketRepository.findOne({ where: { id: trade.ticketId } });
     if (!ticket) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TICKET);
+
+    //해당 티켓의 공연이름 가져오기
+    const show = await this.showRepository.findOne({
+      where: { id: ticket.showId },
+      select: { title: true },
+    });
+    const title = show.title;
 
     //해당 티켓의 소유 갯수 확인
     const haveTicket = await this.ticketRepository.find({
@@ -501,6 +501,26 @@ export class TradesService {
       await queryRunner.manager.save(User, buyer);
       await queryRunner.manager.save(User, seller);
 
+      //포인트 로그 생성,기록 로직
+      const buyerPointLog = {
+        userId: buyer.id,
+        price: ticket.price,
+        description: `중고거래 <${title}>의 티켓 결제`,
+        type: PointType.WITHDRAW,
+      };
+
+      const sellerPointLog = {
+        userId: seller.id,
+        price: ticket.price - Math.floor(ticket.price * 0.05),
+        description: `중고거래 <${title}>의 티켓 판매`,
+        type: PointType.DEPOSIT,
+      };
+      console.log(`buyerPointLog:`, buyerPointLog);
+      console.log(`sellerPointLog:`, sellerPointLog);
+
+      await queryRunner.manager.save(PointLog, buyerPointLog);
+      await queryRunner.manager.save(PointLog, sellerPointLog);
+
       //tradeLog데이타베이스에도 저장
       const log = { id: tradeLogId, tradeId: tradeId, buyerId };
       await queryRunner.manager.save(TradeLog, log);
@@ -509,7 +529,6 @@ export class TradesService {
 
       //구매자에게 전할 새로운 티켓을 생성하고 새로운 티켓을 데이터베이스에 저장
       const newTicket = { ...ticket };
-      console.log(ticket.id);
 
       //티켓의 상태를 바꾼 뒤에 저장
       await queryRunner.manager.update(
@@ -523,6 +542,7 @@ export class TradesService {
       newTicket.userId = buyer.id;
       newTicket.status = TicketStatus.USEABLE;
       newTicket.nickname = buyer.nickname;
+      newTicket.updatedAt = new Date();
 
       await queryRunner.manager.save(Ticket, newTicket);
 
@@ -532,8 +552,8 @@ export class TradesService {
       //티켓 변경 로직 END========================
 
       //거래 삭제
-
-      await queryRunner.manager.update(Trade, { id: tradeId }, { flag: FLAG.INACTIVE });
+      console.log(tradeId);
+      await queryRunner.manager.update(Trade, { id: tradeId }, { flag: FLAG.COMPLETED });
       await queryRunner.manager.update(TradeLog, { tradeId: tradeId }, { buyerId: buyer.id });
 
       await queryRunner.commitTransaction();
@@ -589,13 +609,6 @@ export class TradesService {
       console.error(`테스트 오류:`, err);
     }
 
-    // return {
-    //   PORT: process.env.SERVER_PORT,
-    //   HOST: process.env.DB_HOST,
-    //   USER: process.env.DB_USER,
-    //   PASSWORD: process.env.DB_PASSWORD,
-    //   DATABASE: process.env.DB_NAME,
-    // };
     return { message: `코드 실행 성공` };
   }
 
