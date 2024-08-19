@@ -36,8 +36,8 @@ jobs:
 
       - name: Deploy to EC2
         run: | 
-          INSTANCES=("15.164.143.126" "3.39.217.52" "3.35.183.61")
+          INSTANCES=("ec2-15-164-143-126.ap-northeast-2.compute.amazonaws.com" "ec2-3-39-217-52.ap-northeast-2.compute.amazonaws.com" "ec2-3-35-183-61.ap-northeast-2.compute.amazonaws.com")
           for HOST in "${INSTANCES[@]}"; do
             echo "Deploying to $HOST"
-            ssh -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
+            ssh -v -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
           done
