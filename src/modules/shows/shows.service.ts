@@ -682,11 +682,13 @@ export class ShowsService {
       // 환불 정책에 따른 비율 계산
       let refundPoint = 0;
 
+      console.log(nowTime);
+      console.log(oneHoursBeforeShowTime);
+      console.log(earlyTime);
       // 공연 시간이 현재 시간 기준으로 1시간 이전일 경우 환불하기 어렵다는 메시지 전달
       if (nowTime >= oneHoursBeforeShowTime) {
         throw new ConflictException(SHOW_TICKET_MESSAGES.COMMON.REFUND.EXPIRED);
       }
-
       // 공연 시작 10일 전까지(마지노선) 전액 환불
       if (nowTime <= tenDaysBeforeShow) {
         refundPoint = ticket.price;
@@ -742,6 +744,7 @@ export class ShowsService {
       await queryRunner.manager.save(Schedule, schedule);
 
       await queryRunner.commitTransaction();
+      await queryRunner.release();
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
