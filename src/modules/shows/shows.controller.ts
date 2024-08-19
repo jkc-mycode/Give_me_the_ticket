@@ -58,13 +58,11 @@ export class ShowsController {
    * */
   @Get()
   async getShowList(@Query() getShowListDto: GetShowListDto) {
-    const result = (await this.showsService.getShowList(getShowListDto)) as any;
-    console.log('getShowList response: ', result);
+    const result = await this.showsService.getShowList(getShowListDto);
 
     return {
       status: HttpStatus.OK,
       message: SHOW_MESSAGES.GET_LIST.SUCCEED,
-      // data: result,
       data: result.results,
       total: result.total,
       page: result.page,

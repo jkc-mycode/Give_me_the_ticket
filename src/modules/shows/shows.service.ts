@@ -132,7 +132,7 @@ export class ShowsService {
   }
 
   /*공연 목록 조회 */
-  async getShowList(getShowListDto: GetShowListDto) {
+  async getShowList(getShowListDto: GetShowListDto): Promise<any> {
     const { category, search, page, limit } = getShowListDto;
 
     // 1. search 있는 경우, Elastic Search 로.
@@ -194,7 +194,7 @@ export class ShowsService {
       totalPages: Math.ceil(total / limit),
     };
 
-    await this.cacheManager.set(cacheKey, response, 60);
+    await this.cacheManager.set(cacheKey, response, 300);
 
     return response;
   }

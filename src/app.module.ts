@@ -56,7 +56,7 @@ import { ShowReviewsViewsController } from './views/show-reviews/show-reviews.co
         host: configService.get<string>('REDIS_HOST'),
         port: configService.get<number>('REDIS_PORT'),
         password: configService.get<string>('REDIS_PASSWORD'),
-        ttl: 60,
+        ttl: 300,
       }),
     }),
 
