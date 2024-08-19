@@ -334,7 +334,7 @@ export class TradesService {
         closedAt,
       });
 
-      //Elasticsearch 인덱싱 (가장 최근에 추가한 로직)
+      //Elasticsearch 인덱싱 생성 (가장 최근에 추가한 로직)
       await this.searchService.createTradeIndex(trade);
 
       //트레이드 로그에 기록
@@ -372,10 +372,35 @@ export class TradesService {
       throw new BadRequestException(MESSAGES.TRADES.NOT_EXISTS.AUTHORITY);
 
     //티켓과 중고거래의 가격 둘다 변경(어차피 참고하는 것은 티켓의 가격뿐이기에, 추후 수정 예정, 엔티티에서 중고거래의 가격은 사라져도 될것으로 보임)
-    await this.tradeRepository.update({ id: tradeId }, { price: price });
-    await this.ticketRepository.update({ id: trade.ticketId }, { price: price });
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.update(Trade, { id: tradeId }, { price: price });
+      await queryRunner.manager.update(Ticket, { id: trade.ticketId }, { price: price });
+      const afterTrade = await queryRunner.manager.findOne(Trade, { where: { id: tradeId } });
+      await queryRunner.commitTransaction();
+
+      // Elasticsearch 인덱스 업데이트
+      if (afterTrade) {
+        await this.searchService.indexTradeData(afterTrade);
+      }
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException(`트랙잭션 실패,중고거래가 수정되지 않았습니다.`);
+    } finally {
+      await queryRunner.release();
+    }
+
+    // await this.tradeRepository.update({ id: tradeId }, { price: price });
+    // await this.ticketRepository.update({ id: trade.ticketId }, { price: price });
 
     const afterTrade = await this.tradeRepository.findOne({ where: { id: tradeId } });
+
+    // // Elasticsearch 인덱스 업데이트 (업데이트)
+    // await this.searchService.indexTradeData(afterTrade);
+
     return afterTrade;
   }
 
@@ -390,10 +415,37 @@ export class TradesService {
     await this.ticketRepository.update({ id: trade.ticketId }, { status: TicketStatus.USEABLE });
 
     //모든 검증이 끝난 뒤 삭제 로직
-    return await this.tradeRepository.update({ id: tradeId }, { flag: FLAG.INACTIVE });
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.update(Trade, { id: tradeId }, { flag: FLAG.INACTIVE });
+      await queryRunner.commitTransaction();
+
+      //Elasticsearch 인덱스 삭제 (삭제)
+      await this.searchService.deleteTradeIndex(tradeId);
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      console.error('중고거래 삭제에 실패했습니다.', err);
+      throw new InternalServerErrorException('중고거래 삭제에 실패했습니다.');
+    } finally {
+      queryRunner.release();
+    }
+
+    // const deletedTrade = await this.tradeRepository.update(
+    //   { id: tradeId },
+    //   { flag: FLAG.INACTIVE }
+    // );
+
+    // //Elasticsearch 인덱스 삭제
+    // await this.searchService.deleteTradeIndex(tradeId);
+
+    return { message: `삭제 완료` };
   }
 
-  //<7> 티켓 구매 메서드 (buyerId는 기존의 userId와 같다) (현재 수정중)
+  //<7> 티켓 구매 메서드 (buyerId는 기존의 userId와 같다)
   async createTicket(tradeId: number, buyerId: number) {
     //해당 거래 존재 확인
 
@@ -457,10 +509,14 @@ export class TradesService {
 
       //구매자에게 전할 새로운 티켓을 생성하고 새로운 티켓을 데이터베이스에 저장
       const newTicket = { ...ticket };
+      console.log(ticket.id);
 
       //티켓의 상태를 바꾼 뒤에 저장
-      ticket.status = TicketStatus.SOLD;
-      await queryRunner.manager.save(Ticket, ticket);
+      await queryRunner.manager.update(
+        Ticket,
+        { id: trade.ticketId },
+        { status: TicketStatus.SOLD }
+      );
 
       //티켓의 상태를 바꾼 뒤에 구매자에게 저장
       delete newTicket.id;
@@ -476,18 +532,17 @@ export class TradesService {
       //티켓 변경 로직 END========================
 
       //거래 삭제
-      await queryRunner.manager.update(
-        Ticket,
-        { id: trade.ticketId },
-        { status: TicketStatus.USEABLE }
-      );
+
       await queryRunner.manager.update(Trade, { id: tradeId }, { flag: FLAG.INACTIVE });
       await queryRunner.manager.update(TradeLog, { tradeId: tradeId }, { buyerId: buyer.id });
 
       await queryRunner.commitTransaction();
+
+      //Elasticsearch 인덱스 삭제
+      await this.searchService.deleteTradeIndex(tradeId);
     } catch (err) {
       await queryRunner.rollbackTransaction();
-      return { message: `${MESSAGES.TRADES.FAILED.PURCHASE} 사유:${err}` };
+      throw new InternalServerErrorException(`${MESSAGES.TRADES.FAILED.PURCHASE} 사유:${err}`);
     } finally {
       await queryRunner.release();
     }
