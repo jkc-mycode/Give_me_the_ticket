@@ -16,31 +16,69 @@ jobs:
 
     # 작업 내의 단위 작업(step)을 정의
     steps:
-      - name: Configure SSH
+      - name: Configure SSH for Instance 1
         run: |
           mkdir -p ~/.ssh/
           echo "$SSH_KEY" > ~/.ssh/ec2.key
           chmod 400 ~/.ssh/ec2.key
-          echo "Host instance1
+          cat >>~/.ssh/config <<END
+          Host instance1
             HostName 15.164.143.126
             User $SSH_USER
-            IdentityFile ~/.ssh/ec2.key" >> ~/.ssh/config
-          echo "Host instance2
-            HostName 3.39.217.52
-            User $SSH_USER
-            IdentityFile ~/.ssh/ec2.key" >> ~/.ssh/config
-          echo "Host instance3
-            HostName 3.35.183.61
-            User $SSH_USER
-            IdentityFile ~/.ssh/ec2.key" >> ~/.ssh/config
+            IdentityFile ~/.ssh/ec2.key
+            StrictHostKeyChecking no
+          END
         env:
           SSH_USER: ${{ secrets.AWS_EC2_USERNAME }}
           SSH_KEY: ${{ secrets.AWS_EC2_PEM_KEY }}
 
-      - name: Deploy to EC2 Instances
+      - name: Deploy to EC2 Instance 1
         run: |
-          INSTANCES=("15.164.143.126" "3.39.217.52" "3.35.183.61")
-          for HOST in "${INSTANCES[@]}"; do
-            echo "Deploying to $HOST"
-            ssh -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
-          done
+          HOST="15.164.143.126"
+          echo "Deploying to $HOST"
+          ssh -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
+
+      - name: Configure SSH for Instance 2
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/ec2.key
+          chmod 400 ~/.ssh/ec2.key
+          cat >>~/.ssh/config <<END
+          Host instance2
+            HostName 3.39.217.52
+            User $SSH_USER
+            IdentityFile ~/.ssh/ec2.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: ${{ secrets.AWS_EC2_USERNAME }}
+          SSH_KEY: ${{ secrets.AWS_EC2_PEM_KEY }}
+
+      - name: Deploy to EC2 Instance 2
+        run: |
+          HOST="3.39.217.52"
+          echo "Deploying to $HOST"
+          ssh -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
+
+      - name: Configure SSH for Instance 3
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/ec2.key
+          chmod 400 ~/.ssh/ec2.key
+          cat >>~/.ssh/config <<END
+          Host instance3
+            HostName 3.35.183.61
+            User $SSH_USER
+            IdentityFile ~/.ssh/ec2.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: ${{ secrets.AWS_EC2_USERNAME }}
+          SSH_KEY: ${{ secrets.AWS_EC2_PEM_KEY }}
+
+      - name: Deploy to EC2 Instance 3
+        run: |
+          HOST="3.35.183.61"
+          echo "Deploying to $HOST"
+          ssh -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
+
