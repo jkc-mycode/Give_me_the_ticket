@@ -35,6 +35,8 @@ jobs:
       - name: Deploy to EC2 Instance 1
         run: |
           HOST="15.164.143.126"
+          SSH_USER="ubuntu"
+          
           echo "Deploying to $HOST"
           ssh -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
 
@@ -57,6 +59,8 @@ jobs:
       - name: Deploy to EC2 Instance 2
         run: |
           HOST="3.39.217.52"
+          SSH_USER="ubuntu"
+          
           echo "Deploying to $HOST"
           ssh -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
 
@@ -79,6 +83,8 @@ jobs:
       - name: Deploy to EC2 Instance 3
         run: |
           HOST="3.35.183.61"
+          SSH_USER="ubuntu"
+          
           echo "Deploying to $HOST"
           ssh -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
 
