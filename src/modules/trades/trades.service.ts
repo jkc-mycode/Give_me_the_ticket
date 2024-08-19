@@ -393,13 +393,7 @@ export class TradesService {
       await queryRunner.release();
     }
 
-    // await this.tradeRepository.update({ id: tradeId }, { price: price });
-    // await this.ticketRepository.update({ id: trade.ticketId }, { price: price });
-
     const afterTrade = await this.tradeRepository.findOne({ where: { id: tradeId } });
-
-    // // Elasticsearch 인덱스 업데이트 (업데이트)
-    // await this.searchService.indexTradeData(afterTrade);
 
     return afterTrade;
   }
@@ -433,14 +427,6 @@ export class TradesService {
     } finally {
       queryRunner.release();
     }
-
-    // const deletedTrade = await this.tradeRepository.update(
-    //   { id: tradeId },
-    //   { flag: FLAG.INACTIVE }
-    // );
-
-    // //Elasticsearch 인덱스 삭제
-    // await this.searchService.deleteTradeIndex(tradeId);
 
     return { message: `삭제 완료` };
   }
@@ -589,13 +575,6 @@ export class TradesService {
       console.error(`테스트 오류:`, err);
     }
 
-    // return {
-    //   PORT: process.env.SERVER_PORT,
-    //   HOST: process.env.DB_HOST,
-    //   USER: process.env.DB_USER,
-    //   PASSWORD: process.env.DB_PASSWORD,
-    //   DATABASE: process.env.DB_NAME,
-    // };
     return { message: `코드 실행 성공` };
   }
 
