@@ -86,7 +86,7 @@ export class Show {
    * @example 1800
    */
   @Factory((faker) => faker.number.int({ min: 100, max: 2000 }))
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, unsigned: true })
   totalSeat: number;
 
   @CreateDateColumn()

@@ -197,7 +197,7 @@ export class ShowsService {
     return `${year}${month}${day}${hours}`;
   }
 
-  // Redis 키 패턴 및 최신 키 검색
+  // Redis 키 패턴
   private async getKeys(pattern: string): Promise<string[]> {
     let cursor = '0';
     let keys: string[] = [];
@@ -223,24 +223,22 @@ export class ShowsService {
 
       // 조회수 또는 예매수 증가
       await this.redisClient.zincrby(minKey, 1, String(showId));
-      // TTL 1시간 설정
       await this.redisClient.expire(minKey, 3600);
 
-      // 현재 시간대의 10분 단위 테이블 찾기
+      // 현재 시간대의 minkey 찾기
       const keys = await this.getKeys(`show:${type}:${hourTimestamp}*`);
 
       if (keys.length > 0) {
-        //union테이블 생성
-        await this.redisClient.zunionstore(unionKey, keys.length, ...keys, 'AGGREGATE', 'SUM');
+        //union key 생성
+        await this.redisClient.zunionstore(unionKey, keys.length, ...keys);
       }
-      // unionKey TTL 설정
       await this.redisClient.expire(unionKey, 3600);
     } catch (error) {
       console.log(`레디스 ${type} 증가 오류:`, error);
     }
   }
 
-  /* union key 찾기 */
+  // 최신 unionKey 찾기
   async getUnionKey(type: 'views' | 'bookings'): Promise<string | null> {
     try {
       // 모든 union 키를 검색
@@ -260,14 +258,14 @@ export class ShowsService {
 
   /* 공연 인기별 조회 */
   async getRankedShows(limit: number, sortBy: 'views' | 'bookings'): Promise<Show[]> {
-    // 가장 최신의 union key 찾기
+    // 최근 union key 찾기
     const key = await this.getUnionKey(sortBy);
 
     if (!key) {
       return [];
     }
 
-    // Redis에서 최신 union 키 랭킹 가져오기
+    // redis에서 최근 union key의 랭킹 가져오기 (역순)
     const redisRanking = await this.redisClient.zrevrange(key, 0, limit - 1);
 
     if (redisRanking.length === 0) {
