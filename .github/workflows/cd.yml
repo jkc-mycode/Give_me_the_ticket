@@ -16,28 +16,31 @@ jobs:
 
     # 작업 내의 단위 작업(step)을 정의
     steps:
-      # SSH 접속 후 명령을 통해서 배포 진행
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh/
           echo "$SSH_KEY" > ~/.ssh/ec2.key
           chmod 400 ~/.ssh/ec2.key
-          cat >>~/.ssh/config <<END
-          Host ec2
-            HostName $SSH_HOST
+          echo "Host instance1
+            HostName 15.164.143.126
             User $SSH_USER
-            IdentityFile ~/.ssh/ec2.key
-            StrictHostKeyChecking no
-          END
+            IdentityFile ~/.ssh/ec2.key" >> ~/.ssh/config
+          echo "Host instance2
+            HostName 3.39.217.52
+            User $SSH_USER
+            IdentityFile ~/.ssh/ec2.key" >> ~/.ssh/config
+          echo "Host instance3
+            HostName 3.35.183.61
+            User $SSH_USER
+            IdentityFile ~/.ssh/ec2.key" >> ~/.ssh/config
         env:
           SSH_USER: ${{ secrets.AWS_EC2_USERNAME }}
           SSH_KEY: ${{ secrets.AWS_EC2_PEM_KEY }}
-          SSH_HOST: ${{ secrets.AWS_EC2_HOST }}
 
-      - name: Deploy to EC2
-        run: | 
-          INSTANCES=("ec2-15-164-143-126.ap-northeast-2.compute.amazonaws.com" "ec2-3-39-217-52.ap-northeast-2.compute.amazonaws.com" "ec2-3-35-183-61.ap-northeast-2.compute.amazonaws.com")
+      - name: Deploy to EC2 Instances
+        run: |
+          INSTANCES=("15.164.143.126" "3.39.217.52" "3.35.183.61")
           for HOST in "${INSTANCES[@]}"; do
             echo "Deploying to $HOST"
-            ssh -v -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
+            ssh -o "StrictHostKeyChecking=no" $SSH_USER@$HOST 'cd /home/ubuntu/Give_me_the_ticket && git switch dev && git pull origin dev && echo "${{ secrets.ENV }}" > .env && ./scripts/run.sh'
           done
