@@ -160,7 +160,7 @@ export class ShowsService {
     const cachedData = await this.redisClient.get(cacheKey);
 
     if (cachedData) {
-      return cachedData;
+      return JSON.parse(cachedData);
     }
 
     // 2-2. 캐시 없는 경우, DB에서 조회
