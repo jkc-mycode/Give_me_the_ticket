@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
+  const hash = window.location.hash.substring(1);
+
   const myProfile = document.querySelector('#myProfile');
   const myPoint = document.querySelector('#myPoint');
   const myTicket = document.querySelector('#myTicket');
@@ -325,36 +327,52 @@ document.addEventListener('DOMContentLoaded', function () {
         createdAtElement.textContent = `티켓 구매 일자 : ${log.createdAt}`;
         logElement.appendChild(createdAtElement);
 
-        // 환불
-        const refundButton = document.createElement('button');
-        refundButton.textContent = '환불';
-        refundButton.classList.add('btn-custom', 'btn-refund');
-        // 환불 버튼에 이벤트 추가
-        refundButton.addEventListener('click', () => {
-          window.location.href = `/views/shows/${log.showId}/ticket/${log.id}`;
-        });
-        logElement.appendChild(refundButton);
+        // '사용 가능' 상태인 경우, 버튼 생성
+        if (log.status === 'USEABLE') {
+          // 환불
+          const refundButton = document.createElement('button');
+          refundButton.textContent = '환불';
+          refundButton.classList.add('btn-custom', 'btn-refund');
+          // 환불 버튼에 이벤트 추가
+          refundButton.addEventListener('click', () => {
+            window.location.href = `/views/shows/${log.showId}/ticket/${log.id}`;
+          });
+          logElement.appendChild(refundButton);
 
-        // 중고 판매
-        const resaleButton = document.createElement('button');
-        resaleButton.textContent = '중고 판매';
-        resaleButton.classList.add('btn-custom', 'btn-resale');
-        // 중고 판매 버튼 이벤트 추가
-        resaleButton.addEventListener('click', () => {
-          window.sessionStorage.setItem('ticket', JSON.stringify(log));
-          window.location.href = '/views/trades';
-        });
-        logElement.appendChild(resaleButton);
+          // 중고 판매
+          const resaleButton = document.createElement('button');
+          resaleButton.textContent = '중고 판매';
+          resaleButton.classList.add('btn-custom', 'btn-resale');
+          // 중고 판매 버튼 이벤트 추가
+          resaleButton.addEventListener('click', () => {
+            window.sessionStorage.setItem('ticket', JSON.stringify(log));
+            window.location.href = '/views/trades';
+          });
+          logElement.appendChild(resaleButton);
 
-        // 리뷰 작성
-        const reviewButton = document.createElement('button');
-        reviewButton.textContent = '리뷰 작성';
-        reviewButton.classList.add('btn-custom', 'btn-review');
-        // 리뷰 작성 버튼에 이벤트 추가
-        reviewButton.addEventListener('click', () => {
-          window.location.href = `/views/reviews/${log.id}`;
-        });
-        logElement.appendChild(reviewButton);
+          // 리뷰 작성
+          const reviewButton = document.createElement('button');
+          reviewButton.textContent = '리뷰 작성';
+          reviewButton.classList.add('btn-custom', 'btn-review');
+          // 리뷰 작성 버튼에 이벤트 추가
+          reviewButton.addEventListener('click', () => {
+            window.location.href = `/views/reviews/${log.id}`;
+          });
+          logElement.appendChild(reviewButton);
+        }
+
+        // '티켓 만료' 상태인 경우, '리뷰 작성' 버튼만 생성
+        if (log.status === 'EXPIRED') {
+          // 리뷰 작성
+          const reviewButton = document.createElement('button');
+          reviewButton.textContent = '리뷰 작성';
+          reviewButton.classList.add('btn-custom', 'btn-review');
+          // 리뷰 작성 버튼에 이벤트 추가
+          reviewButton.addEventListener('click', () => {
+            window.location.href = `/views/reviews/${log.id}`;
+          });
+          logElement.appendChild(reviewButton);
+        }
 
         ticketListContainer.appendChild(logElement);
 
