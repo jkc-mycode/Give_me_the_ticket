@@ -73,14 +73,12 @@ export class SearchService {
 
   public async indexTradeData(trade: Trade) {
     try {
-      const originData = await this.tradeRepository.findOne({
-        where: { id: trade.id },
-      });
       const showData = await this.showRepository.findOne({
         where: { id: trade.showId },
       });
-      const tradeData = { ...originData, show: { ...showData } };
+      const tradeData = { ...trade, show: { ...showData } };
 
+      console.log(tradeData);
       await this.esService.index({
         index: this.indexName,
         id: tradeData.id.toString(),

@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       if (err.response && err.response.data) {
         alert(err.response.data.message);
+        window.history.back();
       } else {
         console.error('Error:', err);
         alert('서버와의 통신 중 오류가 발생하였습니다.');
