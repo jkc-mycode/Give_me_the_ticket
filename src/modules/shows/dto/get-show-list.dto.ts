@@ -1,5 +1,14 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min, MinLength } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  MinLength,
+} from 'class-validator';
 import { SHOW_MESSAGES } from 'src/commons/constants/shows/show-messages.constant';
 import { MIN_SHOW_SEARCH_LENGTH } from 'src/commons/constants/shows/shows.constant';
 import { ShowCategory } from 'src/commons/types/shows/show-category.type';
@@ -21,6 +30,14 @@ export class GetShowListDto {
   @MinLength(MIN_SHOW_SEARCH_LENGTH, { message: SHOW_MESSAGES.GET_LIST.MIN_LENGTH })
   @IsString()
   search?: string;
+
+  /**
+   * 검색 키워드
+   * @example "2024-08-31"
+   */
+  @IsOptional()
+  @IsDateString()
+  date?: string;
 
   /**
    * 페이지 번호

@@ -69,7 +69,7 @@ export class User {
     faker.number.int({ min: USER_CONSTANT.POINT.DEFAULT, max: USER_CONSTANT.POINT.DEFAULT })
   )
   @IsNotEmpty()
-  @Column({ type: 'int', default: USER_CONSTANT.POINT.DEFAULT })
+  @Column({ type: 'int', default: USER_CONSTANT.POINT.DEFAULT, unsigned: true })
   point: number;
 
   /**
