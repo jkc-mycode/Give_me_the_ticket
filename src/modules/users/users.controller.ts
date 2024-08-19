@@ -30,6 +30,7 @@ export class UsersController {
   /**
    * 포인트 내역 조회
    * @param req
+   * @param description
    * @returns
    */
   @UseGuards(RolesGuard)
