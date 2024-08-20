@@ -37,8 +37,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const chargeAmount = Number(document.getElementById('chargeAmount').value);
 
-      if (!chargeAmount || chargeAmount <= 0) {
-        alert('충전할 금액을 입력해 주세요.');
+      if (!chargeAmount) {
+        alert('충전할 금액을 선택해 주세요.');
         return;
       }
 
@@ -118,5 +118,11 @@ document.addEventListener('DOMContentLoaded', function () {
   // 결제취소 버튼
   document.querySelector('.cancel__btn').addEventListener('click', function () {
     window.location.href = '/views/users/me#point'; // 마이페이지 포인트 내역 탭으로 이동
+  });
+
+  // 결제 금액 선택
+  document.getElementById('chargeAmountDropdown').addEventListener('change', function () {
+    const selectedAmount = this.value;
+    document.getElementById('chargeAmount').value = selectedAmount;
   });
 });
