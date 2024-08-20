@@ -120,10 +120,10 @@ export class TradesController {
   }
   //<2>중고 거래 검색
   @ApiBearerAuth()
-  @Get('/list/search')
+  @Get('/search')
   @ApiOkResponse({ description: '' })
-  async searchTradeList() {
-    return await this.tradesService.searchTradeList();
+  async searchTradeList(@Query() testDto: TestDto) {
+    return await this.tradesService.searchTradeList(testDto);
   }
 
   //<3>중고 거래 목록 조회
