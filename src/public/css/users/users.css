@@ -27,6 +27,7 @@ h1 {
 
 .links {
   list-style-type: none;
+  text-align: center;
 }
 
 .links li {
@@ -116,6 +117,12 @@ h1 {
   border: 1px solid #ccc;
   padding: 10px;
   margin: 10px 0;
+  cursor: pointer;
+}
+
+.bookmark-list:hover {
+  background-color: #e3f2fd;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .content .trade-log {

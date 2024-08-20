@@ -1,6 +1,4 @@
 document.addEventListener('DOMContentLoaded', function () {
-  const hash = window.location.hash.substring(1);
-
   const myProfile = document.querySelector('#myProfile');
   const myPoint = document.querySelector('#myPoint');
   const myTicket = document.querySelector('#myTicket');
@@ -24,9 +22,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   const token = window.localStorage.getItem('accessToken');
 
-  // 내 정보 (profile)를 기본으로 가져옴
-  getUserProfile();
-
   function showContent(content) {
     profileContent.style.display = 'none';
     pointLogContent.style.display = 'none';
@@ -37,17 +32,48 @@ document.addEventListener('DOMContentLoaded', function () {
     content.style.display = 'block';
   }
 
+  function showTab() {
+    const hash = window.location.hash;
+
+    if (hash === '#point') {
+      showContent(pointLogContent);
+      activeTab(myPoint);
+      getPointLog();
+    } else if (hash === '#ticket') {
+      showContent(ticketListContent);
+      activeTab(myTicket);
+      getTicketList();
+    } else if (hash === '#bookmark') {
+      showContent(bookmarkListContent);
+      activeTab(myBookmark);
+      getBookmarkList();
+    } else if (hash === '#trade') {
+      showContent(tradeLogContent);
+      activeTab(myTrade);
+      getTradeLog();
+    } else {
+      showContent(profileContent);
+      activeTab(myProfile);
+      getUserProfile();
+    }
+  }
+
+  function activeTab(activeTab) {
+    [myProfile, myPoint, myTicket, myBookmark, myTrade].forEach((tab) => {
+      tab.parentElement.style.opacity = tab === activeTab ? '1' : '.6';
+    });
+  }
+
+  // profile로 닉네임 가져오기
+  getUserProfile();
+
+  window.addEventListener('hashchange', showTab);
+  showTab();
+
   //----------- my profile ---------------------
   myProfile.addEventListener('click', function (e) {
     e.preventDefault();
-
-    myProfile.parentElement.style.opacity = '1';
-    Array.from(myProfile.parentElement.parentElement.children).forEach(function (sibling) {
-      if (sibling !== myProfile.parentElement) sibling.style.opacity = '.6';
-    });
-
-    showContent(profileContent);
-    getUserProfile();
+    window.location.hash = '#profile';
   });
 
   async function getUserProfile() {
@@ -90,14 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
   //----------- my point ---------------------
   myPoint.addEventListener('click', function (e) {
     e.preventDefault();
-
-    myPoint.parentElement.style.opacity = '1';
-    Array.from(myPoint.parentElement.parentElement.children).forEach(function (sibling) {
-      if (sibling !== myPoint.parentElement) sibling.style.opacity = '.6';
-    });
-
-    showContent(pointLogContent);
-    getPointLog();
+    window.location.hash = '#point';
   });
 
   pointLogDropdownItems.forEach((item) => {
@@ -247,14 +266,7 @@ document.addEventListener('DOMContentLoaded', function () {
   //----------- my ticket ---------------------
   myTicket.addEventListener('click', function (e) {
     e.preventDefault();
-
-    myTicket.parentElement.style.opacity = '1';
-    Array.from(myTicket.parentElement.parentElement.children).forEach(function (sibling) {
-      if (sibling !== myTicket.parentElement) sibling.style.opacity = '.6';
-    });
-
-    showContent(ticketListContent);
-    getTicketList();
+    window.location.hash = '#ticket';
   });
 
   async function getTicketList() {
@@ -391,14 +403,7 @@ document.addEventListener('DOMContentLoaded', function () {
   //----------- my bookmark ---------------------
   myBookmark.addEventListener('click', function (e) {
     e.preventDefault();
-
-    myBookmark.parentElement.style.opacity = '1';
-    Array.from(myBookmark.parentElement.parentElement.children).forEach(function (sibling) {
-      if (sibling !== myBookmark.parentElement) sibling.style.opacity = '.6';
-    });
-
-    showContent(bookmarkListContent);
-    getBookmarkList();
+    window.location.hash = '#bookmark';
   });
 
   async function getBookmarkList() {
@@ -458,14 +463,7 @@ document.addEventListener('DOMContentLoaded', function () {
   //----------- my trade ---------------------
   myTrade.addEventListener('click', function (e) {
     e.preventDefault();
-
-    myTrade.parentElement.style.opacity = '1';
-    Array.from(myTrade.parentElement.parentElement.children).forEach(function (sibling) {
-      if (sibling !== myTrade.parentElement) sibling.style.opacity = '.6';
-    });
-
-    showContent(tradeLogContent);
-    getTradeLog();
+    window.location.hash = '#trade';
   });
 
   async function getTradeLog() {
