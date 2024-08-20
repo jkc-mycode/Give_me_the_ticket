@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       document.getElementById('nickname').textContent = user.nickname;
       document.getElementById('email').textContent = user.email;
-      document.getElementById('point').textContent = user.point;
+      document.getElementById('point').textContent = user.point.toLocaleString();
 
       if (user && user.profileImg) {
         document.getElementById('profileImg').src = user.profileImg;
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const user = response.data.getUserProfile;
 
-      document.getElementById('userPoint').textContent = user.point;
+      document.getElementById('userPoint').textContent = user.point.toLocaleString();
     } catch (err) {
       console.log(err.response.data);
     }
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.appendChild(createdAtElement);
 
         const priceElement = document.createElement('p');
-        priceElement.textContent = `포인트 금액 : ${log.price}`;
+        priceElement.textContent = `포인트 금액 : ${log.price.toLocaleString()}`;
         logElement.appendChild(priceElement);
 
         const descriptionElement = document.createElement('p');
@@ -313,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.appendChild(locationElement);
 
         const priceElement = document.createElement('p');
-        priceElement.textContent = `티켓 가격 : ${log.price}`;
+        priceElement.textContent = `티켓 가격 : ${log.price.toLocaleString()}`;
         logElement.appendChild(priceElement);
 
         const statusElement = document.createElement('p');
@@ -498,11 +498,11 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.appendChild(showDateTimeElement);
 
         const ticketPriceElement = document.createElement('p');
-        ticketPriceElement.textContent = `티켓 원가 : ${log.ticketPrice}`;
+        ticketPriceElement.textContent = `티켓 원가 : ${log.ticketPrice.toLocaleString()}`;
         logElement.appendChild(ticketPriceElement);
 
         const tradePriceElement = document.createElement('p');
-        tradePriceElement.textContent = `중고 거래 가격 : ${log.tradePrice}`;
+        tradePriceElement.textContent = `중고 거래 가격 : ${log.tradePrice.toLocaleString()}`;
         logElement.appendChild(tradePriceElement);
 
         const tradeStatusElement = document.createElement('p');
