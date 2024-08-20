@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const headerSearchInput = document.querySelector('#searchInput');
   const sortByButton = document.getElementById('sortDropdown');
   const dropdownItems = document.querySelectorAll('.dropdown-item');
-  const rankedShowListContainer = document.querySelector('#rankedShowList');
+  const resetFiltersButton = document.getElementById('resetFilters');
   const params = new URLSearchParams(window.location.search);
   const searchQuery = params.get('search') || '';
   const categoryQuery = params.get('category') || '';
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           sortBy,
         },
       });
-      return data;
+      return Array.isArray(data.data) ? data.data : [];
     } catch (error) {
       console.error('실시간 인기 공연 데이터 가져오기 실패 : ', error);
       return [];
@@ -120,22 +120,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 실시간 인기 공연 렌더링
   function renderRankedShows(shows) {
-    if (!shows || shows.length === 0) {
+    const rankedShowListContainer = document.querySelector('#rankedShowList');
+
+    if (!Array.isArray(shows) || shows.length === 0) {
       rankedShowListContainer.innerHTML = '<p>인기 공연 없음</p>';
       return;
     }
 
     rankedShowListContainer.innerHTML = shows
-      .map((show) => {
+      .map((show, index) => {
+        const imageUrl =
+          show.images && show.images.length > 0 ? show.images[0].imageUrl : 'default-image-url.jpg';
+        const rank = index + 1;
         return `
-        <li class="list-group-item">
-          <a href="/views/shows/${show.id}">
-            ${show.title}
-          </a>
-        </li>
-      `;
+      <div class="col-md-2">
+        <div class="card" data-show-id="${show.id}">
+        <span class="ranking-badge">${rank}</span>
+          <img src="${imageUrl}" class="card-img-top" alt="${show.title}">
+          <div class="card-body">
+            <h5 class="card-title">${show.title}</h5>
+          </div>
+        </div>
+      </div>
+    `;
       })
       .join('');
+
+    // 실시간 인기 공연 카드 클릭 시 상세 페이지로 이동
+    document.querySelectorAll('#rankedShowList .card').forEach((card) => {
+      card.addEventListener('click', function () {
+        const showId = this.dataset.showId;
+        window.location.href = `/views/shows/${showId}`;
+      });
+    });
   }
 
   //공연 날짜별 검색 이벤트 리스너
@@ -276,6 +293,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
+  // 필터 해제 버튼 클릭 이벤트 리스너
+  resetFiltersButton.addEventListener('click', async () => {
+    currentCategory = '';
+    currentSortBy = '';
+    currentDate = '';
+    document.getElementById('filterDate').value = '';
+
+    const result = await fetchShows(currentPage, limit);
+    if (result && result.data) {
+      renderShows(result.data);
+      renderPagination(result.totalPages, currentPage);
+    }
+  });
+
   // 초기 데이터 로딩
   const result = await fetchShows(
     currentPage,
@@ -306,6 +337,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // 실시간 인기 공연 데이터 로딩 및 렌더링
-  const rankedShows = await fetchRankedShows();
+  const rankedShows = await fetchRankedShows(5);
   renderRankedShows(rankedShows);
 });

@@ -316,7 +316,6 @@ export class ShowsService {
       //unionKey 생성
       const keys = await this.getKeys(`show:${type}:${hourTimestamp}*`);
       if (keys.length > 0) {
-        //union key 생성
         await this.redisClient.zunionstore(unionKey, keys.length, ...keys);
       }
       await this.redisClient.expire(unionKey, 3600);
@@ -325,7 +324,7 @@ export class ShowsService {
     }
   }
 
-  // 매 시간마다 실행되는 크론 작업
+  // 매 시간마다 동기화
   @Cron(CronExpression.EVERY_HOUR)
   async handleHourlyRankingUpdate() {
     const previousHour = new Date(Date.now() - 60 * 60 * 1000);
