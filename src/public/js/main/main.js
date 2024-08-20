@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const headerSearchInput = document.querySelector('#searchInput');
   const sortByButton = document.getElementById('sortDropdown');
   const dropdownItems = document.querySelectorAll('.dropdown-item');
-  const resetFiltersButton = document.getElementById('resetFilters');
+  const rankedShowListContainer = document.querySelector('#rankedShowList');
   const params = new URLSearchParams(window.location.search);
   const searchQuery = params.get('search') || '';
   const categoryQuery = params.get('category') || '';
@@ -34,41 +34,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     headerSearchInput.value = searchQuery;
   }
 
-  // 데이터 표준화 함수
-  function ShowData(shows) {
-    return shows.map((show) => {
-      // 이미지 URL 추출
-      const imageUrl =
-        show.imageUrl && show.imageUrl.length > 0
-          ? show.imageUrl
-          : show.images && show.images.length > 0
-            ? show.images.map((image) => image.imageUrl)
-            : ['default-image-url.jpg'];
-
-      // 공연 날짜 추출
-      const showDate =
-        show.showDate && show.showDate.length > 0
-          ? show.showDate
-          : show.schedules && show.schedules.length > 0
-            ? show.schedules.map((schedule) => schedule.date)
-            : ['날짜 정보 없음'];
-
-      return {
-        id: show.id,
-        title: show.title,
-        category: show.category || '기타',
-        location: show.location || '위치 정보 없음',
-        imageUrl,
-        showDate,
-      };
-    });
-  }
-
   // 서버에서 데이터 가져오기
   async function fetchShows(page, limit, search = '', category = '', date = '', sortBy = '') {
     try {
-      const url = sortBy ? '/shows/ranked' : '/shows';
-      const { data } = await axios.get(url, {
+      const { data } = await axios.get('/shows', {
         params: {
           page,
           limit,
@@ -78,23 +47,37 @@ document.addEventListener('DOMContentLoaded', async () => {
           sortBy: sortBy || undefined,
         },
       });
-      const standardData = ShowData(data.data);
-      return {
-        data: standardData,
-        totalPages: data.totalPages,
-      };
+      return data;
     } catch (error) {
       console.error('공연 데이터 가져오기 실패 : ', error);
 
+      // 에러가 발생한 경우 얼럿으로 에러 메시지를 표시합니다.
       if (error.response && error.response.data && error.response.data.message) {
         const errorMessage = Array.isArray(error.response.data.message)
           ? error.response.data.message[0]
           : error.response.data.message;
 
         alert(errorMessage);
+        // 공연 검색 실패 시 메인페이지로 이동
         window.location.href = `/views`;
       }
       return null;
+    }
+  }
+
+  // 실시간 인기 공연 가져오기
+  async function fetchRankedShows(limit = 5, sortBy = 'views') {
+    try {
+      const { data } = await axios.get('/shows/ranked', {
+        params: {
+          limit,
+          sortBy,
+        },
+      });
+      return data;
+    } catch (error) {
+      console.error('실시간 인기 공연 데이터 가져오기 실패 : ', error);
+      return [];
     }
   }
 
@@ -107,8 +90,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     showListContainer.innerHTML = shows
       .map((show) => {
-        const imageUrl = show.imageUrl[0];
-        const showDates = show.showDate.join(', ');
+        const imageUrl = show.imageUrl.length > 0 ? show.imageUrl[0] : 'default-image-url.jpg';
+        const showDates = show.showDate.length > 0 ? show.showDate[0] : '공연 일정이 없습니다.';
         return `
         <div class="col-md-4 mb-3">
           <div class="card" data-show-id="${show.id}">
@@ -135,9 +118,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // 실시간 인기 공연 렌더링
+  function renderRankedShows(shows) {
+    if (!shows || shows.length === 0) {
+      rankedShowListContainer.innerHTML = '<p>인기 공연 없음</p>';
+      return;
+    }
+
+    rankedShowListContainer.innerHTML = shows
+      .map((show) => {
+        return `
+        <li class="list-group-item">
+          <a href="/views/shows/${show.id}">
+            ${show.title}
+          </a>
+        </li>
+      `;
+      })
+      .join('');
+  }
+
   //공연 날짜별 검색 이벤트 리스너
   document.getElementById('filterDate').addEventListener('change', async function () {
     currentDate = this.value;
+    currentPage = 1;
     const result = await fetchShows(
       currentPage,
       limit,
@@ -157,6 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     item.addEventListener('click', async (e) => {
       e.preventDefault();
       currentSortBy = item.getAttribute('data-value');
+      currentPage = 1;
       sortByButton.textContent = item.textContent;
 
       const result = await fetchShows(
@@ -254,8 +259,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       document.querySelectorAll('.category-btn').forEach((btn) => btn.classList.remove('active'));
       this.classList.add('active');
       currentCategory = button.dataset.category;
-
-      const currentDate = document.getElementById('filterDate').value;
+      currentPage = 1;
 
       const result = await fetchShows(
         1,
@@ -272,20 +276,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
-  // 전체 조회 버튼 클릭 이벤트 리스너
-  resetFiltersButton.addEventListener('click', async () => {
-    currentCategory = '';
-    currentDate = '';
-    currentSortBy = '';
-    document.getElementById('filterDate').value = '';
-
-    const result = await fetchShows(currentPage, limit);
-    if (result && result.data) {
-      renderShows(result.data);
-      renderPagination(result.totalPages, currentPage);
-    }
-  });
-
   // 초기 데이터 로딩
   const result = await fetchShows(
     currentPage,
@@ -299,4 +289,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderShows(result.data);
     renderPagination(result.totalPages, currentPage);
   }
+
+  // 실시간 인기 공연 데이터 로딩 및 렌더링
+  const rankedShows = await fetchRankedShows();
+  renderRankedShows(rankedShows);
 });

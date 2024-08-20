@@ -89,6 +89,13 @@ export class Show {
   @Column({ type: 'int', nullable: false, unsigned: true })
   totalSeat: number;
 
+  /**
+   * 공연 조회수
+   *
+   */
+  @Column({ type: 'int', default: 0 })
+  views: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
