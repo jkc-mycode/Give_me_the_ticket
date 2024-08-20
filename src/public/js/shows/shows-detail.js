@@ -59,10 +59,10 @@ document.addEventListener('DOMContentLoaded', function () {
           <p>가격: ${data.price}원</p>
           <p>상영 시간: ${data.runtime}분</p>
           <p>내용:</p>
-     <div>${data.content
-       .split('\n')
-       .map((paragraph) => `<p>${paragraph}</p>`)
-       .join('')}</div>
+      <div>${data.content
+        .split('\n')
+        .map((paragraph) => `<p>${paragraph}</p>`)
+        .join('')}</div>
           <p>위치: ${data.location}</p>
           <p>총 좌석: ${data.totalSeat}석</p>
         `;
