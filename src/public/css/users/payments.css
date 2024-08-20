@@ -46,3 +46,18 @@ input[type='number']:focus {
 .payment__btn:hover {
   background-color: #45a049;
 }
+
+.cancel__btn {
+  background-color: #ff5858;
+  color: white;
+  padding: 10px 20px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.cancel__btn:hover {
+  background-color: #f73842;
+}

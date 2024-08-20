@@ -21,8 +21,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const deleteBtn = document.querySelector('#deleteBtn');
 
   const token = window.localStorage.getItem('accessToken');
-  const urlParams = new URLSearchParams(window.location.search);
-  const tab = urlParams.get('tab');
 
   function showContent(content) {
     profileContent.style.display = 'none';
@@ -32,27 +30,6 @@ document.addEventListener('DOMContentLoaded', function () {
     tradeLogContent.style.display = 'none';
 
     content.style.display = 'block';
-  }
-
-  //특정 탭으로 바로 이동
-  if (tab) {
-    switch (tab) {
-      case 'tradeLog':
-        showContent(tradeLogContent);
-        getTradeLog();
-        myTrade.parentElement.style.opacity = '1';
-        Array.from(myTrade.parentElement.parentElement.children).forEach(function (sibling) {
-          if (sibling !== myTrade.parentElement) sibling.style.opacity = '.6';
-        });
-        break;
-    }
-  } else {
-    showContent(profileContent);
-    getUserProfile();
-    myProfile.parentElement.style.opacity = '1';
-    Array.from(myProfile.parentElement.parentElement.children).forEach(function (sibling) {
-      if (sibling !== myProfile.parentElement) sibling.style.opacity = '.6';
-    });
   }
 
   function showTab() {
