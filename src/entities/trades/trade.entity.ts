@@ -35,7 +35,7 @@ export class Trade {
   @Column({ name: 'show_id', type: 'int', nullable: false })
   showId: number;
 
-  @Column({ type: 'int', nullable: false })
+  @Column({ type: 'int', nullable: false, unsigned: true })
   price: number;
 
   @Column({ nullable: false })

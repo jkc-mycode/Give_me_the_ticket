@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     trade = await axios.get(`/trades/${getTradeIdFromPath()}`);
     ticket = trade.data.ticket;
     console.log(trade.data);
+    console.log(trade.data.title);
   } catch (err) {
     console.log(err);
     alert(err.response.data.message);
@@ -29,13 +30,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 티켓 정보를 HTML로 구성
     ticketContainer.innerHTML = `
       <h3>티켓 정보</h3>
-      <p>제목: ${ticket.title}</p>
-      <p>공연일자: ${ticket.date}</p>
-      <p>공연시간: ${ticket.time}</p>
-      <p>상영시간(분): ${ticket.runtime}</p>
-      <p>공연장소: ${ticket.location}</p>
-      <p>원래가격: ${ticket.price}</p>
-      <p>티켓상태: ${ticket.status}</p>
+      <p>제목: ${trade.data.title}</p>
+      <p>공연일자: ${trade.data.date}</p>
+      <p>공연시간: ${trade.data.time}</p>
+      <p>상영시간(분): ${trade.data.runtime}</p>
+      <p>공연장소: ${trade.data.location}</p>
+      <p>원래가격: ${trade.data.price}</p>
     `;
   }
 
@@ -46,11 +46,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 가격 입력 체크
     if (tradePrice === '') {
       alert('가격을 입력해 주세요.');
+      return;
     }
 
     // 가격 정수 체크
     if (isNaN(tradePrice) || !Number.isInteger(Number(tradePrice))) {
       alert('정수를 입력해 주세요.');
+      return;
     }
 
     try {

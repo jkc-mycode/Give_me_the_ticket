@@ -11,6 +11,7 @@ import { TradeLog } from '../entities/trades/trade-log.entity';
 import { Schedule } from '../entities/shows/schedule.entity';
 import { Image } from '../entities/images/image.entity';
 import { ShowReview } from 'src/entities/show-reviews/show-reviews.entity';
+import { ShowRanking } from 'src/entities/shows/showRanking.entity';
 
 export const typeOrmModuleOptions: TypeOrmModuleAsyncOptions = {
   imports: [ConfigModule],
@@ -34,6 +35,7 @@ export const typeOrmModuleOptions: TypeOrmModuleAsyncOptions = {
       Schedule,
       Image,
       ShowReview,
+      ShowRanking,
     ],
     synchronize: ConfigService.get('DB_SYNC'),
     namingStrategy: new SnakeNamingStrategy(),
