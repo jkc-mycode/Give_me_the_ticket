@@ -442,6 +442,35 @@ document.addEventListener('DOMContentLoaded', function () {
         createdAtElement.textContent = `찜 한 날짜 : ${log.createdAt}`;
         logElement.appendChild(createdAtElement);
 
+        const deleteBookmarkButton = document.createElement('button');
+        deleteBookmarkButton.textContent = '찜하기 취소';
+        deleteBookmarkButton.classList.add('btn-custom', 'btn-review');
+
+        deleteBookmarkButton.addEventListener('click', async (event) => {
+          const showId = log.showId;
+          const bookmarkId = log.id;
+          event.stopPropagation();
+          const confirmDelete = window.confirm('찜하기를 취소하시겠습니까?');
+          if (confirmDelete) {
+            const response = await axios.delete(
+              // await로 요청 대기
+              `/shows/${showId}/bookmark/${bookmarkId}`, // 요청 URL
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`, // 인증 헤더
+                },
+              }
+            );
+
+            if (response.status === 200) {
+              alert('찜하기가 성공적으로 취소되었습니다.'); // 요청 성공 시 알림 표시
+              logElement.remove();
+            }
+          }
+        });
+
+        logElement.appendChild(deleteBookmarkButton);
+
         bookmarkListContainer.appendChild(logElement);
 
         logElement.addEventListener('click', () => {
