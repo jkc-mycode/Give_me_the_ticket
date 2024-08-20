@@ -66,26 +66,26 @@ document.addEventListener('DOMContentLoaded', function () {
           <p>위치: ${data.location}</p>
           <p>총 좌석: ${data.totalSeat}석</p>
         `;
-
         if (data.schedules && data.schedules.length > 0) {
           const now = new Date();
+          const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000);
 
-          // 잔여좌석이 0이 아니고, 현재 시간 이후의 스케줄만 필터링
+          // 잔여좌석이 0이 아니고, 현재 시간 이후의 스케줄 중 2시간 이후 스케줄만 필터링
           const filteredSchedules = data.schedules.filter((schedule) => {
             const scheduleDateTime = new Date(`${schedule.date} ${schedule.time}`);
-            return schedule.remainSeat > 0 && scheduleDateTime > now;
+            return schedule.remainSeat > 0 && scheduleDateTime > twoHoursLater;
           });
 
           if (filteredSchedules.length > 0) {
             scheduleDropdownMenu.innerHTML = filteredSchedules
               .map(
                 (schedule) => `
-            <li>
-              <a class="dropdown-item" href="#" data-schedule-id="${schedule.id}">
-                날짜 : ${schedule.date} | 시간 : ${schedule.time} | 잔여좌석 : ${schedule.remainSeat}
-              </a>
-            </li>
-          `
+      <li>
+        <a class="dropdown-item" href="#" data-schedule-id="${schedule.id}">
+          날짜 : ${schedule.date} | 시간 : ${schedule.time} | 잔여좌석 : ${schedule.remainSeat}
+        </a>
+      </li>
+    `
               )
               .join('');
           } else {
@@ -317,6 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // 전역 리뷰 배열
   let reviews = [];
 
+  //리뷰 수정, 삭제버튼 본인것만 보이게
   async function renderReviews(reviewsData) {
     reviews = reviewsData; // 리뷰 배열 업데이트
     const reviewsContainer = document.getElementById('reviews-container');
