@@ -101,6 +101,24 @@ export class UsersController {
   }
 
   /**
+   * 리뷰 목록 조회
+   * @param req
+   * @returns
+   */
+  @UseGuards(RolesGuard)
+  @Roles(Role.USER)
+  @Get('/me/review')
+  async getReviewList(@Req() req: any) {
+    const getReviewList = await this.userService.getReviewList(req.user.id);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: USER_MESSAGES.USER.REVIEW.GET_LIST.SUCCESS,
+      getReviewList,
+    };
+  }
+
+  /**
    * 사용자 프로필 조회
    * @param req
    * @returns

@@ -14,6 +14,7 @@ import { Ticket } from 'src/entities/shows/ticket.entity';
 import { Bookmark } from 'src/entities/users/bookmark.entity';
 import { Trade } from 'src/entities/trades/trade.entity';
 import { TradeLog } from 'src/entities/trades/trade-log.entity';
+import { ShowReview } from 'src/entities/show-reviews/show-reviews.entity';
 import { USER_MESSAGES } from 'src/commons/constants/users/user-message.constant';
 import { USER_BOOKMARK_MESSAGES } from 'src/commons/constants/users/user-bookmark-messages.constant';
 
@@ -38,7 +39,9 @@ export class UsersService {
     @InjectRepository(Trade)
     private readonly tradeRepository: Repository<Trade>,
     @InjectRepository(TradeLog)
-    private readonly tradeLogRepository: Repository<TradeLog>
+    private readonly tradeLogRepository: Repository<TradeLog>,
+    @InjectRepository(ShowReview)
+    private readonly showReviewRepository: Repository<ShowReview>
   ) {}
 
   // 포인트 내역 조회
@@ -223,6 +226,38 @@ export class UsersService {
       return formatTradeLog;
     } catch (err) {
       throw new InternalServerErrorException(USER_MESSAGES.USER.TRADE.GET_LOG.FAILURE.FAIL);
+    }
+  }
+
+  // 리뷰 목록 조회
+  async getReviewList(id: number) {
+    try {
+      const review = await this.showReviewRepository.find({
+        where: { userId: id },
+        order: { createdAt: 'DESC' },
+      });
+
+      if (review.length === 0) {
+        throw new NotFoundException(USER_MESSAGES.USER.REVIEW.GET_LIST.FAILURE.NOT_FOUND);
+      }
+
+      // 날짜 형식 변환
+      const dateFormatReview = review.map((review) => {
+        // KST로 변환 (+9시간)
+        const kstDate = new Date(review.createdAt);
+        kstDate.setHours(kstDate.getHours() + 9);
+
+        const dateFormat = format(kstDate, 'yyyy-MM-dd HH:mm:ss');
+
+        return {
+          ...review,
+          createdAt: dateFormat,
+        };
+      });
+
+      return dateFormatReview;
+    } catch (err) {
+      throw new InternalServerErrorException(USER_MESSAGES.USER.REVIEW.GET_LIST.FAILURE.FAIL);
     }
   }
 
