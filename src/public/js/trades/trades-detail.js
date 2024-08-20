@@ -46,6 +46,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   const tradeId = getTradeIdFromParam();
   const result = await getDetailTrade(tradeId);
+  let discount = 100 - (result.price / result.origin_price) * 100;
+  discount = discount - (discount % 0.001);
+  if (result.price === 0) discount = 100;
   tradeContainer.innerHTML = '';
   tradeContainer.innerHTML += `<div class="tradeImage">
           <img
@@ -59,7 +62,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div class="location">위치: ${result.location}</div>
         <div class="closedAt">공연 날짜 및 시간: ${result.closedAt}</div>
         <div class="createdAt">거래 생성 날짜 및 시간:${result.createdAt}</div>
-        <div class="updatedAt">게시글 수정 날짜 및 시간:${result.updatedAt}</div>`;
+        <div class="updatedAt">게시글 수정 날짜 및 시간:${result.updatedAt}</div>
+        <div class="discount">
+        <b style="font-size: 200%; color: blue;">
+        기존 티켓 ${result.origin_price}원의 ${discount}% 할인된 가격입니다!
+        </b>
+        </div>`;
+
   PurchaseBtn.addEventListener('click', async (e) => {
     e.preventDefault();
     try {
