@@ -118,3 +118,8 @@ footer {
   text-overflow: ellipsis;
   border: none;
 }
+
+.img-full-width {
+  width: 500px;
+  height: auto;
+}

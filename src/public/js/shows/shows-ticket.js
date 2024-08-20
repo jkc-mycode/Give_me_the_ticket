@@ -50,17 +50,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
         const showsContainer = document.querySelector('#shows');
 
+        // 포인트 잔액 계산
+        const remainingPoints = pointData.point - data.price;
+
+        // 포인트 메시지 결정
+        const pointMessage =
+          remainingPoints < 0
+            ? '잔액 부족으로 예매할 수 없습니다.'
+            : `예매 후 포인트: ${remainingPoints}`;
+
+        // HTML 업데이트
         showsContainer.innerHTML = `
-        
-          <h2>${data.title}</h2>
-          <p>가격: ${data.price}원</p>
-          <p>위치: ${data.location}</p>
-           <p>공연일: ${schedule.date}</p>
-        <p>시간: ${schedule.time}</p>
-          <p>현재 포인트: ${pointData.point}</p>
-          <p>예매 후 포인트: ${pointData.point - data.price} </p>
-     
-        `;
+  <h2>${data.title}</h2>
+  <p>가격: ${data.price}원</p>
+  <p>위치: ${data.location}</p>
+  <p>공연일: ${schedule.date}</p>
+  <p>시간: ${schedule.time}</p>
+  <p>현재 포인트: ${pointData.point}</p>
+  <p>${pointMessage}</p>
+`;
       } else {
         console.error('서버에서 데이터를 가져오지 못했습니다.');
       }

@@ -76,7 +76,12 @@ document.addEventListener('DOMContentLoaded', function () {
           Authorization: `Bearer ${token}`,
         },
       });
-
+      // 예매 확인창 추가
+      const isConfirmed = confirm('이 공연을 환불하시겠습니까?');
+      if (!isConfirmed) {
+        window.history.back(); // 사용자가 취소를 클릭한 경우, 이전 페이지로 이동
+        return;
+      }
       if (response.status === 200) {
         alert('환불이 완료되었습니다');
         window.location.href = '/views';

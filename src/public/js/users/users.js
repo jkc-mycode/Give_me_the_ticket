@@ -21,11 +21,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const deleteBtn = document.querySelector('#deleteBtn');
 
   const token = window.localStorage.getItem('accessToken');
-  const urlParams = new URLSearchParams(window.location.search);
-  const tab = urlParams.get('tab');
-
-  // 내 정보 (profile)를 기본으로 가져옴
-  getUserProfile();
 
   function showContent(content) {
     profileContent.style.display = 'none';
@@ -37,38 +32,48 @@ document.addEventListener('DOMContentLoaded', function () {
     content.style.display = 'block';
   }
 
-  //특정 탭으로 바로 이동
-  if (tab) {
-    switch (tab) {
-      case 'tradeLog':
-        showContent(tradeLogContent);
-        getTradeLog();
-        myTrade.parentElement.style.opacity = '1';
-        Array.from(myTrade.parentElement.parentElement.children).forEach(function (sibling) {
-          if (sibling !== myTrade.parentElement) sibling.style.opacity = '.6';
-        });
-        break;
+  function showTab() {
+    const hash = window.location.hash;
+
+    if (hash === '#point') {
+      showContent(pointLogContent);
+      activeTab(myPoint);
+      getPointLog();
+    } else if (hash === '#ticket') {
+      showContent(ticketListContent);
+      activeTab(myTicket);
+      getTicketList();
+    } else if (hash === '#bookmark') {
+      showContent(bookmarkListContent);
+      activeTab(myBookmark);
+      getBookmarkList();
+    } else if (hash === '#trade') {
+      showContent(tradeLogContent);
+      activeTab(myTrade);
+      getTradeLog();
+    } else {
+      showContent(profileContent);
+      activeTab(myProfile);
+      getUserProfile();
     }
-  } else {
-    showContent(profileContent);
-    getUserProfile();
-    myProfile.parentElement.style.opacity = '1';
-    Array.from(myProfile.parentElement.parentElement.children).forEach(function (sibling) {
-      if (sibling !== myProfile.parentElement) sibling.style.opacity = '.6';
+  }
+
+  function activeTab(activeTab) {
+    [myProfile, myPoint, myTicket, myBookmark, myTrade].forEach((tab) => {
+      tab.parentElement.style.opacity = tab === activeTab ? '1' : '.6';
     });
   }
+
+  // profile로 닉네임 가져오기
+  getUserProfile();
+
+  window.addEventListener('hashchange', showTab);
+  showTab();
 
   //----------- my profile ---------------------
   myProfile.addEventListener('click', function (e) {
     e.preventDefault();
-
-    myProfile.parentElement.style.opacity = '1';
-    Array.from(myProfile.parentElement.parentElement.children).forEach(function (sibling) {
-      if (sibling !== myProfile.parentElement) sibling.style.opacity = '.6';
-    });
-
-    showContent(profileContent);
-    getUserProfile();
+    window.location.hash = '#profile';
   });
 
   async function getUserProfile() {
@@ -90,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       document.getElementById('nickname').textContent = user.nickname;
       document.getElementById('email').textContent = user.email;
-      document.getElementById('point').textContent = user.point;
+      document.getElementById('point').textContent = user.point.toLocaleString();
 
       if (user && user.profileImg) {
         document.getElementById('profileImg').src = user.profileImg;
@@ -111,14 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
   //----------- my point ---------------------
   myPoint.addEventListener('click', function (e) {
     e.preventDefault();
-
-    myPoint.parentElement.style.opacity = '1';
-    Array.from(myPoint.parentElement.parentElement.children).forEach(function (sibling) {
-      if (sibling !== myPoint.parentElement) sibling.style.opacity = '.6';
-    });
-
-    showContent(pointLogContent);
-    getPointLog();
+    window.location.hash = '#point';
   });
 
   pointLogDropdownItems.forEach((item) => {
@@ -141,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const user = response.data.getUserProfile;
 
-      document.getElementById('userPoint').textContent = user.point;
+      document.getElementById('userPoint').textContent = user.point.toLocaleString();
     } catch (err) {
       console.log(err.response.data);
     }
@@ -173,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.appendChild(createdAtElement);
 
         const priceElement = document.createElement('p');
-        priceElement.textContent = `포인트 금액 : ${log.price}`;
+        priceElement.textContent = `포인트 금액 : ${log.price.toLocaleString()}`;
         logElement.appendChild(priceElement);
 
         const descriptionElement = document.createElement('p');
@@ -268,14 +266,7 @@ document.addEventListener('DOMContentLoaded', function () {
   //----------- my ticket ---------------------
   myTicket.addEventListener('click', function (e) {
     e.preventDefault();
-
-    myTicket.parentElement.style.opacity = '1';
-    Array.from(myTicket.parentElement.parentElement.children).forEach(function (sibling) {
-      if (sibling !== myTicket.parentElement) sibling.style.opacity = '.6';
-    });
-
-    showContent(ticketListContent);
-    getTicketList();
+    window.location.hash = '#ticket';
   });
 
   async function getTicketList() {
@@ -322,7 +313,7 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.appendChild(locationElement);
 
         const priceElement = document.createElement('p');
-        priceElement.textContent = `티켓 가격 : ${log.price}`;
+        priceElement.textContent = `티켓 가격 : ${log.price.toLocaleString()}`;
         logElement.appendChild(priceElement);
 
         const statusElement = document.createElement('p');
@@ -348,36 +339,52 @@ document.addEventListener('DOMContentLoaded', function () {
         createdAtElement.textContent = `티켓 구매 일자 : ${log.createdAt}`;
         logElement.appendChild(createdAtElement);
 
-        // 환불
-        const refundButton = document.createElement('button');
-        refundButton.textContent = '환불';
-        refundButton.classList.add('btn-custom', 'btn-refund');
-        // 환불 버튼에 이벤트 추가
-        refundButton.addEventListener('click', () => {
-          window.location.href = `/views/shows/${log.showId}/ticket/${log.id}`;
-        });
-        logElement.appendChild(refundButton);
+        // '사용 가능' 상태인 경우, 버튼 생성
+        if (log.status === 'USEABLE') {
+          // 환불
+          const refundButton = document.createElement('button');
+          refundButton.textContent = '환불';
+          refundButton.classList.add('btn-custom', 'btn-refund');
+          // 환불 버튼에 이벤트 추가
+          refundButton.addEventListener('click', () => {
+            window.location.href = `/views/shows/${log.showId}/ticket/${log.id}`;
+          });
+          logElement.appendChild(refundButton);
 
-        // 중고 판매
-        const resaleButton = document.createElement('button');
-        resaleButton.textContent = '중고 판매';
-        resaleButton.classList.add('btn-custom', 'btn-resale');
-        // 중고 판매 버튼 이벤트 추가
-        resaleButton.addEventListener('click', () => {
-          window.sessionStorage.setItem('ticket', JSON.stringify(log));
-          window.location.href = '/views/trades';
-        });
-        logElement.appendChild(resaleButton);
+          // 중고 판매
+          const resaleButton = document.createElement('button');
+          resaleButton.textContent = '중고 판매';
+          resaleButton.classList.add('btn-custom', 'btn-resale');
+          // 중고 판매 버튼 이벤트 추가
+          resaleButton.addEventListener('click', () => {
+            window.sessionStorage.setItem('ticket', JSON.stringify(log));
+            window.location.href = '/views/trades';
+          });
+          logElement.appendChild(resaleButton);
 
-        // 리뷰 작성
-        const reviewButton = document.createElement('button');
-        reviewButton.textContent = '리뷰 작성';
-        reviewButton.classList.add('btn-custom', 'btn-review');
-        // 리뷰 작성 버튼에 이벤트 추가
-        reviewButton.addEventListener('click', () => {
-          window.location.href = `/views/reviews/${log.id}`;
-        });
-        logElement.appendChild(reviewButton);
+          // 리뷰 작성
+          const reviewButton = document.createElement('button');
+          reviewButton.textContent = '리뷰 작성';
+          reviewButton.classList.add('btn-custom', 'btn-review');
+          // 리뷰 작성 버튼에 이벤트 추가
+          reviewButton.addEventListener('click', () => {
+            window.location.href = `/views/reviews/${log.id}`;
+          });
+          logElement.appendChild(reviewButton);
+        }
+
+        // '티켓 만료' 상태인 경우, '리뷰 작성' 버튼만 생성
+        if (log.status === 'EXPIRED') {
+          // 리뷰 작성
+          const reviewButton = document.createElement('button');
+          reviewButton.textContent = '리뷰 작성';
+          reviewButton.classList.add('btn-custom', 'btn-review');
+          // 리뷰 작성 버튼에 이벤트 추가
+          reviewButton.addEventListener('click', () => {
+            window.location.href = `/views/reviews/${log.id}`;
+          });
+          logElement.appendChild(reviewButton);
+        }
 
         ticketListContainer.appendChild(logElement);
 
@@ -396,14 +403,7 @@ document.addEventListener('DOMContentLoaded', function () {
   //----------- my bookmark ---------------------
   myBookmark.addEventListener('click', function (e) {
     e.preventDefault();
-
-    myBookmark.parentElement.style.opacity = '1';
-    Array.from(myBookmark.parentElement.parentElement.children).forEach(function (sibling) {
-      if (sibling !== myBookmark.parentElement) sibling.style.opacity = '.6';
-    });
-
-    showContent(bookmarkListContent);
-    getBookmarkList();
+    window.location.hash = '#bookmark';
   });
 
   async function getBookmarkList() {
@@ -463,14 +463,7 @@ document.addEventListener('DOMContentLoaded', function () {
   //----------- my trade ---------------------
   myTrade.addEventListener('click', function (e) {
     e.preventDefault();
-
-    myTrade.parentElement.style.opacity = '1';
-    Array.from(myTrade.parentElement.parentElement.children).forEach(function (sibling) {
-      if (sibling !== myTrade.parentElement) sibling.style.opacity = '.6';
-    });
-
-    showContent(tradeLogContent);
-    getTradeLog();
+    window.location.hash = '#trade';
   });
 
   async function getTradeLog() {
@@ -505,11 +498,11 @@ document.addEventListener('DOMContentLoaded', function () {
         logElement.appendChild(showDateTimeElement);
 
         const ticketPriceElement = document.createElement('p');
-        ticketPriceElement.textContent = `티켓 원가 : ${log.ticketPrice}`;
+        ticketPriceElement.textContent = `티켓 원가 : ${log.ticketPrice.toLocaleString()}`;
         logElement.appendChild(ticketPriceElement);
 
         const tradePriceElement = document.createElement('p');
-        tradePriceElement.textContent = `중고 거래 가격 : ${log.tradePrice}`;
+        tradePriceElement.textContent = `중고 거래 가격 : ${log.tradePrice.toLocaleString()}`;
         logElement.appendChild(tradePriceElement);
 
         const tradeStatusElement = document.createElement('p');
