@@ -6,19 +6,23 @@ export class TradeViewsController {
   @Render('trades/list.view.ejs')
   getTradeList() {}
 
-  @Get('/:tradeid')
-  @Render('trades/detail.view.ejs')
-  getTradeDetail() {}
+  @Get(`/search`)
+  @Render(`trades/trade-search.view.ejs`)
+  searchTrade() {}
 
   @Get('/purchase/:tradeid')
   @Render(`trades/trade-purchase.view.ejs`)
   purchaseTrade() {}
 
-  @Get('/:tradeId/edit')
-  @Render('trades/trade-update.view.ejs')
-  updateTrade() {}
-
   @Get()
   @Render('trades/trade-create.view.ejs')
   createTrade() {}
+
+  @Get('/:tradeid')
+  @Render('trades/detail.view.ejs')
+  getTradeDetail() {}
+
+  @Get('/:tradeId/edit')
+  @Render('trades/trade-update.view.ejs')
+  updateTrade() {}
 }

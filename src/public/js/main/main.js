@@ -321,6 +321,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderPagination(result.totalPages, currentPage);
   }
 
+  // 페이지 로드 시 모달 표시
+  window.onload = function () {
+    var contentModal = new bootstrap.Modal(document.getElementById('contentModal'));
+    if (window.name !== 'modalHidden') {
+      contentModal.show();
+    }
+  };
+
+  // "다시 보지 않기" 버튼 클릭 시 모달 숨김 및 상태 저장
+  document.getElementById('dontShowAgainBtn').addEventListener('click', function () {
+    var contentModal = bootstrap.Modal.getInstance(document.getElementById('contentModal'));
+    contentModal.hide();
+    window.name = 'modalHidden'; // 상태 저장
+  });
+
   // 실시간 인기 공연 데이터 로딩 및 렌더링
   const rankedShows = await fetchRankedShows(5);
   renderRankedShows(rankedShows);

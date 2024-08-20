@@ -744,7 +744,7 @@ export class ShowsService {
         throw new NotFoundException(SHOW_TICKET_MESSAGES.COMMON.TICKET.NOT_FOUND);
       }
 
-      const showTime = `${String(ticket.date)}T${String(ticket.time)}.000+09:00`;
+      const showTime = `${String(ticket.date)}T${String(ticket.time)}.000Z`;
 
       // 현재의 시간에서 1시간 전으로 시간 제한을 설정
       const oneHoursBeforeShowTime = subHours(

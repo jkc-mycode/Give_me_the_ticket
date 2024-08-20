@@ -190,3 +190,29 @@ footer {
   color: #fff;
   padding: 10px 0;
 }
+
+.col-md-3 {
+  position: sticky;
+  top: 20px;
+  max-width: 280px;
+}
+
+#rankedShowList {
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  padding: 0;
+}
+
+#rankedShowList .list-group-item {
+  padding: 10px 15px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: none;
+}
+
+.img-full-width {
+  width: 500px;
+  height: auto;
+}

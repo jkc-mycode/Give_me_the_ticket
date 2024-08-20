@@ -37,8 +37,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const chargeAmount = Number(document.getElementById('chargeAmount').value);
 
-      if (!chargeAmount || chargeAmount <= 0) {
-        alert('충전할 금액을 입력해 주세요.');
+      if (!chargeAmount) {
+        alert('충전할 금액을 선택해 주세요.');
         return;
       }
 
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function () {
               );
 
               if (notified.data.statusCode === 200) {
-                window.location.href = '/views/users/me'; // 내 정보 조회 페이지 (마이 페이지)로 이동
+                window.location.href = '/views/users/me#point'; // 내 정보 조회 페이지 (마이 페이지)의 포인트 내역 탭으로 이동
               } else {
                 throw new Error(notified.data.message || '결제 검증 중 오류 발생');
               }
@@ -112,5 +112,17 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  document.querySelector('button').addEventListener('click', doPayment);
+  // 결제하기 버튼
+  document.querySelector('.payment__btn').addEventListener('click', doPayment);
+
+  // 결제취소 버튼
+  document.querySelector('.cancel__btn').addEventListener('click', function () {
+    window.location.href = '/views/users/me#point'; // 마이페이지 포인트 내역 탭으로 이동
+  });
+
+  // 결제 금액 선택
+  document.getElementById('chargeAmountDropdown').addEventListener('change', function () {
+    const selectedAmount = this.value;
+    document.getElementById('chargeAmount').value = selectedAmount;
+  });
 });

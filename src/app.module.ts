@@ -28,6 +28,7 @@ import { UsersViewsController } from './views/users/users.view.controller';
 import { ShowsViewsController } from './views/shows/shows.view.controller';
 import { TradeViewsController } from './views/trades/trades.view.controller';
 import { ShowReviewsViewsController } from './views/show-reviews/show-reviews.controller';
+import { TaskModule } from './modules/task/task.module';
 
 @Module({
   imports: [
@@ -71,6 +72,7 @@ import { ShowReviewsViewsController } from './views/show-reviews/show-reviews.co
     PaymentsModule,
     RedlockModule,
     ShowReviewsModule,
+    TaskModule,
   ],
   controllers: [
     AppController,

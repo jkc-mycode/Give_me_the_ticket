@@ -98,6 +98,89 @@
         </nav>
       </div>
     </main>
+    <div class="container mt-5">
+      <!-- Modal -->
+      <div
+        class="modal fade"
+        id="contentModal"
+        tabindex="-1"
+        aria-labelledby="contentModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-xl">
+          <!-- 변경된 부분 -->
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="contentModalLabel">사이트 이용 안내</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-4">
+                  <div id="list-example" class="list-group">
+                    <a class="list-group-item list-group-item-action" href="#list-item-1"
+                      >예매 안내</a
+                    >
+                    <a class="list-group-item list-group-item-action" href="#list-item-2"
+                      >중고거래 등록 안내</a
+                    >
+                    <a class="list-group-item list-group-item-action" href="#list-item-3"
+                      >중고 거래 구매 안내</a
+                    >
+                    <a class="list-group-item list-group-item-action" href="#list-item-4"
+                      >환불 안내</a
+                    >
+                  </div>
+                </div>
+                <div class="col-8">
+                  <div
+                    data-bs-spy="scroll"
+                    data-bs-target="#list-example"
+                    data-bs-smooth-scroll="true"
+                    class="scrollspy-example"
+                    tabindex="0"
+                    style="height: 500px; width: 700px; overflow-y: scroll"
+                  >
+                    <h4 id="list-item-1">공연 예매 안내</h4>
+                    <img
+                      src="https://d3pbkwvgb6ktnr.cloudfront.net/ticketing/2024-8-20_87692492.png"
+                      alt="공연 예매"
+                      class="img-full-width"
+                    />
+                    <h4 id="list-item-2">공연 환불 안내</h4>
+                    <img
+                      src="https://d3pbkwvgb6ktnr.cloudfront.net/ticketing/2024-8-20_45216031.png"
+                      alt="공연 환불"
+                      class="img-full-width"
+                    />
+                    <h4 id="list-item-3">중고 거래 등록 안내</h4>
+                    <img
+                      src="https://d3pbkwvgb6ktnr.cloudfront.net/ticketing/2024-8-20_25428238.png"
+                      alt="중고 거래 등록"
+                      class="img-full-width"
+                    />
+                    <h4 id="list-item-4">중고 거래 구매 안내</h4>
+                    <img
+                      src="https://d3pbkwvgb6ktnr.cloudfront.net/ticketing/2024-8-20_88521407.png"
+                      alt="환불 안내"
+                      class="img-full-width"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" id="dontShowAgainBtn">닫기</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <footer class="text-center py-4">
       <p>&copy; 2024 GIVE ME THE TICKET. All Rights Reserved.</p>
     </footer>
