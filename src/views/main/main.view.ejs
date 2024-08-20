@@ -42,10 +42,23 @@
     <%- include('../common/header.view.ejs') %>
     <main class="py-4">
       <div class="container">
-        <div class="row">
-          <div class="col-md-9">
-            <!-- Main content -->
-            <div class="category-container mb-4 text-center">
+        <section class="popular-shows mb-4">
+          <h5 class="mb-3">실시간 인기 공연 TOP 5</h5>
+          <div id="rankedShowList" class="row"></div>
+        </section>
+        <div class="row mb-4 align-items-center">
+          <div class="col-md-4">
+            <input
+              type="text"
+              id="filterDate"
+              class="form-control"
+              placeholder="원하는 공연 날짜를 선택해주세요"
+              onfocus="(this.type='date')"
+              onblur="(this.type='text')"
+            />
+          </div>
+          <div class="col-md-4 text-center">
+            <div class="category-container">
               <button class="btn btn-outline-primary category-btn" data-category="Musical">
                 뮤지컬
               </button>
@@ -55,48 +68,34 @@
               <button class="btn btn-outline-primary category-btn" data-category="Play">
                 연극
               </button>
+              <button class="btn btn-outline-secondary reset-btn" id="resetFilters">
+                필터 해제
+              </button>
             </div>
-            <div class="row mb-4">
-              <div class="col-md-4">
-                <input
-                  type="text"
-                  id="filterDate"
-                  class="form-control"
-                  placeholder="원하는 공연 날짜를 선택해주세요"
-                  onfocus="(this.type='date')"
-                  onblur="(this.type='text')"
-                />
-              </div>
-              <div class="col-md-4 offset-md-4 text-end">
-                <div class="dropdown">
-                  <button
-                    class="btn btn-secondary dropdown-toggle"
-                    type="button"
-                    id="sortDropdown"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    정렬기준
-                  </button>
-                  <ul class="dropdown-menu" aria-labelledby="sortDropdown">
-                    <li><a class="dropdown-item" href="#" data-value="views">조회순</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="bookings">예매순</a></li>
-                    <li><a class="dropdown-item" href="#" data-value="createdAt">최신순</a></li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div id="showList" class="row"></div>
-            <nav aria-label="Page navigation">
-              <ul class="pagination justify-content-center mt-4" id="pagination"></ul>
-            </nav>
           </div>
-          <div class="col-md-3">
-            <!-- Sidebar content -->
-            <h5>실시간 인기 공연</h5>
-            <ul id="rankedShowList" class="list-group"></ul>
+          <div class="col-md-4 text-end">
+            <div class="dropdown">
+              <button
+                class="btn btn-secondary dropdown-toggle"
+                type="button"
+                id="sortDropdown"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                정렬 기준
+              </button>
+              <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                <li><a class="dropdown-item" href="#" data-value="createdAt">최신순</a></li>
+                <li><a class="dropdown-item" href="#" data-value="views">조회순</a></li>
+                <li><a class="dropdown-item" href="#" data-value="bookings">예매순</a></li>
+              </ul>
+            </div>
           </div>
         </div>
+        <div id="showList" class="row"></div>
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center mt-4" id="pagination"></ul>
+        </nav>
       </div>
     </main>
     <footer class="text-center py-4">
