@@ -56,6 +56,7 @@ export class SearchService {
                 category: { type: 'keyword' },
                 location: { type: 'text' },
                 imageUrl: { type: 'text' },
+                views: { type: 'integer' },
               },
             },
           },
@@ -85,6 +86,7 @@ export class SearchService {
           location: showData.location,
           imageUrl: showData.images.map((image) => image.imageUrl),
           showDate: showData.schedules.map((schedule) => schedule.date),
+          views: showData.views,
         },
       });
     } catch (error) {
@@ -128,7 +130,7 @@ export class SearchService {
     }
   }
 
-  @Cron('*/5 * * * *') //5분마다 동기화
+  @Cron('* * * * *') //1분마다 동기화
   async handleCron() {
     await this.syncAllShows();
   }

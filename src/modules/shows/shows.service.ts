@@ -33,6 +33,7 @@ import { PointLog } from 'src/entities/users/point-log.entity';
 import { PointType } from 'src/commons/types/users/point.type';
 import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import Redis from 'ioredis';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class ShowsService {
@@ -92,7 +93,6 @@ export class ShowsService {
         })
       );
 
-      // 이미지 병렬로 저장
       await queryRunner.manager.save(images);
 
       //트랜잭션 커밋
@@ -134,7 +134,7 @@ export class ShowsService {
 
   /*공연 목록 조회 */
   async getShowList(getShowListDto: GetShowListDto): Promise<any> {
-    const { category, search, page, limit, date } = getShowListDto;
+    const { category, search, page, limit, date, sortBy } = getShowListDto;
 
     // 1. search 있는 경우, Elastic Search 로.
     if (search) {
@@ -158,7 +158,7 @@ export class ShowsService {
 
     // 2. search 없는 경우
     // 2-1. 캐시에서 조회
-    const cacheKey = `showList:${category}:${page}:${limit}:${date}`;
+    const cacheKey = `showList:${category}:${page}:${limit}:${date}:${sortBy}`;
     const cachedData = await this.redisClient.get(cacheKey);
 
     if (cachedData) {
@@ -179,10 +179,23 @@ export class ShowsService {
       queryBuilder.andWhere('schedule.date = :date', { date });
     }
 
+    // 정렬 기준 설정
+    if (sortBy === 'views') {
+      queryBuilder.orderBy('show.views', 'DESC');
+    } else if (sortBy === 'bookings') {
+      queryBuilder
+        .leftJoinAndSelect('show.tickets', 'ticket')
+        .addSelect('COUNT(ticket.id)', 'ticketCount')
+        .andWhere('ticket.status = :status', { status: TicketStatus.USEABLE })
+        .groupBy('show.id')
+        .orderBy('ticketCount', 'DESC');
+    } else {
+      queryBuilder.orderBy('show.createdAt', 'DESC');
+    }
+
     const [shows, total] = await queryBuilder
       .skip((page - 1) * limit)
       .take(limit)
-      .orderBy('show.id', 'DESC')
       .getManyAndCount();
 
     // response 형태 변환: Elastic Search response에 맞게
@@ -218,6 +231,9 @@ export class ShowsService {
     if (!show) {
       throw new NotFoundException(SHOW_MESSAGES.COMMON.NOT_FOUND);
     }
+
+    // 조회수 증가
+    await this.showRepository.increment({ id: showId }, 'views', 1);
 
     return {
       id: show.id,
@@ -304,21 +320,29 @@ export class ShowsService {
         await this.redisClient.zunionstore(unionKey, keys.length, ...keys);
       }
       await this.redisClient.expire(unionKey, 3600);
-
-      // // 이전 UnionKey를 찾아 DB에 저장
-      // const previousHourTimestamp = this.getHourTimestamp(
-      //   new Date(date.getTime() - 60 * 60 * 1000)
-      // );
-      // const previousUnionKey = `show:${type}:union:${previousHourTimestamp}`;
-      // await this.updateRanking(type, previousUnionKey);
-
-      //스케줄링 사용해서 업데이트해주기
     } catch (error) {
       console.log(`레디스 ${type} 증가 오류:`, error);
     }
   }
 
-  // DB에 랭킹 데이터 저장
+  // 매 시간마다 실행되는 크론 작업
+  @Cron(CronExpression.EVERY_HOUR)
+  async handleHourlyRankingUpdate() {
+    const previousHour = new Date(Date.now() - 60 * 60 * 1000);
+
+    for (const type of ['views', 'bookings'] as const) {
+      const unionKey = await this.getUnionKeyForHour(type, previousHour);
+      if (unionKey) await this.updateRanking(type, unionKey);
+    }
+  }
+
+  private async getUnionKeyForHour(type: 'views' | 'bookings', date: Date): Promise<string | null> {
+    const pattern = `show:${type}:union:${this.getHourTimestamp(date)}`;
+    const keys = await this.getKeys(pattern);
+    return keys.length > 0 ? keys.sort().reverse()[0] : null;
+  }
+
+  /* DB에 랭킹 데이터 저장 */
   async updateRanking(type: 'views' | 'bookings', unionKey: string) {
     const redisData = await this.redisClient.zrange(unionKey, 0, -1, 'WITHSCORES');
     if (redisData.length === 0) return;
@@ -326,35 +350,22 @@ export class ShowsService {
     const today = new Date().toISOString().slice(0, 10);
     const rankingData = new Map<number, any>();
 
-    // Redis에서 랭킹 데이터 가져오기
     for (let i = 0; i < redisData.length; i += 2) {
       const showId = parseInt(redisData[i], 10);
       const count = parseInt(redisData[i + 1], 10);
 
-      // Map에서 기존 데이터 확인
       if (rankingData.has(showId)) {
         const existingEntry = rankingData.get(showId);
-        if (type === 'views') {
-          existingEntry.views += count;
-        } else {
-          existingEntry.bookings += count;
-        }
+        existingEntry[type] += count;
       } else {
-        // DB에서 기존 데이터 조회
         const existingData = await this.showRankingRepository.findOne({
           where: { date: today, showId },
         });
 
         if (existingData) {
-          // 기존 데이터가 있으면 누적 합산
-          if (type === 'views') {
-            existingData.views += count;
-          } else {
-            existingData.bookings += count;
-          }
+          existingData[type] += count;
           rankingData.set(showId, existingData);
         } else {
-          // 기존 데이터가 없으면 새로운 데이터 생성
           const newDateRanking = this.showRankingRepository.create({
             date: today,
             showId,
@@ -485,9 +496,6 @@ export class ShowsService {
 
       // 트랜잭션 커밋
       await queryRunner.commitTransaction();
-
-      // Elasticsearch 인덱스 업데이트 (업데이트)
-      await this.searchService.indexShowData(show);
 
       return {};
     } catch (error) {
