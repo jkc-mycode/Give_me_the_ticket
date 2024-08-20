@@ -1,9 +1,10 @@
 // 페이지 이동 함수 전역 선언
-function goToPage(pageNumber, category, search, sortBy) {
+function goToPage(pageNumber, category, search, date, sortBy) {
   const url = new URL(window.location.href);
   url.searchParams.set('page', pageNumber);
   url.searchParams.set('category', category);
   url.searchParams.set('search', search);
+  url.searchParams.set('date', date);
   url.searchParams.set('sortBy', sortBy);
   window.location.href = url.toString();
 }
@@ -18,15 +19,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const searchQuery = params.get('search') || '';
   const categoryQuery = params.get('category') || '';
+  const selectedDate = params.get('date') || '';
   const sortByQuery = params.get('sortBy') || '';
   const page = parseInt(params.get('page') || '1');
   const limit = parseInt(params.get('limit') || '6');
-  const selectedDate = params.get('date') || '';
 
   let currentCategory = categoryQuery;
+  let currentDate = selectedDate;
   let currentSortBy = sortByQuery;
   let currentPage = page;
-  let currentDate = selectedDate;
 
   // 검색어를 검색창에 설정
   if (headerSearchInput) {
@@ -137,7 +138,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   //공연 날짜별 검색 이벤트 리스너
   document.getElementById('filterDate').addEventListener('change', async function () {
     currentDate = this.value;
-    const result = await fetchShows(currentPage, limit, searchQuery, currentCategory, selectedDate);
+    const result = await fetchShows(
+      currentPage,
+      limit,
+      searchQuery,
+      currentCategory,
+      currentDate,
+      currentSortBy
+    );
     if (result && result.data) {
       renderShows(result.data);
       renderPagination(result.totalPages, currentPage);
@@ -235,7 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       link.addEventListener('click', function (event) {
         event.preventDefault();
         const pageNumber = parseInt(this.dataset.page);
-        goToPage(pageNumber, currentCategory, searchQuery, currentSortBy);
+        goToPage(pageNumber, currentCategory, searchQuery, currentDate, currentSortBy);
       });
     });
   }
@@ -247,14 +255,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       this.classList.add('active');
       currentCategory = button.dataset.category;
 
-      const selectedDate = document.getElementById('filterDate').value;
+      const currentDate = document.getElementById('filterDate').value;
 
       const result = await fetchShows(
         1,
         limit,
         searchQuery,
         currentCategory,
-        selectedDate,
+        currentDate,
         currentSortBy
       );
       if (result && result.data) {
@@ -267,8 +275,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 전체 조회 버튼 클릭 이벤트 리스너
   resetFiltersButton.addEventListener('click', async () => {
     currentCategory = '';
-    currentSortBy = '';
     currentDate = '';
+    currentSortBy = '';
     document.getElementById('filterDate').value = '';
 
     const result = await fetchShows(currentPage, limit);
@@ -284,8 +292,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     limit,
     searchQuery,
     currentCategory,
-    currentSortBy,
-    currentDate
+    currentDate,
+    currentSortBy
   );
   if (result && result.data) {
     renderShows(result.data);

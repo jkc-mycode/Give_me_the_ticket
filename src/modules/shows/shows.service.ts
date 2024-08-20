@@ -305,12 +305,14 @@ export class ShowsService {
       }
       await this.redisClient.expire(unionKey, 3600);
 
-      // 이전 UnionKey를 찾아 DB에 저장
-      const previousHourTimestamp = this.getHourTimestamp(
-        new Date(date.getTime() - 60 * 60 * 1000)
-      );
-      const previousUnionKey = `show:${type}:union:${previousHourTimestamp}`;
-      await this.updateRanking(type, previousUnionKey);
+      // // 이전 UnionKey를 찾아 DB에 저장
+      // const previousHourTimestamp = this.getHourTimestamp(
+      //   new Date(date.getTime() - 60 * 60 * 1000)
+      // );
+      // const previousUnionKey = `show:${type}:union:${previousHourTimestamp}`;
+      // await this.updateRanking(type, previousUnionKey);
+
+      //스케줄링 사용해서 업데이트해주기
     } catch (error) {
       console.log(`레디스 ${type} 증가 오류:`, error);
     }
