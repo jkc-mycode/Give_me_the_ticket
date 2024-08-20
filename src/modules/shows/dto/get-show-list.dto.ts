@@ -40,6 +40,14 @@ export class GetShowListDto {
   date?: string;
 
   /**
+   * 검색 기준
+   * @example "views"
+   */
+  @IsOptional()
+  @IsString()
+  sortBy?: string;
+
+  /**
    * 페이지 번호
    * @example 1
    */

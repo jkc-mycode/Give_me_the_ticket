@@ -39,6 +39,5 @@ export const typeOrmModuleOptions: TypeOrmModuleAsyncOptions = {
     ],
     synchronize: ConfigService.get('DB_SYNC'),
     namingStrategy: new SnakeNamingStrategy(),
-    // logging: true,
   }),
 };
