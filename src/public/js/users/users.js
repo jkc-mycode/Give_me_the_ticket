@@ -279,6 +279,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
   async function getTicketList() {
     try {
+      // 이미 작성한 리뷰 확인을 위한 백엔드 사용자 리뷰 목록 조회 API 호출
+      const reviewResponse = await axios.get('/users/me/review', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const userReview = reviewResponse.data.getReviewList;
+      const reviewedShow = userReview.map((review) => review.showId); // 리뷰 작성된 showId 목록
+
       // 백엔드 사용자 예매 목록 조회 API 호출
       const response = await axios.get('/users/me/ticket', {
         headers: {
@@ -379,7 +389,12 @@ document.addEventListener('DOMContentLoaded', function () {
           reviewButton.classList.add('btn-custom', 'btn-review');
           // 리뷰 작성 버튼에 이벤트 추가
           reviewButton.addEventListener('click', () => {
-            window.location.href = `/views/reviews/${log.id}`;
+            // 이미 리뷰를 작성한 경우
+            if (reviewedShow.includes(log.showId)) {
+              alert('이미 작성한 리뷰가 존재합니다.');
+            } else {
+              window.location.href = `/views/reviews/${log.id}`;
+            }
           });
           logElement.appendChild(reviewButton);
         }
@@ -598,7 +613,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
               });
               alert('삭제에 성공했습니다!');
-              location.href = location.href;
+              window.location.href = `/views/users/me#trade`;
             }
           } catch (err) {
             alert('삭제에 실패했습니다.');
