@@ -4,6 +4,12 @@ function goToPage(pageNumber) {
   url.searchParams.set('page', pageNumber);
   window.location.href = url.toString();
 }
+let currentUrl = window.location.href;
+currentUrl = currentUrl.split(`/`);
+if (currentUrl.includes('trades') && currentUrl.includes('list')) {
+  console.log('exist');
+}
+console.log(currentUrl);
 
 document.addEventListener('DOMContentLoaded', async () => {
   const token = window.localStorage.getItem('accessToken');
