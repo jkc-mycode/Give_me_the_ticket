@@ -118,15 +118,8 @@ export class TradesController {
     const user = req.user;
     return await this.tradesService.getLogs(user.id);
   }
-  //<2>중고 거래 검색
-  @ApiBearerAuth()
-  @Get('/search')
-  @ApiOkResponse({ description: '' })
-  async searchTradeList(@Query() testDto: TestDto) {
-    return await this.tradesService.searchTradeList(testDto);
-  }
 
-  //<3>중고 거래 목록 조회
+  //<2>중고 거래 목록 조회
   @ApiBearerAuth()
   @Get('/list')
   @ApiOperation({
@@ -156,7 +149,7 @@ export class TradesController {
     return await this.tradesService.createTrade(createTradeDto, user.id);
   }
 
-  //<5>중고 거래 상세 조회
+  //<4>중고 거래 상세 조회
   @ApiBearerAuth()
   @Get('/:tradeId')
   @ApiOperation({
@@ -172,7 +165,7 @@ export class TradesController {
   }
   //첫 주솟값을 param으로 받는 콘트롤러 메서드
 
-  //<6>중고 거래 수정
+  //<5>중고 거래 수정
   @ApiBearerAuth()
   @Patch('/:tradeId')
   @ApiOperation({
@@ -194,7 +187,7 @@ export class TradesController {
     return await this.tradesService.updateTrade(tradeId, updateTradeDto, user.id);
   }
 
-  //<7>중고 거래 삭제
+  //<6>중고 거래 삭제
   @ApiBearerAuth()
   @Delete('/:tradeId')
   @ApiOperation({
@@ -213,7 +206,7 @@ export class TradesController {
     return { message: MESSAGES.TRADES.SUCCESSFULLY_DELETE.TRADE };
   }
 
-  //<8>중고 거래 구매
+  //<7>중고 거래 구매
   @ApiBearerAuth()
   @Post('/:tradeId')
   @ApiOperation({
