@@ -97,6 +97,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   backBtn.addEventListener('click', function (e) {
     e.preventDefault();
-    window.location.href = '/views/users/me';
+    window.location.href = '/views/users/me#ticket';
   });
 });

@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       alert('중고 거래 수정에 성공했습니다.');
-      window.location.href = '/views/users/me';
+      window.location.href = '/views/users/me#trade';
     } catch (err) {
       console.log(err);
       alert(err.response.data.message);

@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
       alert('회원 정보 수정이 완료되었습니다.');
 
       // 수정 후 마이 페이지로 이동
-      window.location.href = '/views/users/me';
+      window.location.href = '/views/users/me#profile';
     } catch (err) {
       console.log(err.response.data);
       alert(err.response.data.message);

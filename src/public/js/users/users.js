@@ -598,7 +598,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
               });
               alert('삭제에 성공했습니다!');
-              location.href = location.href;
+              window.location.href = `/views/users/me#trade`;
             }
           } catch (err) {
             alert('삭제에 실패했습니다.');
