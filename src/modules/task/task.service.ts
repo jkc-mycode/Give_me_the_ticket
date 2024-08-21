@@ -28,8 +28,8 @@ export class TaskService {
     await this.searchService.syncAllShows();
   }
 
-  // 매 초마다 실행되어 만료된 티켓을 업데이트
-  @Cron('* * * * * *')
+  // 3시간마다 실행되어 만료된 티켓을 업데이트
+  @Cron('* * 3 * * *')
   async updateExpiredTicket() {
     const nowTime = new Date();
 
