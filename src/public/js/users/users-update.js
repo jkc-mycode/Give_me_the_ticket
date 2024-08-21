@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
   const updateForm = document.getElementById('updateForm');
+  const backBtn = document.querySelector('#backBtn');
   const token = window.localStorage.getItem('accessToken');
 
   //----------- update user ---------------------
@@ -91,5 +92,11 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
       profileImgPreview.innerHTML = '';
     }
+  });
+
+  //----------- back ---------------------
+  backBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+    window.location.href = `/views/users/me#profile`;
   });
 });

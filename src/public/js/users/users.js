@@ -350,19 +350,20 @@ document.addEventListener('DOMContentLoaded', function () {
           statusText = '판매됨';
         }
 
-        statusElement.textContent = `티켓 상태 : ${statusText}`;
+        statusElement.innerHTML = `티켓 상태 : <strong>${statusText}</strong>`;
         logElement.appendChild(statusElement);
 
         const createdAtElement = document.createElement('p');
         createdAtElement.textContent = `티켓 구매 일자 : ${log.createdAt}`;
         logElement.appendChild(createdAtElement);
 
-        // '사용 가능' 상태인 경우, '환불', '중고 판매' 버튼 생성
+        // '사용 가능' 상태인 경우, '환불' 및 '중고 판매' 버튼 생성
         if (log.status === 'USEABLE') {
           // 환불
           const refundButton = document.createElement('button');
           refundButton.textContent = '환불';
           refundButton.classList.add('btn-custom', 'btn-refund');
+
           // 환불 버튼에 이벤트 추가
           refundButton.addEventListener('click', () => {
             window.location.href = `/views/shows/${log.showId}/ticket/${log.id}`;
@@ -373,6 +374,7 @@ document.addEventListener('DOMContentLoaded', function () {
           const resaleButton = document.createElement('button');
           resaleButton.textContent = '중고 판매';
           resaleButton.classList.add('btn-custom', 'btn-resale');
+
           // 중고 판매 버튼 이벤트 추가
           resaleButton.addEventListener('click', () => {
             window.sessionStorage.setItem('ticket', JSON.stringify(log));
@@ -565,7 +567,7 @@ document.addEventListener('DOMContentLoaded', function () {
           tradeStatusText = `거래 취소됨`;
         }
 
-        tradeStatusElement.textContent = `거래 상태 : ${tradeStatusText}`;
+        tradeStatusElement.innerHTML = `거래 상태 : <strong>${tradeStatusText}</strong>`;
         logElement.appendChild(tradeStatusElement);
 
         const buyerIdElement = document.createElement('p');
@@ -584,6 +586,7 @@ document.addEventListener('DOMContentLoaded', function () {
         tradeLogCreatedAtElement.textContent = `거래 내역 일자 : ${log.tradeLogCreatedAt}`;
         logElement.appendChild(tradeLogCreatedAtElement);
 
+        // '거래 진행 중' 상태인 경우, '수정' 및 '삭제' 버튼 생성
         if (log.tradeStatus === 'ACTIVATION') {
           // 수정
           const updateTradeBtn = document.createElement('button');
@@ -596,31 +599,32 @@ document.addEventListener('DOMContentLoaded', function () {
             window.location.href = `/views/trades/${log.tradeId}/edit`;
           });
           logElement.appendChild(updateTradeBtn);
-        }
 
-        // 삭제
-        const deleteTradeBtn = document.createElement('button');
-        deleteTradeBtn.textContent = '삭제';
-        deleteTradeBtn.classList.add('btn-custom', 'btn-delete');
+          // 삭제
+          const deleteTradeBtn = document.createElement('button');
+          deleteTradeBtn.textContent = '삭제';
+          deleteTradeBtn.classList.add('btn-custom', 'btn-delete');
 
-        // 삭제 버튼 이벤트 추가
-        deleteTradeBtn.addEventListener('click', async () => {
-          try {
-            if (confirm('삭제하시겠습니까?')) {
-              await axios.delete(`/trades/${log.tradeId}`, {
-                headers: {
-                  Authorization: `Bearer ${token}`, // 인증 헤더에 토큰 추가
-                },
-              });
-              alert('삭제에 성공했습니다!');
-              window.location.href = `/views/users/me#trade`;
+          // 삭제 버튼 이벤트 추가
+          deleteTradeBtn.addEventListener('click', async () => {
+            try {
+              if (confirm('삭제하시겠습니까?')) {
+                await axios.delete(`/trades/${log.tradeId}`, {
+                  headers: {
+                    Authorization: `Bearer ${token}`, // 인증 헤더에 토큰 추가
+                  },
+                });
+                alert('삭제에 성공했습니다!');
+                window.location.href = `/views/users/me#trade`;
+                window.location.reload();
+              }
+            } catch (err) {
+              alert('삭제에 실패했습니다.');
+              console.error('삭제에 실패했습니다.', err);
             }
-          } catch (err) {
-            alert('삭제에 실패했습니다.');
-            console.error('삭제에 실패했습니다.', err);
-          }
-        });
-        logElement.appendChild(deleteTradeBtn);
+          });
+          logElement.appendChild(deleteTradeBtn);
+        }
 
         tradeLogContainer.appendChild(logElement);
 
