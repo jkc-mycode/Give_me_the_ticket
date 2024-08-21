@@ -54,11 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 가격 입력 체크
     if (tradePrice === '') {
       alert('가격을 입력해 주세요.');
+      return;
     }
 
     // 가격 정수 체크
     if (isNaN(tradePrice) || !Number.isInteger(Number(tradePrice))) {
       alert('정수를 입력해 주세요.');
+      return;
     }
 
     try {
