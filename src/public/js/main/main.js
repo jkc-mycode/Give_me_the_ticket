@@ -91,7 +91,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     showListContainer.innerHTML = shows
       .map((show) => {
         const imageUrl = show.imageUrl.length > 0 ? show.imageUrl[0] : 'default-image-url.jpg';
-        const showDates = show.showDate.length > 0 ? show.showDate[0] : '공연 일정이 없습니다.';
+        const showDates =
+          show.showDate.length > 0 ? show.showDate.join(' , ') : '공연 일정이 없습니다.';
         return `
         <div class="col-md-4 mb-3">
           <div class="card" data-show-id="${show.id}">
@@ -299,6 +300,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentSortBy = '';
     currentDate = '';
     document.getElementById('filterDate').value = '';
+
+    // 모든 카테고리 버튼의 활성화 상태 제거
+    document.querySelectorAll('.category-btn').forEach((btn) => btn.classList.remove('active'));
 
     const result = await fetchShows(currentPage, limit);
     if (result && result.data) {
