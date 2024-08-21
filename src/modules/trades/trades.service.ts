@@ -70,9 +70,6 @@ export class TradesService {
     @InjectRepository(PointLog)
     private pointLogRepository: Repository<PointLog>,
 
-    //Queue
-    @InjectQueue(QUEUES.TRADE_QUEUE) private ticketQueue: Queue,
-
     //Service
     private readonly searchService: SearchService,
 
