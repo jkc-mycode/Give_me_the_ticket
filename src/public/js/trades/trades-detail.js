@@ -3,13 +3,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const token = window.localStorage.getItem('accessToken');
   const tradeContainer = document.querySelector('#tradeBox');
   const PurchaseBtn = document.querySelector('#createTrade');
-  // const title = document.querySelector('.title');
-  // const price = document.querySelector('.price');
-  // const location = document.querySelector('.location');
-  // const description = document.querySelector('.description');
-  // const closedAt = document.querySelector('.createdAt');
-  // const createdAt = document.querySelector('.createdAt');
-  // const updatedAt = document.querySelector('.updateAt');
 
   if (!token) {
     window.location.href = '/views/auth/sign';

@@ -15,16 +15,12 @@ import { Show } from 'src/entities/shows/show.entity';
 import { Schedule } from 'src/entities/shows/schedule.entity';
 import { Ticket } from 'src/entities/shows/ticket.entity';
 import { User } from 'src/entities/users/user.entity';
-import { TicketProcessor } from './ticket.process';
 import { Image } from 'src/entities/images/image.entity';
 import { PointLog } from 'src/entities/users/point-log.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    BullModule.registerQueue({
-      name: 'tradeQueue',
-    }),
     RedlockModule,
     SearchModule,
     TypeOrmModule.forFeature([
@@ -40,7 +36,7 @@ import { PointLog } from 'src/entities/users/point-log.entity';
     ]),
   ],
   controllers: [TradesController],
-  providers: [TradesService, TicketProcessor],
+  providers: [TradesService],
   exports: [TypeOrmModule],
 })
 export class TradesModule {}
