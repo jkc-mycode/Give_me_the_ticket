@@ -279,6 +279,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
   async function getTicketList() {
     try {
+      // 이미 작성한 리뷰 확인을 위한 백엔드 사용자 리뷰 목록 조회 API 호출
+      const reviewResponse = await axios.get('/users/me/review', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const userReview = reviewResponse.data.getReviewList;
+      const reviewedShow = userReview.map((review) => review.showId); // 리뷰 작성된 showId 목록
+
       // 백엔드 사용자 예매 목록 조회 API 호출
       const response = await axios.get('/users/me/ticket', {
         headers: {
@@ -371,7 +381,7 @@ document.addEventListener('DOMContentLoaded', function () {
           logElement.appendChild(resaleButton);
         }
 
-        // '티켓 만료' 상태인 경우, '리뷰 작성' 버튼 생성
+        // '티켓 만료' 상태인 경우와 리뷰 작성하지 않은 경우, '리뷰 작성' 버튼 생성
         if (log.status === 'EXPIRED') {
           // 리뷰 작성
           const reviewButton = document.createElement('button');
@@ -379,7 +389,11 @@ document.addEventListener('DOMContentLoaded', function () {
           reviewButton.classList.add('btn-custom', 'btn-review');
           // 리뷰 작성 버튼에 이벤트 추가
           reviewButton.addEventListener('click', () => {
-            window.location.href = `/views/reviews/${log.id}`;
+            if (reviewedShow.includes(log.showId)) {
+              alert('이미 작성한 리뷰가 존재합니다.');
+            } else {
+              window.location.href = `/views/reviews/${log.id}`;
+            }
           });
           logElement.appendChild(reviewButton);
         }
