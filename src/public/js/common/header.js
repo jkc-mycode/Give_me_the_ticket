@@ -58,26 +58,56 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 });
 
+const currentUrl = window.location.href;
+
 // 검색 버튼 클릭 이벤트 핸들러
-headerSearchButton.addEventListener('click', () => {
-  const search = headerSearchInput.value;
-  const currentUrl = new URL(window.location.href);
-  currentUrl.pathname = '/views';
-  currentUrl.searchParams.set('search', search);
-  currentUrl.searchParams.set('page', 1);
-  window.location.href = currentUrl.href;
-});
+if (currentUrl.includes('trades') && currentUrl.includes('list')) {
+  //중고 거래일 때
+  headerSearchButton.addEventListener('click', () => {
+    const search = headerSearchInput.value;
+    const currentUrl = new URL(window.location.href);
+    currentUrl.pathname = '/views/trades/list';
+    currentUrl.searchParams.set('search', search);
+    currentUrl.searchParams.set('page', 1);
+    console.log(currentUrl);
+    window.location.href = currentUrl.href;
+  });
+} else {
+  //공연 검색일 때
+  headerSearchButton.addEventListener('click', () => {
+    const search = headerSearchInput.value;
+    const currentUrl = new URL(window.location.href);
+    currentUrl.pathname = '/views';
+    currentUrl.searchParams.set('search', search);
+    currentUrl.searchParams.set('page', 1);
+    window.location.href = currentUrl.href;
+  });
+}
 
 // 엔터 키 이벤트 핸들러
-headerSearchForm.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const search = headerSearchInput.value;
-  const currentUrl = new URL(window.location.href);
-  currentUrl.pathname = '/views';
-  currentUrl.searchParams.set('search', search);
-  currentUrl.searchParams.set('page', 1);
-  window.location.href = currentUrl.href;
-});
+if (currentUrl.includes('trades') && currentUrl.includes('list')) {
+  //중고 거래일 때
+  headerSearchForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const search = headerSearchInput.value;
+    const currentUrl = new URL(window.location.href);
+    currentUrl.pathname = '/views/trades/list';
+    currentUrl.searchParams.set('search', search);
+    currentUrl.searchParams.set('page', 1);
+    window.location.href = currentUrl.href;
+  });
+} else {
+  //공연 검색일 때
+  headerSearchForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const search = headerSearchInput.value;
+    const currentUrl = new URL(window.location.href);
+    currentUrl.pathname = '/views';
+    currentUrl.searchParams.set('search', search);
+    currentUrl.searchParams.set('page', 1);
+    window.location.href = currentUrl.href;
+  });
+}
 
 // 브라우저 닫을 때 토큰 초기화
 document.addEventListener('unload', () => {

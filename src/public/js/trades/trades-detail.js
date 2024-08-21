@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
   }
+
   const tradeId = getTradeIdFromParam();
   const result = await getDetailTrade(tradeId);
   let discount = 100 - (result.price / result.origin_price) * 100;

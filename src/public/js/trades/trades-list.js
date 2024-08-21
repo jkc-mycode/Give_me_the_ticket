@@ -4,6 +4,12 @@ function goToPage(pageNumber) {
   url.searchParams.set('page', pageNumber);
   window.location.href = url.toString();
 }
+let currentUrl = window.location.href;
+currentUrl = currentUrl.split(`/`);
+if (currentUrl.includes('trades') && currentUrl.includes('list')) {
+  console.log('exist');
+}
+console.log(currentUrl);
 
 document.addEventListener('DOMContentLoaded', async () => {
   const token = window.localStorage.getItem('accessToken');
@@ -12,8 +18,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const params = new URLSearchParams(window.location.search);
   const page = parseInt(params.get('page') || '1');
   const limit = parseInt(params.get('limit') || '6');
+  const search = params.get('search');
 
   let currentPage = page;
+
+  if (search) console.log(search);
 
   if (!token) {
     alert('로그인이 필요합니다.');
@@ -22,16 +31,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // 데이터 가져오기
-  async function fetchTradesList(page, limit) {
+  async function fetchTradesList(page, limit, search) {
     try {
       const { data } = await axios.get(`/trades/list`, {
-        params: { page, limit },
+        params: { page, limit, search },
       });
+      console.log(data.trade_list);
 
       return data;
     } catch (err) {
       console.error('중고 거래 내역 가져오기 실패:', err);
-      alert('중고 거래 내역이 없습니다.');
+      alert('2글자 이상 검색하지 않았거나, 중고거래 내역이 없습니다!');
       // 중고 거래 목록 조회 실패 시 메인페이지로 이동
       window.location.href = `/views`;
       return null;
@@ -123,7 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  const result = await fetchTradesList(currentPage, limit);
+  const result = await fetchTradesList(currentPage, limit, search);
   if (result) {
     showTradeList(result.trade_list); // 거래 목록 표시
     renderPagination(Math.ceil(result.total_count / limit), currentPage); // 페이지네이션 렌더링

@@ -16,7 +16,7 @@ import {
 import { Injectable, Inject } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { InjectQueue } from '@nestjs/bullmq';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 
 //constants
 import { MESSAGES } from 'src/commons/constants/trades/messages';
@@ -155,26 +155,60 @@ export class TradesService {
 
   //=========ConvenienceFunction======================
   //<1> 중고 거래 검색
-  async searchTradeList() {}
+  async searchTradeList(testDto: TestDto) {
+    const { search } = testDto;
+    try {
+      const searchData = await this.searchService.searchTrades(search);
+      return searchData;
+    } catch (err) {
+      console.error(`테스트 오류:`, err);
+    }
+
+    return { message: `코드 실행 성공` };
+  }
 
   //<2> 중고 거래 목록 보기//완료 (검증 대부분 완료)
   async getTradeList(getTradeListDto: GetTradeListDto) {
     const { search, page, limit } = getTradeListDto;
-
     const total_count = await this.tradeRepository.count({
       where: { flag: FLAG.ACTIVATION },
     });
 
+    //검색 데이터를 받아옴
+    let ids = [];
+    if (search) {
+      const searchData = await this.searchService.searchTrades(search);
+      ids = searchData.results.map((result) => result.id);
+    }
+
     //페이지네이션 계산
     const skip: number = (page - 1) * limit;
 
-    let trade_list = await this.tradeRepository.find({
-      where: { flag: FLAG.ACTIVATION },
-      select: { id: true, ticketId: true, createdAt: true, closedAt: true },
-      skip: skip,
-      take: limit,
-      order: { id: 'DESC' },
-    });
+    let trade_list;
+
+    if (search) {
+      const searchData = await this.searchService.searchTrades(search);
+      const ids = searchData.results.map((result) => result.id);
+
+      trade_list = await this.tradeRepository.find({
+        where: {
+          flag: FLAG.ACTIVATION,
+          id: In(ids), // 검색된 id들만 포함
+        },
+        select: { id: true, ticketId: true, createdAt: true, closedAt: true },
+        skip: skip,
+        take: limit,
+        order: { id: 'DESC' },
+      });
+    } else {
+      trade_list = await this.tradeRepository.find({
+        where: { flag: FLAG.ACTIVATION },
+        select: { id: true, ticketId: true, createdAt: true, closedAt: true },
+        skip: skip,
+        take: limit,
+        order: { id: 'DESC' },
+      });
+    }
 
     //중고 거래 목록 조회 //테스트 완료
     //trade_list에 공연에서 가져온 주소값을 병합
