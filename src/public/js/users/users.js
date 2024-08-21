@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const myTicket = document.querySelector('#myTicket');
   const myBookmark = document.querySelector('#myBookmark');
   const myTrade = document.querySelector('#myTrade');
+  const myReview = document.querySelector('#myReview');
 
   const profileContent = document.querySelector('#profileContent');
   const pointLogContent = document.querySelector('#pointLogContent');
@@ -14,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const bookmarkListContainer = document.getElementById('bookmarkListContainer');
   const tradeLogContent = document.querySelector('#tradeLogContent');
   const tradeLogContainer = document.getElementById('tradeLogContainer');
+  const reviewListContent = document.querySelector('#reviewListContent');
+  const reviewListContainer = document.getElementById('reviewListContainer');
 
   const pointLogDropdownItems = document.querySelectorAll('.dropdown-item');
   const chargeBtn = document.querySelector('#chargeBtn');
@@ -28,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
     ticketListContent.style.display = 'none';
     bookmarkListContent.style.display = 'none';
     tradeLogContent.style.display = 'none';
+    reviewListContent.style.display = 'none';
 
     content.style.display = 'block';
   }
@@ -51,6 +55,10 @@ document.addEventListener('DOMContentLoaded', function () {
       showContent(tradeLogContent);
       activeTab(myTrade);
       getTradeLog();
+    } else if (hash === '#review') {
+      showContent(reviewListContent);
+      activeTab(myReview);
+      getReviewList();
     } else {
       showContent(profileContent);
       activeTab(myProfile);
@@ -59,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function activeTab(activeTab) {
-    [myProfile, myPoint, myTicket, myBookmark, myTrade].forEach((tab) => {
+    [myProfile, myPoint, myTicket, myBookmark, myTrade, myReview].forEach((tab) => {
       tab.parentElement.style.opacity = tab === activeTab ? '1' : '.6';
     });
   }
@@ -593,6 +601,75 @@ document.addEventListener('DOMContentLoaded', function () {
       console.log(err.response?.data || err.message);
     }
   }
+
+  //----------- my review ---------------------
+  myReview.addEventListener('click', function (e) {
+    e.preventDefault();
+    window.location.hash = '#review';
+  });
+
+  async function getReviewList() {
+    try {
+      // 백엔드 사용자 리뷰 목록 조회 API 호출
+      const response = await axios.get('/users/me/review', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const reviewList = response.data.getReviewList;
+
+      // 리뷰 목록이 존재하지 않을 때
+      if (reviewList.length === 0) {
+        reviewListContainer.innerHTML = '';
+        return;
+      }
+
+      reviewListContainer.innerHTML = '';
+
+      reviewList.forEach((log, index) => {
+        const logElement = document.createElement('div');
+        logElement.classList.add('review-list');
+        logElement.dataset.showId = log.showId;
+
+        const showTitleElement = document.createElement('p');
+        showTitleElement.textContent = `공연 제목 : ${log.ticket.title}`;
+        logElement.appendChild(showTitleElement);
+
+        const showDateTimeElement = document.createElement('p');
+        showDateTimeElement.textContent = `공연 날짜 및 시간 : ${log.ticket.date} ${log.ticket.time}`;
+        logElement.appendChild(showDateTimeElement);
+
+        const rateElement = document.createElement('p');
+        rateElement.textContent = `공연 평점 : ${log.rate}`;
+        logElement.appendChild(rateElement);
+
+        const postscriptElement = document.createElement('p');
+        postscriptElement.textContent = `공연 후기 : ${log.postscript}`;
+        logElement.appendChild(postscriptElement);
+
+        const createdAtElement = document.createElement('p');
+        createdAtElement.textContent = `리뷰 작성 일자 : ${log.createdAt}`;
+        logElement.appendChild(createdAtElement);
+
+        reviewListContainer.appendChild(logElement);
+
+        logElement.addEventListener('click', () => {
+          window.location.href = `/views/shows/${log.showId}`;
+        });
+
+        if (index < reviewList.length - 1) {
+          const separator = document.createElement('hr');
+          separator.classList.add('separator');
+          reviewListContainer.appendChild(separator);
+        }
+      });
+    } catch (err) {
+      // 사용자 리뷰 목록 조회 실패 시 에러 처리
+      console.log(err.response.data);
+    }
+  }
+
   //----------- update user ---------------------
   updateBtn.addEventListener('click', async function (e) {
     e.preventDefault();

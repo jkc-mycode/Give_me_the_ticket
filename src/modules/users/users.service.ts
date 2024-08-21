@@ -235,6 +235,7 @@ export class UsersService {
       const review = await this.showReviewRepository.find({
         where: { userId: id },
         order: { createdAt: 'DESC' },
+        relations: ['ticket'],
       });
 
       if (review.length === 0) {
