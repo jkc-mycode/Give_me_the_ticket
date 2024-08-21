@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       <p>공연시간: ${trade.data.time}</p>
       <p>상영시간(분): ${trade.data.runtime}</p>
       <p>공연장소: ${trade.data.location}</p>
-      <p>원래가격: ${trade.data.price}</p>
+      <p>원래가격: ${trade.data.price.toLocaleString()}</p>
     `;
   }
 

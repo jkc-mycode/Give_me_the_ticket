@@ -57,16 +57,16 @@ document.addEventListener('DOMContentLoaded', function () {
         const pointMessage =
           remainingPoints < 0
             ? '잔액 부족으로 예매할 수 없습니다.'
-            : `예매 후 포인트: ${remainingPoints}`;
+            : `예매 후 포인트: ${remainingPoints.toLocaleString()}`;
 
         // HTML 업데이트
         showsContainer.innerHTML = `
   <h2>${data.title}</h2>
-  <p>가격: ${data.price}원</p>
+  <p>가격: ${data.price.toLocaleString()}원</p>
   <p>위치: ${data.location}</p>
   <p>공연일: ${schedule.date}</p>
   <p>시간: ${schedule.time}</p>
-  <p>현재 포인트: ${pointData.point}</p>
+  <p>현재 포인트: ${pointData.point.toLocaleString()}</p>
   <p>${pointMessage}</p>
 `;
       }

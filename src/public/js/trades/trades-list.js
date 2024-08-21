@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <div class="card-body">
             <h5 class="card-title">${trade.title}</h5>
             <p class="card-text">
-              판매 가격: ${trade.price}<br>
+              판매 가격: ${trade.price.toLocaleString()}<br>
               공연 날짜: ${trade.date}<br>
               공연 시간: ${trade.time}<br>
             </p>

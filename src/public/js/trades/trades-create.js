@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <p>공연 시간: ${ticket.time}</p>
       <p>상영 시간(분): ${ticket.runtime}</p>
       <p>위치: ${ticket.location}</p>
-      <p>티켓 예매 가격: ${ticket.price}</p>
+      <p>티켓 예매 가격: ${ticket.price.toLocaleString()}</p>
       <p>티켓 상태: ${ticketStatusText}</p>
     `;
   }
