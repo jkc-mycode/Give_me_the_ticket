@@ -1,21 +1,35 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TicketStatus } from 'src/commons/types/shows/ticket.type';
 import { Ticket } from 'src/entities/shows/ticket.entity';
 import { Repository } from 'typeorm';
+import { ShowsService } from '../shows/shows.service';
+import { SearchService } from '../shows/search/search.service';
 
 @Injectable()
 export class TaskService {
   private readonly logger = new Logger(TaskService.name);
-  constructor(@InjectRepository(Ticket) private ticketRepository: Repository<Ticket>) {}
+  constructor(
+    private readonly showService: ShowsService,
+    private readonly searchService: SearchService,
+    @InjectRepository(Ticket) private ticketRepository: Repository<Ticket>
+  ) {}
 
-  @Cron('* * 5 * * *', { name: 'cronTask' })
-  handleCron() {
-    this.logger.log('Task Called!');
+  // 매 시간마다 실행되어 쇼 랭킹을 업데이트
+  @Cron(CronExpression.EVERY_HOUR, { name: 'hourlyRankingUpdate' })
+  async handleHourlyRankingUpdate() {
+    await this.showService.handleHourlyRankingUpdate();
   }
 
-  @Cron('* * * * * *') // 매 초마다 실행
+  // 매 분마다 실행되어 쇼 데이터를 동기화
+  @Cron(CronExpression.EVERY_MINUTE, { name: 'syncAllShows' })
+  async syncAllShowsCron() {
+    await this.searchService.syncAllShows();
+  }
+
+  // 매 초마다 실행되어 만료된 티켓을 업데이트
+  @Cron('* * * * * *')
   async updateExpiredTicket() {
     const nowTime = new Date();
 

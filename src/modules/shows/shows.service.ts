@@ -324,8 +324,6 @@ export class ShowsService {
     }
   }
 
-  // 매 시간마다 동기화
-  @Cron(CronExpression.EVERY_HOUR)
   async handleHourlyRankingUpdate() {
     const previousHour = new Date(Date.now() - 60 * 60 * 1000);
 

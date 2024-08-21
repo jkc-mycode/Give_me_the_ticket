@@ -5,6 +5,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Show } from 'src/entities/shows/show.entity';
 import { ScheduleModule } from '@nestjs/schedule';
+import { BatchController } from 'src/modules/task/batch.controller';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     TypeOrmModule.forFeature([Show]),
     ScheduleModule.forRoot(),
   ],
+  controllers: [BatchController],
   providers: [SearchService],
   exports: [SearchService],
 })

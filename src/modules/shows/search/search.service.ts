@@ -2,7 +2,6 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThan, Repository } from 'typeorm';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
-import { Cron } from '@nestjs/schedule';
 import { Show } from 'src/entities/shows/show.entity';
 import { SHOW_MESSAGES } from 'src/commons/constants/shows/show-messages.constant';
 
@@ -113,7 +112,7 @@ export class SearchService {
   // }
 
   //show 동기화 (스케줄링)
-  private async syncAllShows() {
+  public async syncAllShows() {
     try {
       const indexTime = new Date(Date.now() - 5 * 60 * 1000);
 
@@ -128,11 +127,6 @@ export class SearchService {
       console.error('동기화 오류:', error);
       throw new InternalServerErrorException(SHOW_MESSAGES.INDEX.FAIL);
     }
-  }
-
-  @Cron('* * * * *') //1분마다 동기화
-  async handleCron() {
-    await this.syncAllShows();
   }
 
   // show 생성 시 인덱스에 추가

@@ -279,7 +279,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       currentPage = 1;
 
       const result = await fetchShows(
-        1,
+        currentPage,
         limit,
         searchQuery,
         currentCategory,
