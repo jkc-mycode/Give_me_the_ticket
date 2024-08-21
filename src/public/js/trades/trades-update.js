@@ -55,6 +55,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       return;
     }
 
+    if (tradePrice < 0) {
+      alert('양수를 입력해 주세요.');
+      return;
+    }
+
     try {
       // 중고 거래 수정 DTO
       const updateTradeDto = {
