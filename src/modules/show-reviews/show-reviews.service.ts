@@ -123,8 +123,7 @@ export class ShowReviewsService {
     if (showReview.userId !== user.id) {
       throw new ForbiddenException(SHOW_REVIEWS_MESSAGES.COMMON.FORBIDDEN.DELETE);
     }
-    // 리뷰 삭제
-    showReview.deletedAt = new Date();
-    return await this.showReviewRepository.save(showReview);
+
+    return await this.showReviewRepository.remove(showReview);
   }
 }
