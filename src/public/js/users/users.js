@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', function () {
           logElement.appendChild(resaleButton);
         }
 
-        // '티켓 만료' 상태인 경우와 리뷰 작성하지 않은 경우, '리뷰 작성' 버튼 생성
+        // '티켓 만료' 상태인 경우, '리뷰 작성' 버튼 생성
         if (log.status === 'EXPIRED') {
           // 리뷰 작성
           const reviewButton = document.createElement('button');
@@ -389,6 +389,7 @@ document.addEventListener('DOMContentLoaded', function () {
           reviewButton.classList.add('btn-custom', 'btn-review');
           // 리뷰 작성 버튼에 이벤트 추가
           reviewButton.addEventListener('click', () => {
+            // 이미 리뷰를 작성한 경우
             if (reviewedShow.includes(log.showId)) {
               alert('이미 작성한 리뷰가 존재합니다.');
             } else {
