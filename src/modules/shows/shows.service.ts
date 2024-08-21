@@ -365,7 +365,7 @@ export class ShowsService {
   //DB에 unionKey 저장
   async updateRanking(type: 'views' | 'bookings', unionKey: string) {
     // redis에서 최근 union key의 랭킹 가져오기
-    const redisData = await this.redisClient.zrange(unionKey, 0, -1);
+    const redisData = await this.redisClient.zrange(unionKey, 0, -1, 'WITHSCORES');
     if (redisData.length === 0) return;
 
     //오늘 날짜 계산(yyyy-mm-dd)
