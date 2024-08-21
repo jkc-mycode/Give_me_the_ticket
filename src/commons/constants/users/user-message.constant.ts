@@ -68,5 +68,14 @@ export const USER_MESSAGES = {
         },
       },
     },
+    REVIEW: {
+      GET_LIST: {
+        SUCCESS: '리뷰 목록 조회에 성공했습니다.',
+        FAILURE: {
+          FAIL: '리뷰 목록 조회에 실패했습니다.',
+          NOT_FOUND: '리뷰 목록이 없습니다.',
+        },
+      },
+    },
   },
 };

@@ -16,6 +16,7 @@ import { ShowsController } from './shows.controller';
 import { ShowsService } from './shows.service';
 import { ImagesService } from '../images/images.service';
 import { ShowRanking } from 'src/entities/shows/showRanking.entity';
+import { BatchController } from '../task/batch.controller';
 
 @Module({
   imports: [
@@ -34,7 +35,7 @@ import { ShowRanking } from 'src/entities/shows/showRanking.entity';
     RedisModule,
     CacheModule.register(),
   ],
-  controllers: [ShowsController],
+  controllers: [ShowsController, BatchController],
 
   providers: [ShowsService, ImagesService],
   exports: [TypeOrmModule],
