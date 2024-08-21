@@ -212,11 +212,6 @@ footer {
   border: none;
 }
 
-.img-full-width {
-  width: 500px;
-  height: auto;
-}
-
 /* nav-link 크기 조정 */
 .nav-link {
   /* 링크의 폰트 크기 및 다른 스타일을 조정 */

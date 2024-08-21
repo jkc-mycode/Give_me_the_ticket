@@ -1,0 +1,15 @@
+.modal-body img {
+  margin-bottom: 50px; /* 이미지 아래에 여백 추가 */
+}
+
+.modal-body p {
+  font-size: 24px; /* 폰트 크기 조정 */
+  margin-top: 30px; /* 제목 위에 여백 추가 */
+  margin-bottom: 15px; /* 본문 텍스트에 여백 추가 */
+}
+
+.img-full-width {
+  width: 700px;
+  max-width: 100%;
+  height: auto;
+}
