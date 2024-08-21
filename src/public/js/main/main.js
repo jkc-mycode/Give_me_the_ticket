@@ -91,7 +91,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     showListContainer.innerHTML = shows
       .map((show) => {
         const imageUrl = show.imageUrl.length > 0 ? show.imageUrl[0] : 'default-image-url.jpg';
-        const showDates = show.showDate.length > 0 ? show.showDate[0] : '공연 일정이 없습니다.';
+        const showDates =
+          show.showDate.length > 0 ? show.showDate.join(' , ') : '공연 일정이 없습니다.';
         return `
         <div class="col-md-4 mb-3">
           <div class="card" data-show-id="${show.id}">
@@ -300,6 +301,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentDate = '';
     document.getElementById('filterDate').value = '';
 
+    // 모든 카테고리 버튼의 활성화 상태 제거
+    document.querySelectorAll('.category-btn').forEach((btn) => btn.classList.remove('active'));
+
     const result = await fetchShows(currentPage, limit);
     if (result && result.data) {
       renderShows(result.data);
@@ -320,21 +324,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderShows(result.data);
     renderPagination(result.totalPages, currentPage);
   }
-
-  // 페이지 로드 시 모달 표시
-  window.onload = function () {
-    var contentModal = new bootstrap.Modal(document.getElementById('contentModal'));
-    if (window.name !== 'modalHidden') {
-      contentModal.show();
-    }
-  };
-
-  // "다시 보지 않기" 버튼 클릭 시 모달 숨김 및 상태 저장
-  document.getElementById('dontShowAgainBtn').addEventListener('click', function () {
-    var contentModal = bootstrap.Modal.getInstance(document.getElementById('contentModal'));
-    contentModal.hide();
-    window.name = 'modalHidden'; // 상태 저장
-  });
 
   // 실시간 인기 공연 데이터 로딩 및 렌더링
   const rankedShows = await fetchRankedShows(5);

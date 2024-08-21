@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const data = showResponse.data.data;
 
       const ticketData = ticketResponse.data.getTicketList.find((ticket) => ticket.id == ticketId);
-      console.log(ticketData);
+
       if (showResponse.status === 200 && data && ticketData) {
         const showsContainer = document.querySelector('#shows');
 
@@ -57,8 +57,6 @@ document.addEventListener('DOMContentLoaded', function () {
           <p>날짜: ${ticketData.date}<p>
           <p>시간: ${ticketData.time}</p>
         `;
-      } else {
-        console.error('서버에서 데이터를 가져오지 못했습니다.');
       }
     } catch (error) {
       console.error('공연 정보 가져오기 오류:', error);
