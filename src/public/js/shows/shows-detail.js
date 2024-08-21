@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const bookmarkBtn = document.getElementById('bookmarkBtn');
   const separator = document.querySelector('.separator');
   const reviewContainer = document.querySelector('.text-bg-warning');
+
   // 전역 변수 설정
   window.selectedScheduleId = null;
   let isBookmarked = false;
@@ -15,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   //내가 찜한 목록을 가져오기 그리고 url상의 showId와 일치하는지 판단을 한다.
   //찜목록에 있으면 취소 없으면 찜하기 버튼
-
   async function getBookmarkedShows() {
     try {
       const response = await axios.get('/users/me/bookmark', {
@@ -180,6 +180,7 @@ document.addEventListener('DOMContentLoaded', function () {
       bookmarkBtn.setAttribute('data-bookmarked', 'false');
     }
   }
+
   document.getElementById('bookmarkBtn').addEventListener('click', async function () {
     try {
       const method = isBookmarked ? 'delete' : 'post';
@@ -261,6 +262,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   checkUserRoleAndDisplayDeleteButton();
+
   // 삭제 버튼 클릭 이벤트 핸들러
   deleteBtn.addEventListener('click', async function () {
     try {
@@ -300,13 +302,20 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // 페이지네이션 버튼 렌더링
-        if (reviewData.totalShowReviews !== undefined) {
+        if (reviewData.totalShowReviews !== undefined && reviewData.totalShowReviews > 0) {
           renderPagination(reviewData.totalShowReviews, page, limit);
+        } else {
+          // 리뷰 없는 경우, 페이지네이션 버튼 숨기기
+          const paginationContainer = document.getElementById('pagination');
 
-          // 총 리뷰수 업로드
-          if (reviewContainer) {
-            reviewContainer.textContent = `총 리뷰 수: ${reviewData.totalShowReviews}`;
+          if (paginationContainer) {
+            paginationContainer.style.display = 'none';
           }
+        }
+
+        // 총 리뷰수 업로드
+        if (reviewContainer) {
+          reviewContainer.textContent = `총 리뷰 수: ${reviewData.totalShowReviews}`;
         }
       }
     } catch (error) {
@@ -473,8 +482,8 @@ document.addEventListener('DOMContentLoaded', function () {
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary save-changes-btn">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+        <button type="button" class="btn btn-primary save-changes-btn">저장</button>
       </div>
     </div>
   </div>
@@ -554,10 +563,16 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   //삭제
-
   document.body.addEventListener('click', async function (event) {
     if (event.target.classList.contains('delete-btn')) {
       const reviewId = Number(event.target.getAttribute('data-review-id')); // 리뷰 ID를 추출합니다.
+
+      // 예매 확인창 추가
+      const isConfirmed = confirm('리뷰를 삭제하시겠습니까?');
+
+      if (!isConfirmed) {
+        return;
+      }
 
       try {
         // 리뷰를 삭제합니다.
@@ -569,9 +584,6 @@ document.addEventListener('DOMContentLoaded', function () {
             },
           }
         );
-
-        // 예매 확인창 추가
-        const isConfirmed = confirm('리뷰를 삭제하시겠습니까?');
 
         if (response.status === 200) {
           alert('리뷰가 성공적으로 삭제되었습니다.');

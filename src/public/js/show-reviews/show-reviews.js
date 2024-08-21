@@ -26,6 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       if (response.status === 201) {
         alert(response.data.message);
+
+        // 리뷰 작성 성공 시 마이페이지 리뷰 목록 탭으로
+        window.location.href = '/views/users/me#review';
       } else {
         alert('작성에 실패하였습니다. 응답 상태 코드: ' + response.status);
       }

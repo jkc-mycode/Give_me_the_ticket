@@ -347,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function () {
         createdAtElement.textContent = `티켓 구매 일자 : ${log.createdAt}`;
         logElement.appendChild(createdAtElement);
 
-        // '사용 가능' 상태인 경우, 버튼 생성
+        // '사용 가능' 상태인 경우, '환불', '중고 판매' 버튼 생성
         if (log.status === 'USEABLE') {
           // 환불
           const refundButton = document.createElement('button');
@@ -369,19 +369,9 @@ document.addEventListener('DOMContentLoaded', function () {
             window.location.href = '/views/trades';
           });
           logElement.appendChild(resaleButton);
-
-          // 리뷰 작성
-          const reviewButton = document.createElement('button');
-          reviewButton.textContent = '리뷰 작성';
-          reviewButton.classList.add('btn-custom', 'btn-review');
-          // 리뷰 작성 버튼에 이벤트 추가
-          reviewButton.addEventListener('click', () => {
-            window.location.href = `/views/reviews/${log.id}`;
-          });
-          logElement.appendChild(reviewButton);
         }
 
-        // '티켓 만료' 상태인 경우, '리뷰 작성' 버튼만 생성
+        // '티켓 만료' 상태인 경우, '리뷰 작성' 버튼 생성
         if (log.status === 'EXPIRED') {
           // 리뷰 작성
           const reviewButton = document.createElement('button');
