@@ -8,6 +8,10 @@
   margin-bottom: 15px; /* 본문 텍스트에 여백 추가 */
 }
 
+.list-group {
+  width: 300px;
+}
+
 .img-full-width {
   width: 700px;
   max-width: 100%;

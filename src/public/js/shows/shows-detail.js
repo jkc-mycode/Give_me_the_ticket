@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function () {
           ${imageHtml}
           <h2>${data.title}</h2>
           <p>카테고리: ${data.category}</p>
-          <p>가격: ${data.price}원</p>
+          <p>가격: ${data.price.toLocaleString()}원</p>
           <p>상영 시간: ${data.runtime}분</p>
           <p>내용:</p>
       <div>${data.content
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 (schedule) => `
       <li>
         <a class="dropdown-item" href="#" data-schedule-id="${schedule.id}">
-          날짜 : ${schedule.date} | 시간 : ${schedule.time} | 잔여좌석 : ${schedule.remainSeat}
+          날짜 : ${schedule.date} | 시간 : ${schedule.time} | 잔여 좌석 : ${schedule.remainSeat}
         </a>
       </li>
     `

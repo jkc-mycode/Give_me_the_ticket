@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
       <p>공연 시간: ${ticket.time}</p>
       <p>상영 시간(분): ${ticket.runtime}</p>
       <p>위치: ${ticket.location}</p>
-      <p>티켓 예매 가격: ${ticket.price}</p>
+      <p>티켓 예매 가격: ${ticket.price.toLocaleString()}</p>
       <p>티켓 상태: ${ticketStatusText}</p>
     `;
   }
@@ -59,11 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 가격 정수&음수 체크
     if (isNaN(tradePrice) || !Number.isInteger(Number(tradePrice))) {
-      alert('정수를 입력해 주세요.');
+      alert('올바른 가격을 입력해 주세요.');
       return;
     }
     if (tradePrice < 0) {
-      alert('양수를 입력해 주세요.');
+      alert('올바른 가격을 입력해 주세요.');
       return;
     }
 

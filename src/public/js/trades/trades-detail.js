@@ -52,10 +52,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
         <h2 class="title">공연명: ${result.title}</h2>
         <p>
-        <div class="description">공연내용: <br>${result.content}</div>
+        <div class="description">공연 내용: <br>${result.content}</div>
         </p>
         <p>
-        <div class="price"><b>판매가격: ${result.price}</b></div>
+        <div class="price"><b>판매 가격: ${result.price.toLocaleString()}</b></div>
         </p>
         <p>
         <div class="location">위치: ${result.location}</div>
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <p>
         <div class="discount">
         <b style="font-size: 200%; color: blue;">
-        기존 티켓 ${result.origin_price}원의 ${discount}% 할인된 가격입니다!
+        기존 티켓 ${result.origin_price.toLocaleString()}원의 ${discount}% 할인된 가격입니다!
         </b>
         </p>
         </div>`;

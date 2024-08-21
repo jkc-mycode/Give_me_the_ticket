@@ -31,11 +31,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     ticketContainer.innerHTML = `
       <h3>티켓 정보</h3>
       <p>제목: ${trade.data.title}</p>
-      <p>공연일자: ${trade.data.date}</p>
-      <p>공연시간: ${trade.data.time}</p>
-      <p>상영시간(분): ${trade.data.runtime}</p>
-      <p>공연장소: ${trade.data.location}</p>
-      <p>원래가격: ${trade.data.price}</p>
+      <p>공연 일자: ${trade.data.date}</p>
+      <p>공연 시간: ${trade.data.time}</p>
+      <p>상영 시간(분): ${trade.data.runtime}</p>
+      <p>공연 장소: ${trade.data.location}</p>
+      <p>기존 가격: ${trade.data.price.toLocaleString()}</p>
     `;
   }
 
@@ -51,12 +51,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 가격 정수 체크
     if (isNaN(tradePrice) || !Number.isInteger(Number(tradePrice))) {
-      alert('정수를 입력해 주세요.');
+      alert('올바른 가격을 입력해 주세요.');
       return;
     }
 
     if (tradePrice < 0) {
-      alert('양수를 입력해 주세요.');
+      alert('올바른 가격을 입력해 주세요.');
       return;
     }
 

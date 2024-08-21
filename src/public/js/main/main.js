@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               <h5 class="card-title">${show.title}</h5>
               <div class="card-text">
                 <p>위치: ${show.location}</p>
-                <p>공연날짜 : ${showDates}</p>
+                <p>공연 날짜 : ${showDates}</p>
               </div>
             </div>
           </div>

@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
         showsContainer.innerHTML = `
           ${imageHtml}
           <h2>${data.title}</h2>
-          <p>가격: ${data.price}원</p>
+          <p>가격: ${data.price.toLocaleString()}원</p>
           <p>날짜: ${ticketData.date}<p>
           <p>시간: ${ticketData.time}</p>
         `;

@@ -1,72 +1,43 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>공연 상세-GIVE ME THE TICKET</title>
-    <link
-      rel="shortcut icon"
-      type="image/x-icon"
-      href="https://cdn-icons-png.flaticon.com/128/432/432312.png"
-    />
 
-    <!-- 부트스트랩 CSS CDN -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
-      crossorigin="anonymous"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>공연 상세-GIVE ME THE TICKET</title>
+  <link rel="shortcut icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/128/432/432312.png" />
 
-    <!-- 부트스트랩 JS CDN -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-      integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
-      integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
-      crossorigin="anonymous"
-    ></script>
+  <!-- 부트스트랩 CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous" />
 
-    <!-- 부트스트랩 Icons CSS CDN -->
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"
-      rel="stylesheet"
-    />
+  <!-- 부트스트랩 JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+    integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
+    integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
+    crossorigin="anonymous"></script>
 
-    <!-- 티켓 상세조회 페이지에 필요한 CSS 및 JS -->
-    <link rel="stylesheet" href="/css/shows/shows-detail.css" />
-    <script type="module" src="/js/shows/shows-detail.js"></script>
-  </head>
+  <!-- 부트스트랩 Icons CSS CDN -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"
+    rel="stylesheet" />
 
-  <body>
-    <%- include('../common/header.view.ejs') %>
+  <!-- 티켓 상세조회 페이지에 필요한 CSS 및 JS -->
+  <link rel="stylesheet" href="/css/shows/shows-detail.css" />
+  <script type="module" src="/js/shows/shows-detail.js"></script>
+</head>
+
+<body>
+  <%- include('../common/header.view.ejs') %>
     <main>
-
-
-
       <div class="container">
-        <button
-          id="bookmarkBtn"
-          class="bookmark__btn btn btn-outline-danger"
-          data-bookmarked="false"
-          data-bookmark-id=""
-          data-show-id="${showId}"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            class="bi bi-heart"
-            viewBox="0 0 16 16"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314"
-            ></path>
+        <button id="bookmarkBtn" class="bookmark__btn btn btn-outline-danger" data-bookmarked="false"
+          data-bookmark-id="" data-show-id="${showId}">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart"
+            viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314">
+            </path>
           </svg>
           찜하기
         </button>
@@ -78,13 +49,8 @@
 
         <!-- 스케줄 드롭다운 -->
         <div class="dropdown">
-          <button
-            class="btn btn-secondary dropdown-toggle"
-            type="button"
-            id="scheduleDropdown"
-            data-bs-toggle="dropdown"
-            aria-expanded="false"
-          >
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="scheduleDropdown"
+            data-bs-toggle="dropdown" aria-expanded="false">
             날짜 및 시간 선택
           </button>
           <ul class="dropdown-menu" id="scheduleDropdownMenu" aria-labelledby="scheduleDropdown">
@@ -100,7 +66,7 @@
         <!-- update button -->
         <button class="btn-custom btn btn-warning update__btn">수정하기</button>
 
-        
+
         <!-- separator -->
         <div class="separator">
           <p>OR</p>
@@ -110,23 +76,24 @@
         <button class="btn-custom btn btn-info delete__btn">삭제하기</button>
       </div>
 
-<div class="divider"></div>
+      <div class="divider"></div>
 
       <!-- 공연 리뷰 보기  -->
- 
-  <div class="review_container">
-    <span class="badge text-bg-warning">총 리뷰 수</span>
-</div>
 
-<div id="reviews-container" class="row">
-    <!-- 리뷰들 -->
-</div>
+      <div class="review_container">
+        <span class="badge text-bg-warning">총 리뷰 수</span>
+      </div>
 
-<nav aria-label="Page navigation example">
-    <ul id="pagination" class="pagination">
-        <!-- 페이지네이션  -->
-    </ul>
+      <div id="reviews-container" class="row">
+        <!-- 리뷰들 -->
+      </div>
+
+      <nav aria-label="Page navigation example">
+        <ul id="pagination" class="pagination">
+          <!-- 페이지네이션  -->
+        </ul>
     </main>
     <footer></footer>
-  </body>
+</body>
+
 </html>
