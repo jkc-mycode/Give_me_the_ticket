@@ -77,8 +77,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
         );
         alert('거래에 성공했습니다!');
+        window.location.href = '/views/users/me#trade';
+      } else {
+        window.history.back();
       }
-      window.location.href = '/views/users/me#trade';
     } catch (err) {
       console.error('중고 거래 구매에 실패했습니다.', err);
       alert('중고 거래 구매에 실패했습니다.');
