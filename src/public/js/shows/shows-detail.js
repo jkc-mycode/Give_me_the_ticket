@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 (schedule) => `
       <li>
         <a class="dropdown-item" href="#" data-schedule-id="${schedule.id}">
-          날짜 : ${schedule.date} | 시간 : ${schedule.time} | 잔여좌석 : ${schedule.remainSeat}
+          날짜 : ${schedule.date} | 시간 : ${schedule.time} | 잔여 좌석 : ${schedule.remainSeat}
         </a>
       </li>
     `

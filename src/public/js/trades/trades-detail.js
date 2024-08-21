@@ -52,10 +52,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         </div>
         <h2 class="title">공연명: ${result.title}</h2>
         <p>
-        <div class="description">공연내용: <br>${result.content}</div>
+        <div class="description">공연 내용: <br>${result.content}</div>
         </p>
         <p>
-        <div class="price"><b>판매가격: ${result.price.toLocaleString()}</b></div>
+        <div class="price"><b>판매 가격: ${result.price.toLocaleString()}</b></div>
         </p>
         <p>
         <div class="location">위치: ${result.location}</div>

@@ -12,7 +12,6 @@ import { PointType } from 'src/commons/types/users/point.type';
 import { ChargePointDto } from './dto/charge-point.dto';
 import { Ticket } from 'src/entities/shows/ticket.entity';
 import { Bookmark } from 'src/entities/users/bookmark.entity';
-import { Trade } from 'src/entities/trades/trade.entity';
 import { TradeLog } from 'src/entities/trades/trade-log.entity';
 import { ShowReview } from 'src/entities/show-reviews/show-reviews.entity';
 import { USER_MESSAGES } from 'src/commons/constants/users/user-message.constant';
@@ -36,8 +35,6 @@ export class UsersService {
     private readonly ticketRepository: Repository<Ticket>,
     @InjectRepository(Bookmark)
     private readonly bookmarkRepository: Repository<Bookmark>,
-    @InjectRepository(Trade)
-    private readonly tradeRepository: Repository<Trade>,
     @InjectRepository(TradeLog)
     private readonly tradeLogRepository: Repository<TradeLog>,
     @InjectRepository(ShowReview)

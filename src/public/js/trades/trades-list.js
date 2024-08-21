@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </p>
           </div>
           <div class="card-footer">
-            <small class="text-body-secondary">만료기한: ${trade.closedAt}</small>
+            <small class="text-body-secondary">만료 기한: ${trade.closedAt}</small>
           </div>
         </div>
       </div>`;

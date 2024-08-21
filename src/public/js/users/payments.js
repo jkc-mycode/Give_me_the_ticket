@@ -58,7 +58,6 @@ document.addEventListener('DOMContentLoaded', function () {
           amount: chargeAmount,
           buyer_email: userEmail,
           buyer_name: userName,
-          // notice_url: "http://localhost:3000/payments/webhook" // Webhook 수신 URL 설정
         },
         async function (response) {
           // 결제 후 호출되는 callback 로직
