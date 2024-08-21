@@ -91,7 +91,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     showListContainer.innerHTML = shows
       .map((show) => {
         const imageUrl = show.imageUrl.length > 0 ? show.imageUrl[0] : 'default-image-url.jpg';
-        const showDates = show.showDate.length > 0 ? show.showDate[0] : '공연 일정이 없습니다.';
+        const showDates =
+          show.showDate.length > 0 ? show.showDate.join(' , ') : '공연 일정이 없습니다.';
         return `
         <div class="col-md-4 mb-3">
           <div class="card" data-show-id="${show.id}">
