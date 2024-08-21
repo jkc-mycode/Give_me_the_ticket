@@ -50,17 +50,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             alt="이미지 파일 존재하지 않습니다"
           />
         </div>
-        <div class="title">공연명: ${result.title}</div>
-        <div class="description">공연내용: ${result.content}</div>
+        <h2 class="title">공연명: ${result.title}</h2>
+        <p>
+        <div class="description">공연내용: <br>${result.content}</div>
+        </p>
+        <p>
         <div class="price"><b>판매가격: ${result.price}</b></div>
+        </p>
+        <p>
         <div class="location">위치: ${result.location}</div>
+        </p>
+        <p>
         <div class="closedAt">공연 날짜 및 시간: ${result.closedAt}</div>
+        </p>
+        <p>
         <div class="createdAt">거래 생성 날짜 및 시간:${result.createdAt}</div>
+        </p>
+        <p>
         <div class="updatedAt">게시글 수정 날짜 및 시간:${result.updatedAt}</div>
+        </p>
+        <p>
         <div class="discount">
         <b style="font-size: 200%; color: blue;">
         기존 티켓 ${result.origin_price}원의 ${discount}% 할인된 가격입니다!
         </b>
+        </p>
         </div>`;
 
   PurchaseBtn.addEventListener('click', async (e) => {
@@ -83,6 +97,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     } catch (err) {
       console.error('중고 거래 구매에 실패했습니다.', err);
+      if (err.response.data.message) {
+        alert(err.response.data.message);
+        console.log(err.response);
+      }
       alert('중고 거래 구매에 실패했습니다.');
     }
   });

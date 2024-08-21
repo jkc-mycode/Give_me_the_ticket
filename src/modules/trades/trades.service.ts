@@ -484,7 +484,6 @@ export class TradesService {
       where: { showId: ticket.showId, userId: ticket.userId },
     });
     if (haveTicket.length > 5) {
-      console.log(haveTicket.length);
       throw new BadRequestException('동일시간의 동일공연은 5장만 소지할 수 있습니다!');
     }
 
@@ -495,8 +494,9 @@ export class TradesService {
     if (!buyer) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.BUYER);
 
     //구매자와 판매자가 동일한 경우
-    if (seller.id === buyer.id)
+    if (seller.id === buyer.id) {
       throw new BadRequestException(MESSAGES.TRADES.EQUAL.BUYER_AND_SELLER);
+    }
 
     //현재 가장 높은 ticketId보다 1 높은 값 (새로 재발급 하기 위해서)
     let query = await this.ticketRepository.query('SELECT MAX(id) AS maxId FROM tickets');
@@ -538,8 +538,6 @@ export class TradesService {
         description: `중고거래 <${title}>의 티켓 판매`,
         type: PointType.DEPOSIT,
       };
-      console.log(`buyerPointLog:`, buyerPointLog);
-      console.log(`sellerPointLog:`, sellerPointLog);
 
       await queryRunner.manager.save(PointLog, buyerPointLog);
       await queryRunner.manager.save(PointLog, sellerPointLog);
@@ -575,7 +573,6 @@ export class TradesService {
       //티켓 변경 로직 END========================
 
       //거래 삭제
-      console.log(tradeId);
       await queryRunner.manager.update(Trade, { id: tradeId }, { flag: FLAG.COMPLETED });
       await queryRunner.manager.update(TradeLog, { tradeId: tradeId }, { buyerId: buyer.id });
 
