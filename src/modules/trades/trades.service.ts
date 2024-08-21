@@ -151,20 +151,8 @@ export class TradesService {
   }
 
   //=========ConvenienceFunction======================
-  //<1> 중고 거래 검색
-  async searchTradeList(testDto: TestDto) {
-    const { search } = testDto;
-    try {
-      const searchData = await this.searchService.searchTrades(search);
-      return searchData;
-    } catch (err) {
-      console.error(`테스트 오류:`, err);
-    }
 
-    return { message: `코드 실행 성공` };
-  }
-
-  //<2> 중고 거래 목록 보기//완료 (검증 대부분 완료)
+  //<1> 중고 거래 목록 보기//완료 (검증 대부분 완료)
   async getTradeList(getTradeListDto: GetTradeListDto) {
     const { search, page, limit } = getTradeListDto;
     const total_count = await this.tradeRepository.count({
@@ -271,7 +259,7 @@ export class TradesService {
     };
   }
 
-  //<3> 중고 거래 상세 보기 //수정 필요 리스트가 아님 (검증 대부분 완료) //테스트 완료
+  //<2> 중고 거래 상세 보기 //수정 필요 리스트가 아님 (검증 대부분 완료) //테스트 완료
   async getTradeDetail(tradeId: number) {
     const trade = await this.tradeRepository.findOne({ where: { id: tradeId } });
     if (!trade) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE);
@@ -297,7 +285,7 @@ export class TradesService {
     return trade;
   }
 
-  //<4> 중고거래 생성 함수 //완료(검증 대부분 완료) 테스트 완료
+  //<3> 중고거래 생성 함수 //완료(검증 대부분 완료) 테스트 완료
   async createTrade(createTradeDto: CreateTradeDto, sellerId: number) {
     const { ticketId, price } = createTradeDto;
 
@@ -396,7 +384,7 @@ export class TradesService {
     return { message: MESSAGES.TRADES.SUCCESSFULLY_CREATE.TRADE };
   }
 
-  //<5> 중고 거래 수정 메서드 //완료(검증 대부분 완료)  //테스트 완료
+  //<4> 중고 거래 수정 메서드 //완료(검증 대부분 완료)  //테스트 완료
   async updateTrade(tradeId, updateTradeDto: UpdateTradeDto, userId: number) {
     const { price } = updateTradeDto;
 
@@ -440,7 +428,7 @@ export class TradesService {
     return afterTrade;
   }
 
-  //<6> 중고 거래 삭제 메서드  //완료(검증 대부분 완료)
+  //<5> 중고 거래 삭제 메서드  //완료(검증 대부분 완료)
   async deleteTrade(tradeId: number, userId: number) {
     const trade = await this.tradeRepository.findOne({ where: { id: tradeId } });
     if (!trade) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE);
@@ -473,7 +461,7 @@ export class TradesService {
     return { message: `삭제 완료` };
   }
 
-  //<7> 티켓 구매 메서드 (buyerId는 기존의 userId와 같다)
+  //<6> 티켓 구매 메서드 (buyerId는 기존의 userId와 같다)
   async createTicket(tradeId: number, buyerId: number) {
     //해당 거래 존재 확인
 
@@ -496,7 +484,6 @@ export class TradesService {
       where: { showId: ticket.showId, userId: ticket.userId },
     });
     if (haveTicket.length > 5) {
-      console.log(haveTicket.length);
       throw new BadRequestException('동일시간의 동일공연은 5장만 소지할 수 있습니다!');
     }
 
@@ -507,8 +494,9 @@ export class TradesService {
     if (!buyer) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.BUYER);
 
     //구매자와 판매자가 동일한 경우
-    if (seller.id === buyer.id)
+    if (seller.id === buyer.id) {
       throw new BadRequestException(MESSAGES.TRADES.EQUAL.BUYER_AND_SELLER);
+    }
 
     //현재 가장 높은 ticketId보다 1 높은 값 (새로 재발급 하기 위해서)
     let query = await this.ticketRepository.query('SELECT MAX(id) AS maxId FROM tickets');
@@ -550,8 +538,6 @@ export class TradesService {
         description: `중고거래 <${title}>의 티켓 판매`,
         type: PointType.DEPOSIT,
       };
-      console.log(`buyerPointLog:`, buyerPointLog);
-      console.log(`sellerPointLog:`, sellerPointLog);
 
       await queryRunner.manager.save(PointLog, buyerPointLog);
       await queryRunner.manager.save(PointLog, sellerPointLog);
@@ -587,7 +573,6 @@ export class TradesService {
       //티켓 변경 로직 END========================
 
       //거래 삭제
-      console.log(tradeId);
       await queryRunner.manager.update(Trade, { id: tradeId }, { flag: FLAG.COMPLETED });
       await queryRunner.manager.update(TradeLog, { tradeId: tradeId }, { buyerId: buyer.id });
 
@@ -610,7 +595,7 @@ export class TradesService {
     return { message: '성공적으로 티켓을 구매하였습니다.' };
   }
 
-  //<8>중고 거래 로그 조회
+  //<7>중고 거래 로그 조회
   async getLogs(userId: number) {
     const buyLogs = await this.tradeLogRepository.find({
       where: { buyerId: userId },
