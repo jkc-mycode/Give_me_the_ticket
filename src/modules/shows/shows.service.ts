@@ -268,7 +268,6 @@ export class ShowsService {
       try {
         // Redis에서 조회수 증가
         await this.increaseRanking(showId, 'views');
-        console.log(`Show ID ${showId}의 조회수를 증가시켰습니다.`);
       } catch (error) {
         console.error(`조회수 증가 작업 중 오류 발생 (Show ID: ${showId}): ${error.message}`);
       }
@@ -639,14 +638,11 @@ export class ShowsService {
 
   /* 티켓 예매 */
   async createTicket(showId: number, createTicketDto: CreateTicketDto, user: User) {
+    const lock = await this.redisService.acquireLock();
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-
-    //트랜잭션 시도 후 락 걸기 시작
-    let lock;
     try {
-      lock = await this.redisService.acquireLock();
       const { scheduleId } = createTicketDto;
 
       // 공연이 있는지 확인합니다.

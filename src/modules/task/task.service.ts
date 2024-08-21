@@ -31,11 +31,11 @@ export class TaskService {
   // 10분마다 실행되어 공연의 조회수를 업데이트
   @Cron('*/10 * * * *')
   async increaseShowViewCount() {
-    await this.showService.increaseShowViewCount;
+    await this.showService.increaseShowViewCount();
   }
 
-  // 매 초마다 실행되어 만료된 티켓을 업데이트
-  @Cron('* * * * * *')
+  // 3시간마다 실행되어 만료된 티켓을 업데이트
+  @Cron('* * 3 * * *')
   async updateExpiredTicket() {
     const nowTime = new Date();
 
