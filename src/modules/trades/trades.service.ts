@@ -186,6 +186,10 @@ export class TradesService {
     if (search) {
       const searchData = await this.searchService.searchTrades(search);
       const ids = searchData.results.map((result) => result.id);
+      //어떤 값도 없었을 경우
+      if (!ids.length) {
+        return { message: `Search result not found` };
+      }
 
       trade_list = await this.tradeRepository.find({
         where: {
