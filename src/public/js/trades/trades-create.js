@@ -57,9 +57,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // 가격 정수 체크
+    // 가격 정수&음수 체크
     if (isNaN(tradePrice) || !Number.isInteger(Number(tradePrice))) {
       alert('정수를 입력해 주세요.');
+      return;
+    }
+    if (tradePrice < 0) {
+      alert('양수를 입력해 주세요.');
       return;
     }
 
