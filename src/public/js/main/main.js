@@ -301,6 +301,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     currentDate = '';
     document.getElementById('filterDate').value = '';
 
+    // 모든 카테고리 버튼의 활성화 상태 제거
+    document.querySelectorAll('.category-btn').forEach((btn) => btn.classList.remove('active'));
+
     const result = await fetchShows(currentPage, limit);
     if (result && result.data) {
       renderShows(result.data);

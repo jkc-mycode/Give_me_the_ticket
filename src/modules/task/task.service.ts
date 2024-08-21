@@ -11,21 +11,27 @@ import { SearchService } from '../shows/search/search.service';
 export class TaskService {
   private readonly logger = new Logger(TaskService.name);
   constructor(
-    private readonly showService: ShowsService,
     private readonly searchService: SearchService,
+    private readonly showService: ShowsService,
     @InjectRepository(Ticket) private ticketRepository: Repository<Ticket>
   ) {}
-
-  // 매 시간마다 실행되어 쇼 랭킹을 업데이트
-  @Cron(CronExpression.EVERY_HOUR, { name: 'hourlyRankingUpdate' })
-  async handleHourlyRankingUpdate() {
-    await this.showService.handleHourlyRankingUpdate();
-  }
 
   // 매 분마다 실행되어 쇼 데이터를 동기화
   @Cron(CronExpression.EVERY_MINUTE, { name: 'syncAllShows' })
   async syncAllShowsCron() {
     await this.searchService.syncAllShows();
+  }
+
+  // 매 시간마다 실행되어 쇼 랭킹을 업데이트
+  @Cron(CronExpression.EVERY_HOUR, { name: 'hourlyRankingUpdate' })
+  async HourlyRankingUpdate() {
+    await this.showService.HourlyRankingUpdate();
+  }
+
+  // 10분마다 실행되어 공연의 조회수를 업데이트
+  @Cron('*/10 * * * *')
+  async increaseShowViewCount() {
+    await this.showService.increaseShowViewCount;
   }
 
   // 매 초마다 실행되어 만료된 티켓을 업데이트

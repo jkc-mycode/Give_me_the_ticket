@@ -8,6 +8,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, In, Repository } from 'typeorm';
+import { addHours, startOfDay, subDays, subHours } from 'date-fns';
+import Redis from 'ioredis';
+
 import { Show } from 'src/entities/shows/show.entity';
 import { User } from 'src/entities/users/user.entity';
 import { Bookmark } from 'src/entities/users/bookmark.entity';
@@ -15,25 +18,25 @@ import { Schedule } from 'src/entities/shows/schedule.entity';
 import { Ticket } from 'src/entities/shows/ticket.entity';
 import { Image } from 'src/entities/images/image.entity';
 import { ShowRanking } from 'src/entities/shows/showRanking.entity';
+import { PointLog } from 'src/entities/users/point-log.entity';
+
 import { CreateShowDto } from './dto/create-show.dto';
 import { GetShowListDto } from './dto/get-show-list.dto';
 import { UpdateShowDto } from './dto/update-show.dto';
 import { DeleteBookmarkDto } from './dto/delete-bookmark.dto';
 import { CreateTicketDto } from './dto/create-ticket-dto';
-import { TicketStatus } from 'src/commons/types/shows/ticket.type';
+
 import { SHOW_MESSAGES } from 'src/commons/constants/shows/show-messages.constant';
 import { SHOW_TICKETS } from 'src/commons/constants/shows/show-tickets.constant';
 import { SHOW_TICKET_MESSAGES } from 'src/commons/constants/shows/show-ticket-messages.constant';
 import { USER_BOOKMARK_MESSAGES } from 'src/commons/constants/users/user-bookmark-messages.constant';
+
+import { TicketStatus } from 'src/commons/types/shows/ticket.type';
+import { PointType } from 'src/commons/types/users/point.type';
+
 import { ImagesService } from '../images/images.service';
 import { SearchService } from './search/search.service';
 import { RedisService } from '../redis/redis.service';
-import { addHours, startOfDay, subDays, subHours } from 'date-fns';
-import { PointLog } from 'src/entities/users/point-log.entity';
-import { PointType } from 'src/commons/types/users/point.type';
-import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
-import Redis from 'ioredis';
-import { Cron, CronExpression } from '@nestjs/schedule';
 
 @Injectable()
 export class ShowsService {
@@ -46,7 +49,6 @@ export class ShowsService {
     private dataSource: DataSource,
     private readonly imagesService: ImagesService,
     private readonly searchService: SearchService,
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly redisService: RedisService,
     @Inject('REDIS_CLIENT') private redisClient: Redis
   ) {
@@ -258,7 +260,22 @@ export class ShowsService {
     };
   }
 
-  // 10분 단위 타임스탬프
+  // 특정 공연 ID의 조회수를 주기적으로 증가시키기
+  async increaseShowViewCount() {
+    const targetShowIds = [1, 5, 20, 35, 67];
+
+    for (const showId of targetShowIds) {
+      try {
+        // Redis에서 조회수 증가
+        await this.increaseRanking(showId, 'views');
+        console.log(`Show ID ${showId}의 조회수를 증가시켰습니다.`);
+      } catch (error) {
+        console.error(`조회수 증가 작업 중 오류 발생 (Show ID: ${showId}): ${error.message}`);
+      }
+    }
+  }
+
+  // 10분 단위 타임스탬프(yyyymmddhhmm)
   private getMinTimestamp(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -269,7 +286,7 @@ export class ShowsService {
     return `${year}${month}${day}${hours}${minutes}`;
   }
 
-  // 1시간 단위 타임스탬프
+  // 1시간 단위 타임스탬프(yyyymmddhh)
   private getHourTimestamp(date: Date): string {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -279,7 +296,7 @@ export class ShowsService {
     return `${year}${month}${day}${hours}`;
   }
 
-  // Redis 키 패턴
+  // 패턴에 일치하는 Redis 키 검색
   private async getKeys(pattern: string): Promise<string[]> {
     let cursor = '0';
     let keys: string[] = [];
@@ -290,7 +307,7 @@ export class ShowsService {
         'MATCH',
         pattern,
         'COUNT',
-        100
+        100 // 한 번의 scan에서 가져올 최대 키 수
       );
       cursor = newCursor;
       keys.push(...foundKeys);
@@ -311,20 +328,24 @@ export class ShowsService {
 
       // 조회수 또는 예매수 증가
       await this.redisClient.zincrby(minKey, 1, String(showId));
+      //TTL 설정 (1시간)
       await this.redisClient.expire(minKey, 3600);
 
-      //unionKey 생성
+      //unionKey 생성 및 업데이트
       const keys = await this.getKeys(`show:${type}:${hourTimestamp}*`);
       if (keys.length > 0) {
         await this.redisClient.zunionstore(unionKey, keys.length, ...keys);
       }
+      //TTL 설정 (1시간)
       await this.redisClient.expire(unionKey, 3600);
     } catch (error) {
       console.log(`레디스 ${type} 증가 오류:`, error);
     }
   }
 
-  async handleHourlyRankingUpdate() {
+  // 매 시간마다 이전 시각의 unionKey 업데이트
+  async HourlyRankingUpdate() {
+    //1시간 전의 unionKey 계산
     const previousHour = new Date(Date.now() - 60 * 60 * 1000);
 
     for (const type of ['views', 'bookings'] as const) {
@@ -333,17 +354,22 @@ export class ShowsService {
     }
   }
 
+  //1시간 동안의 unionKey 찾기
   private async getUnionKeyForHour(type: 'views' | 'bookings', date: Date): Promise<string | null> {
     const pattern = `show:${type}:union:${this.getHourTimestamp(date)}`;
     const keys = await this.getKeys(pattern);
+
+    //키가 있다면 가장 최신 키 반환
     return keys.length > 0 ? keys.sort().reverse()[0] : null;
   }
 
-  /* DB에 랭킹 데이터 저장 */
+  //DB에 unionKey 저장
   async updateRanking(type: 'views' | 'bookings', unionKey: string) {
-    const redisData = await this.redisClient.zrange(unionKey, 0, -1, 'WITHSCORES');
+    // redis에서 최근 union key의 랭킹 가져오기
+    const redisData = await this.redisClient.zrange(unionKey, 0, -1);
     if (redisData.length === 0) return;
 
+    //오늘 날짜 계산(yyyy-mm-dd)
     const today = new Date().toISOString().slice(0, 10);
     const rankingData = new Map<number, any>();
 
@@ -353,6 +379,7 @@ export class ShowsService {
 
       if (rankingData.has(showId)) {
         const existingEntry = rankingData.get(showId);
+        // 기존 데이터가 있으면 합산
         existingEntry[type] += count;
       } else {
         const existingData = await this.showRankingRepository.findOne({
@@ -360,20 +387,25 @@ export class ShowsService {
         });
 
         if (existingData) {
+          //기존 DB 데이터가 있으면 합산
           existingData[type] += count;
           rankingData.set(showId, existingData);
         } else {
           const newDateRanking = this.showRankingRepository.create({
             date: today,
             showId,
+            //조회수 초기화
             views: type === 'views' ? count : 0,
+            //예매수 초기화
             bookings: type === 'bookings' ? count : 0,
           });
+          //새로운 랭킹 데이터 생성
           rankingData.set(showId, newDateRanking);
         }
       }
     }
 
+    //MAP 객체 DB에 저장
     await this.showRankingRepository.save(Array.from(rankingData.values()));
   }
 
@@ -383,6 +415,7 @@ export class ShowsService {
       // 모든 union 키를 검색
       const keys = await this.getKeys(`show:${type}:union:*`);
 
+      //키가 있다면 가장 최신 키 반환
       return keys.length > 0 ? keys.sort().reverse()[0] : null;
     } catch (error) {
       console.log(`Redis ${type} union key 검색 오류:`, error);
