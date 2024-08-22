@@ -3,9 +3,7 @@ import { TradesService } from './trades.service';
 import { TradesController } from './trades.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { BullModule } from '@nestjs/bullmq';
 import { QUEUES } from 'src/commons/constants/queue.constant';
-import { RedlockModule } from '../redis/redlock.module';
 import { SearchModule } from './search/search.module';
 
 //entities
@@ -17,11 +15,11 @@ import { Ticket } from 'src/entities/shows/ticket.entity';
 import { User } from 'src/entities/users/user.entity';
 import { Image } from 'src/entities/images/image.entity';
 import { PointLog } from 'src/entities/users/point-log.entity';
+import { RedisModule } from '../redis/redis.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    RedlockModule,
     SearchModule,
     TypeOrmModule.forFeature([
       Trade,
@@ -34,6 +32,7 @@ import { PointLog } from 'src/entities/users/point-log.entity';
       Image,
       PointLog,
     ]),
+    RedisModule,
   ],
   controllers: [TradesController],
   providers: [TradesService],

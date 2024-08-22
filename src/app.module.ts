@@ -18,7 +18,6 @@ import { RedisModule } from './modules/redis/redis.module';
 import { BullModule } from '@nestjs/bullmq';
 import { SearchModule } from './modules/shows/search/search.module';
 import { PaymentsModule } from './modules/payments/payments.module';
-import { RedlockModule } from './modules/redis/redlock.module';
 import { CacheModule } from '@nestjs/cache-manager';
 
 //controllers
@@ -70,7 +69,6 @@ import { TaskModule } from './modules/task/task.module';
     RedisModule,
     SearchModule,
     PaymentsModule,
-    RedlockModule,
     ShowReviewsModule,
     TaskModule,
   ],
