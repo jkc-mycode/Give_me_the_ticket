@@ -450,8 +450,8 @@ export class TradesService {
       await this.searchService.deleteTradeIndex(tradeId);
     } catch (err) {
       await queryRunner.rollbackTransaction();
-      console.error('중고거래 삭제에 실패했습니다.', err);
-      throw new InternalServerErrorException('중고거래 삭제에 실패했습니다.');
+      console.error(MESSAGES.TRADES.FAILED.DELETE_TRADE, err);
+      throw new InternalServerErrorException(MESSAGES.TRADES.FAILED.DELETE_TRADE);
     } finally {
       queryRunner.release();
     }
@@ -593,7 +593,7 @@ export class TradesService {
     // //기존에 존재하는 id를 레디스에서 제거
     this.deleteRedisTicket(String(trade.ticketId));
 
-    return { message: '성공적으로 티켓을 구매하였습니다.' };
+    return { message: MESSAGES.TRADES.SUCCESSFULLY_CREATE.TICKET };
   }
 
   //<7>중고 거래 로그 조회
@@ -613,48 +613,11 @@ export class TradesService {
       // 병합된 배열을 id 기준으로 정렬
       logs.sort((a, b) => a.id - b.id);
     } catch (err) {
-      console.error(`중고거래 로그 조회 실패`, err);
-      throw new InternalServerErrorException('중고 거래 로그 조회 중 에러가 발생했습니다');
+      console.error(MESSAGES.TRADES.FAILED.GET_TRADE_LOGS, err);
+      throw new InternalServerErrorException(MESSAGES.TRADES.ERROR_OCCUR.GET_TRADE_LOGS);
     }
 
     if (!logs[0]) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE_LOG);
     else return logs;
   }
-
-  //=======================테스트 함수 START====================
-  async hello(userId: number) {
-    return await this.userRepository.findOne({ where: { id: userId } });
-  }
-
-  async test(testDto: TestDto) {
-    const { search } = testDto;
-    const tradeData = 0;
-    try {
-      const result = await this.searchService.searchTrades(search);
-      return result;
-    } catch (err) {
-      console.error(`테스트 오류:`, err);
-    }
-
-    return { message: `코드 실행 성공` };
-  }
-
-  async changeRole(userId: number) {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-
-    if (user.role === Role.USER) {
-      await this.userRepository.update({ id: userId }, { role: Role.ADMIN });
-      return { message: MESSAGES.TRADES.SUCCESSFULLY_UPDATE.CHANGE_ROLE_ADMIN };
-    } else if (user.role === Role.ADMIN) {
-      await this.userRepository.update({ id: userId }, { role: Role.USER });
-      return { message: MESSAGES.TRADES.SUCCESSFULLY_UPDATE.CHANGE_ROLE_USER };
-    }
-  }
-
-  async changRemainSeat(scheduleId) {
-    const seat: number = 45;
-    await this.scheduleRepository.update({ id: scheduleId }, { remainSeat: seat });
-    return { message: `좌석이 ${seat}로 수정되었습니다.` };
-  }
-  //=======================테스트 함수 END====================
 }
