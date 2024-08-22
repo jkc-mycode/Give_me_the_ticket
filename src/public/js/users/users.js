@@ -278,6 +278,8 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   async function getTicketList() {
+    let reviewedShow = [];
+
     try {
       // 이미 작성한 리뷰 확인을 위한 백엔드 사용자 리뷰 목록 조회 API 호출
       const reviewResponse = await axios.get('/users/me/review', {
@@ -286,9 +288,13 @@ document.addEventListener('DOMContentLoaded', function () {
         },
       });
 
-      const userReview = reviewResponse.data.getReviewList;
-      const reviewedShow = userReview.map((review) => review.showId); // 리뷰 작성된 showId 목록
+      const userReview = reviewResponse.data.getReviewList || [];
+      reviewedShow = userReview.map((review) => review.showId); // 리뷰 작성된 showId 목록
+    } catch (err) {
+      console.log(err.response?.data || err.message);
+    }
 
+    try {
       // 백엔드 사용자 예매 목록 조회 API 호출
       const response = await axios.get('/users/me/ticket', {
         headers: {
@@ -411,7 +417,7 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     } catch (err) {
       // 사용자 예매 목록 조회 실패 시 에러 처리
-      console.log(err.response.data);
+      console.log(err.response?.data || err.message);
     }
   }
 
