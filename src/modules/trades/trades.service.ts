@@ -563,6 +563,7 @@ export class TradesService {
       newTicket.userId = buyer.id;
       newTicket.status = TicketStatus.USEABLE;
       newTicket.nickname = buyer.nickname;
+      newTicket.createdAt = new Date();
       newTicket.updatedAt = new Date();
 
       await queryRunner.manager.save(Ticket, newTicket);
