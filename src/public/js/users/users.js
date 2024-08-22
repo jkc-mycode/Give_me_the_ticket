@@ -359,9 +359,9 @@ document.addEventListener('DOMContentLoaded', function () {
         statusElement.innerHTML = `티켓 상태 : <strong>${statusText}</strong>`;
         logElement.appendChild(statusElement);
 
-        const createdAtElement = document.createElement('p');
-        createdAtElement.textContent = `티켓 구매 일자 : ${log.createdAt}`;
-        logElement.appendChild(createdAtElement);
+        const updatedAtElement = document.createElement('p');
+        updatedAtElement.textContent = `티켓 구매 일자 : ${log.updatedAt}`;
+        logElement.appendChild(updatedAtElement);
 
         // '사용 가능' 상태인 경우, '환불' 및 '중고 판매' 버튼 생성
         if (log.status === 'USEABLE') {
