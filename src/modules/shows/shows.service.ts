@@ -680,13 +680,17 @@ export class ShowsService {
 
       // date와 time을 하나의 showTime으로 연결합니다.
       const showTime = `${String(schedule.date)}T${String(schedule.time)}.000Z`;
-
+      console.log(showTime);
       // 공연 시간 기준 2시간 전
       const twoHoursBeforeShowTime = subHours(
         showTime,
         SHOW_TICKETS.COMMON.TICKET.HOURS.BEFORE_TWO_HOURS
       );
-      const nowTime = new Date();
+
+      const utcTime = new Date();
+      const offsetInHours = 9;
+      const nowTime = new Date(utcTime.getTime() + offsetInHours * 60 * 60 * 1000);
+
       if (nowTime >= twoHoursBeforeShowTime) {
         throw new BadRequestException(SHOW_TICKET_MESSAGES.COMMON.TIME.EXPIRED);
       }
@@ -778,9 +782,12 @@ export class ShowsService {
         showTime,
         SHOW_TICKETS.COMMON.TICKET.HOURS.BEFORE_ONE_HOURS
       );
-      //현재 시간 - 기준은 UTC 시간으로 되어있습니다.
-      const nowTime = new Date();
+      const utcTime = new Date();
+
+      const offsetInHours = 9;
+      const nowTime = new Date(utcTime.getTime() + offsetInHours * 60 * 60 * 1000);
       // 티켓 예매 시점 확인 (티켓의 생성 시점)
+
       const bookingTime = new Date(ticket.createdAt);
       // 공연 시작 3일 전,  10일 전 시간 계산
 
