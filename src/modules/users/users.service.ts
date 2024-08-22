@@ -86,7 +86,7 @@ export class UsersService {
     try {
       const ticket = await this.ticketRepository.find({
         where: { userId: id },
-        order: { createdAt: 'DESC' },
+        order: { updatedAt: 'DESC' },
       });
 
       if (ticket.length === 0) {
@@ -96,14 +96,14 @@ export class UsersService {
       // 날짜 형식 변환
       const dateFormatTicket = ticket.map((ticket) => {
         // KST로 변환 (+9시간)
-        const kstDate = new Date(ticket.createdAt);
+        const kstDate = new Date(ticket.updatedAt);
         kstDate.setHours(kstDate.getHours() + 9);
 
         const dateFormat = format(kstDate, 'yyyy-MM-dd HH:mm:ss');
 
         return {
           ...ticket,
-          createdAt: dateFormat,
+          updatedAt: dateFormat,
         };
       });
 
