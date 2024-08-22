@@ -42,7 +42,10 @@ export class ShowReviewsService {
     //공연이 끝난 후에 리뷰를 작성하게 합니다.
     const runtimeAfterShowTime = addMinutes(showTime, ticket.runtime);
 
-    const nowDate = new Date();
+    const utcTime = new Date();
+
+    const offsetInHours = 9;
+    const nowDate = new Date(utcTime.getTime() + offsetInHours * 60 * 60 * 1000);
     if (runtimeAfterShowTime > nowDate) {
       throw new ConflictException(SHOW_REVIEWS_MESSAGES.COMMON.SHOW.FINSHED);
     }
