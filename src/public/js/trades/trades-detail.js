@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function getDetailTrade(tradeId) {
     try {
       const { data } = await axios.get(`/trades/${tradeId}`);
-      console.log(data);
       if (data) return data;
     } catch (err) {
       console.error('failed to fetch DetailTrade', err);

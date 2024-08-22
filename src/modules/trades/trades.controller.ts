@@ -44,61 +44,6 @@ import { Roles } from '../auth/utils/roles.decorator';
 export class TradesController {
   constructor(private readonly tradesService: TradesService) {}
 
-  //테스트 메서드==============================
-  @ApiBearerAuth()
-  @Get('/hello')
-  @ApiOperation({
-    summary: SWAGGER.TRADES.HELLO.API_OPERATION.SUMMARY,
-    description: SWAGGER.TRADES.HELLO.API_OPERATION.DESCRIPTION,
-  })
-  @ApiOkResponse({ description: 'hello를 출력합니다' })
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(Role.USER)
-  async hello(@Req() req: { user: User }) {
-    const user = req.user;
-    return await this.tradesService.hello(user.id);
-  }
-  @ApiBearerAuth()
-  @Get('/test')
-  @ApiOperation({
-    summary: SWAGGER.TRADES.TEST.API_OPERATION.SUMMARY,
-    description: SWAGGER.TRADES.TEST.API_OPERATION.DESCRIPTION,
-  })
-  @ApiOkResponse({
-    description: '실행이 완료되면 bbbbbbbbbbbbbbbbbbbbbbbb를 출력합니다',
-  })
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(Role.USER)
-  async test(@Body() testDto: TestDto) {
-    console.log('테스트를 시작합니다.');
-    return await this.tradesService.test(testDto);
-  }
-
-  @Get('/change-role')
-  @ApiOperation({
-    summary: SWAGGER.TRADES.CHANGE_ROLE.API_OPERATION.SUMMARY,
-    description: SWAGGER.TRADES.CHANGE_ROLE.API_OPERATION.DESCRIPTION,
-  })
-  @ApiOkResponse({ description: '' })
-  @ApiNoContentResponse({ description: '유저의 계정이 변경됩니다' })
-  @UseGuards(AuthGuard('jwt'))
-  async changeRole(@Req() req: { user: User }) {
-    const user = req.user;
-    return await this.tradesService.changeRole(user.id);
-  }
-
-  @Get('/schedule/:scheduleId')
-  @ApiOperation({
-    summary: SWAGGER.TRADES.CHANGE_REMAIN_SEAT.API_OPERATION.SUMMARY,
-    description: SWAGGER.TRADES.CHANGE_REMAIN_SEAT.API_OPERATION.DESCRIPTION,
-  })
-  @ApiOkResponse({ description: '' })
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(Role.USER)
-  async changRemainSeat(@Param('scheduleId', ParseIntPipe) scheduleId: number) {
-    return await this.tradesService.changRemainSeat(scheduleId);
-  }
-
   //테스트 메서드========================================================
 
   //<1>중고 거래 로그 조회

@@ -54,10 +54,14 @@ export const MESSAGES = {
     CAN_NOT_UPDATE: { TICKET_PRICE: `원래 티켓 가격보다 높게 설정할 수 없습니다!` },
     ERROR_OCCUR: {
       REDIS: 'Redis에서 에러 발생',
+      GET_TRADE_LOGS: '중고 거래 로그 조회 중 에러가 발생했습니다',
     },
     FAILED: {
       CREATE_TRADE: '거래 생성에 실패했습니다',
       CREATE_INDEX: `트레이드 인덱스 생성에 실패했습니다`,
+      GET_TRADE_LOGS: `중고거래 로그 조회 실패`,
+      GET_TRADE_LOG: `중고거래 로그 조회 실패`,
+      DELETE_TRADE: '중고거래 삭제에 실패했습니다.',
       PURCHASE: '구매에 실패했습니다',
     },
   },
