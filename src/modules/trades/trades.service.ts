@@ -8,6 +8,8 @@ import { TestDto } from './dto/test-dto';
 //error Type
 import {
   BadRequestException,
+  ConflictException,
+  ForbiddenException,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
@@ -312,7 +314,7 @@ export class TradesService {
     //1-4 이미 이 티켓이 중고거래에 올라와있는지 검증
     const trade = await this.tradeRepository.find({ where: { ticketId: ticketId } });
 
-    if (trade[0]) return { message: MESSAGES.TRADES.ALREADY_EXISTS.IN_TRADE_TICKET };
+    if (trade[0]) throw new ConflictException(MESSAGES.TRADES.ALREADY_EXISTS.IN_TRADE_TICKET);
 
     //해당 티켓이 사용 가능한지 검증 (레디스 검증과 티켓의 날짜와 시간에 따른 검증)
     if (
@@ -320,7 +322,7 @@ export class TradesService {
       new Date().getTime() >=
         this.combineDateAndTime(String(date), time).getTime() - 60 * 1000 * 60 * 2
     )
-      throw new BadRequestException(MESSAGES.TRADES.IS_EXPIRED.TICKET);
+      throw new ForbiddenException(MESSAGES.TRADES.IS_EXPIRED.TICKET);
 
     //가격이 기존의 티켓 가격보다 같거나 낮은지 검증
     if (ticket.price < price) {
@@ -331,7 +333,7 @@ export class TradesService {
 
     //본인의 티켓인지 검증
     if (ticket.userId !== sellerId) {
-      throw new BadRequestException(MESSAGES.TRADES.NOT_HAVE.TICKET);
+      throw new ForbiddenException(MESSAGES.TRADES.NOT_HAVE.TICKET);
     }
 
     //티켓이 사용 가능한지 검증
@@ -399,7 +401,7 @@ export class TradesService {
     }
 
     if (trade.sellerId !== userId)
-      throw new BadRequestException(MESSAGES.TRADES.NOT_EXISTS.AUTHORITY);
+      throw new ForbiddenException(MESSAGES.TRADES.NOT_EXISTS.AUTHORITY);
 
     //티켓과 중고거래의 가격 둘다 변경(어차피 참고하는 것은 티켓의 가격뿐이기에, 추후 수정 예정, 엔티티에서 중고거래의 가격은 사라져도 될것으로 보임)
     const queryRunner = this.dataSource.createQueryRunner();
@@ -434,7 +436,7 @@ export class TradesService {
     if (!trade) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE);
 
     if (trade.sellerId !== userId) {
-      throw new BadRequestException(MESSAGES.TRADES.NOT_EXISTS.AUTHORITY);
+      throw new ForbiddenException(MESSAGES.TRADES.NOT_EXISTS.AUTHORITY);
     }
     await this.ticketRepository.update({ id: trade.ticketId }, { status: TicketStatus.USEABLE });
 
@@ -464,7 +466,6 @@ export class TradesService {
   //<6> 티켓 구매 메서드 (buyerId는 기존의 userId와 같다)
   async createTicket(tradeId: number, buyerId: number) {
     //해당 거래 존재 확인
-
     const trade = await this.tradeRepository.findOne({ where: { id: tradeId } });
     if (!trade) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE);
 
@@ -495,7 +496,7 @@ export class TradesService {
 
     //구매자와 판매자가 동일한 경우
     if (seller.id === buyer.id) {
-      throw new BadRequestException(MESSAGES.TRADES.EQUAL.BUYER_AND_SELLER);
+      throw new ConflictException(MESSAGES.TRADES.EQUAL.BUYER_AND_SELLER);
     }
 
     //현재 가장 높은 ticketId보다 1 높은 값 (새로 재발급 하기 위해서)
@@ -597,20 +598,26 @@ export class TradesService {
 
   //<7>중고 거래 로그 조회
   async getLogs(userId: number) {
-    const buyLogs = await this.tradeLogRepository.find({
-      where: { buyerId: userId },
-    });
-    const sellLogs = await this.tradeLogRepository.find({
-      where: { sellerId: userId },
-    });
+    let logs = [];
+    try {
+      const buyLogs = await this.tradeLogRepository.find({
+        where: { buyerId: userId },
+      });
+      const sellLogs = await this.tradeLogRepository.find({
+        where: { sellerId: userId },
+      });
 
-    // buyLogs와 sellLogs 병합
-    const logs = [...buyLogs, ...sellLogs];
+      // buyLogs와 sellLogs 병합
+      logs = [...buyLogs, ...sellLogs];
 
-    // 병합된 배열을 id 기준으로 정렬
-    logs.sort((a, b) => a.id - b.id);
+      // 병합된 배열을 id 기준으로 정렬
+      logs.sort((a, b) => a.id - b.id);
+    } catch (err) {
+      console.error(`중고거래 로그 조회 실패`, err);
+      throw new InternalServerErrorException('중고 거래 로그 조회 중 에러가 발생했습니다');
+    }
 
-    if (!logs[0]) return { message: MESSAGES.TRADES.NOT_EXISTS.TRADE_LOG };
+    if (!logs[0]) throw new NotFoundException(MESSAGES.TRADES.NOT_EXISTS.TRADE_LOG);
     else return logs;
   }
 
