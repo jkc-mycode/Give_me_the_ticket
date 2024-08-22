@@ -17,11 +17,16 @@ export class RedisService {
     this.redlock = new Redlock([this.redisClient], {
       retryCount: REDIS_LOCK.RETRY_COUNT, // 재시도 횟수
       retryDelay: REDIS_LOCK.RETRY_DELAY, // 재시도 지연시간
+      retryJitter: REDIS_LOCK.RETRY_JITTER,
     });
   }
 
   //락 획득
   async acquireLock() {
     return this.redlock.acquire([REDIS_LOCK.TICKET], this.lockDuration);
+  }
+
+  async TradePurchaseAcquireLock() {
+    return this.redlock.acquire([REDIS_LOCK.PURCHASE_TRADE], this.lockDuration);
   }
 }

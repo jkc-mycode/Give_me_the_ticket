@@ -26,8 +26,8 @@ import { MESSAGES } from 'src/commons/constants/trades/messages';
 //transaction
 import { Redis } from 'ioredis';
 import { Queue } from 'bullmq';
-import Redlock from 'redlock';
 import { DataSource } from 'typeorm';
+import { RedisService } from '../redis/redis.service';
 
 //Service
 import { SearchService } from './search/search.service';
@@ -77,8 +77,8 @@ export class TradesService {
 
     //Redis
     private dataSource: DataSource,
-    @Inject('REDIS_CLIENT') private redisClient: Redis,
-    @Inject('REDLOCK') private readonly redlock: Redlock
+    private readonly redisService: RedisService,
+    @Inject('REDIS_CLIENT') private redisClient: Redis
   ) {}
 
   combineDateAndTime(dateStr: string, timeStr: string) {
@@ -505,7 +505,7 @@ export class TradesService {
 
     //<6-1>쿼리 러너문 만들기=========트랜잭션 시작=========가져온 변수:trade,ticket,seller,buyer,===============================================
     //Redlock생성==================//
-    let lock = await this.redlock.acquire(['TradeLockKey'], 1000);
+    let lock = await this.redisService.TradePurchaseAcquireLock();
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
