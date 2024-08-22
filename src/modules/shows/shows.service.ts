@@ -680,7 +680,7 @@ export class ShowsService {
 
       // date와 time을 하나의 showTime으로 연결합니다.
       const showTime = `${String(schedule.date)}T${String(schedule.time)}.000Z`;
-      console.log(showTime);
+
       // 공연 시간 기준 2시간 전
       const twoHoursBeforeShowTime = subHours(
         showTime,
