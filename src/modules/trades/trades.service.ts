@@ -346,9 +346,6 @@ export class TradesService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    //Redlock생성==================//
-    let lock = await this.redlock.acquire(['TradeLockKey'], 1000);
-
     try {
       //정책에 따라 티켓의 가격을 중고거래 게시된 시점의 가격으로 고정
       await queryRunner.manager.save(Ticket, {
@@ -379,7 +376,6 @@ export class TradesService {
       return { message: MESSAGES.TRADES.CAN_NOT_CREATE.TRADE };
     } finally {
       await queryRunner.release();
-      await lock.release();
     }
 
     //=======Redlock End===========//
@@ -508,6 +504,9 @@ export class TradesService {
     const tradeLogId = tradeLog.id;
 
     //<6-1>쿼리 러너문 만들기=========트랜잭션 시작=========가져온 변수:trade,ticket,seller,buyer,===============================================
+    //Redlock생성==================//
+    let lock = await this.redlock.acquire(['TradeLockKey'], 1000);
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -586,6 +585,7 @@ export class TradesService {
       throw new InternalServerErrorException(`${MESSAGES.TRADES.FAILED.PURCHASE} 사유:${err}`);
     } finally {
       await queryRunner.release();
+      await lock.release();
     }
 
     //티켓 재발급 로직==================
