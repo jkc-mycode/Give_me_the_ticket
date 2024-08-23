@@ -201,13 +201,27 @@ http://localhost:3000/
 - 매크로 방지를 위해 한 사람당 한 공연의 티켓을 최대 5장 구매하게 합니다.
 - 공연 예매에 성공하면 사용자의 포인트를 공연 금액만큼 감소시키고, 잔여 좌석수를 감소시킵니다.
 
-- https://github.com/jkc-mycode/Give_me_the_ticket/blob/dev/src/modules/shows/shows.service.ts#L640-L755
+- https://github.com/jkc-mycode/Give_me_the_ticket/blob/736ee3774119f5ab316976273c498515e52e48c1/src/modules/shows/shows.service.ts#L653-L755
 
 #### 5-3-2. 동시성 처리
 
 ![ticket booking](./docs/readme-images/ticket-flowchart.jpg)
 
-- 한 좌석이 남은 공연이 있을 경우, 먼저 락을 획득한 사람이 공연을 예매할 수 있게 합니다.
+- 한 좌석이 남은 공연이 있다고 가정할 경우에, 먼저 락을 획득한 사람이 공연을 예매할 수 있게 합니다.
+
+```
+const lock = await this.redisService.acquireLock();
+```
+
+- 이 코드를 통해서 티켓 생성 메서드에 락을 걸어 한 유저가 락을 점유하고 있으면 다른 유저가 데이터베이스 리소스에 접근하지 못하게 합니다.
+
+- 실제로 1000명의 사용자가 총 좌석이 20개인 공연을 예매하기 위해서 몰렸을 때 정확히 20개의 티켓만 생성되는지 테스트를 진행하였습니다.
+
+![ticket booking](./docs/readme-images/ticket-booking1.png)
+
+- 정확히 20개의 티켓이 예매 되었고 해당 스케줄의 공연의 잔여 좌석은 0이 된 것을 볼 수 있습니다.
+
+![ticket booking](./docs/readme-images/ticket-booking2.png)
 
 ### 5-4. 공연 티켓 환불 API
 
@@ -218,7 +232,7 @@ http://localhost:3000/
 - 공연 티켓 환불 시 위 차트의 정책을 기반으로 에러 처리를 합니다.
 - 환불된 금액을 사용자 포인트에 입금하고, 해당 공연의 잔여 좌석을 증가시킵니다.
 
-- https://github.com/jkc-mycode/Give_me_the_ticket/blob/dev/src/modules/shows/shows.service.ts#L758-L883
+- https://github.com/jkc-mycode/Give_me_the_ticket/blob/736ee3774119f5ab316976273c498515e52e48c1/src/modules/shows/shows.service.ts#L772-L897
 
 ### 5-5. 중고 거래 티켓 구매 API
 
@@ -231,7 +245,7 @@ http://localhost:3000/
 
 - 중고 거래 게시물의 상태를 판매 완료로 변경합니다.
 
-- https://github.com/jkc-mycode/Give_me_the_ticket/blob/dev/src/modules/trades/trades.service.ts#L463-L598
+- https://github.com/jkc-mycode/Give_me_the_ticket/blob/736ee3774119f5ab316976273c498515e52e48c1/src/modules/trades/trades.service.ts#L463-L598
 
 ## 6. 사이트 이용 안내
 
@@ -329,7 +343,7 @@ http://localhost:3000/
 
 ### 7-1. Red Lock 동시성 테스트
 
-- **문제** : 문제: 10명의 사용자가 5개의 공연 좌석을 예매하는 상황으로 동시성 테스트를 진행. 좌석 5개가 예매 완료 되어야 하는데, 4개가 예매 완료되는 상황이 발생
+- **문제** : 10명의 사용자가 5개의 공연 좌석을 예매하는 상황으로 동시성 테스트를 진행. 좌석 5개가 예매 완료 되어야 하는데, 4개가 예매 완료되는 상황이 발생
 
 - **추정 원인** : 락 획득 재시도 지연시간 문제라고 추정
 
@@ -339,57 +353,7 @@ http://localhost:3000/
 
 <br>
 
-### 7-2. Elasticsearch 이용
-
-#### 7-2-1. 데이터 휘발
-
-- **문제** : 공연 목록 조회 시 전달 data안에 이미지 URL을 함께 전달하고 있지만 새로고침을 연달아 클릭 시 data안에 이미지URL이 휘발되는 문제 발생
-
-![show search](./docs/readme-images//show-search-1.png)
-
-- **추정 원인**
-
-  - 내가 기대한 내용 : 기존의 인덱싱된 인덱스는 그대로 두고, 변동이 있는 인덱스만 인덱싱
-
-  - 실제 동작하는 내용 : 기존 인덱스를 모두 삭제하고 다시 모든 데이터를 인덱싱
-    → 실제 인덱스는 15개 밖에 없는데, 새로고침 할 떄 마다 Elasticsearch안에 삭제된 문서가 증가함
-
-  - 결과 : 기존 데이터를 비우고 다시 인덱싱하는 과정보다 실제 새로고침하는 시간이 더 짧아 JOIN이 있는 이미지 URL을 가져오는게 늦어져 data안에 이미지 URL이 휘발되는 것으로 추정
-
-- **시도한 내용**
-
-  - 짧은 스케줄링 간격과 deletedAt컬럼 때문에 기존 데이터도 지워버리고 다시 인덱싱하는 듯해 수정
-
-  - 기존 코드 : 1분마다 deletedAt컬럼을 기준으로 컬럼 값이 있다면 인덱스를 삭제하고, 값이 null이라면 인덱스를 생성 하도록 구현
-
-  - 수정한 코드 : 5분마다 updatedAt컬럼을 기준으로 스케줄링을 돌며 현재 시간의 5분 전과 비교하여 변경된 데이터만 인덱싱하도록 구현
-
-- **해결 방안**
-  - Elasticsearch(search.service.ts) : 인덱싱한 id만 반환
-  - 공연 목록 조회 API (shows.service.ts) : 인덱싱한 id에 해당하는 데이터를 DB에서 조회하여 데이터 반환
-  - 최종 해결 방법 : 기존에 연결한 AWS OpenSearch 도메인을 삭제하고, 새로운 도메인을 생성하여 연결하였더니 기존에 작성한 코드로도 데이터가 휘발되지 않고 정상 작동함
-    <br>
-
-#### 7-2-2. 유사 검색
-
-- **문제** : 유사 검색을 위해 match쿼리에 fuzziness를 설정하여 검색 시 너무 많은 정보가 검색됨
-
-- **추정 원인** : 유사도가 낮은 문서도 검색을 해서 데이터를 반환해주는 것 같음
-
-- **시도한 내용** : fuzzy query실행, mult_match쿼리 설정 등 해당 방법은 오타 보정이 되지 않음
-
-- **해결 방안** : "minmum_shold_match" : "55%"로 유사도를 조절하여 해결
-
-- 유사 검색 해결 전 (minimum_should_match 옵션 설정 전)
-- '테스트공연' 검색을 위해 '테스트'를 검색 시 '스'와 '트'가 포함된 다른 공연도 조회됩니다.
-  ![show search](./docs/readme-images//show-search-2.png)
-
-- 유사 검색 해결 후 (minimum_should_match : 55% 설정 후)
-- '테스트공연' 검색을 위해 '테스트'를 검색 시 원하는 결과인 '테스트공연'만 조회됩니다.
-  ![show search](./docs/readme-images//show-search-3.png)
-  <br>
-
-### 7-3. CI/CD 설정
+### 7-2. CI/CD 설정
 
 - **문제** : CD workflow 멈춤 현상
   ![CI/CD](./docs/readme-images//ci-cd-1.png)
@@ -422,3 +386,26 @@ http://localhost:3000/
   - 결과적으로 `appleboy/ssh-action` 으로 인한 문제가 맞는 것 같음
   - 해당 action을 사용하지 않고 직접 SSH를 통해서 명령을 실행하는 방법을 사용
   - Github Actions VM에서 직접 SSH에 접속하는 명령을 통해서 EC2 인스턴스에 접근함
+
+### 7-3. 소셜 로그인 보안 강화
+
+- **문제** : 소셜 로그인을 진행할 때 URL 상에 토큰 정보를 담아서 보내서 보안적으로 취약하다는 문제가 있었음
+
+- **추정 원인** : 카카오 로그인 백엔드 API에서 생성한 토큰을 직접 URL에 담아서 전송하고 있음
+
+- **시도한 내용** : 프론트엔드로 리다이렉트 할 때, 랜덤한 code값을 전송
+
+- **해결 방안**
+
+  - 랜덤한 code를 만들어서 해당 코드를 키로 하는 사용자 ID를 레디스에 저장했음
+  - 이 방법을 사용하면 클라이언트는 URL 상에서 해당 코드만 확인이 가능하기 때문에 정확한 사용자 정보를 확인할 수 없음
+  - 그리고 클라이언트가 필요로 하는 토큰은 직접적으로 노출된 형태가 아니라 Body에 담겨서 클라이언트에게 전달되기 때문에 보안적으로 다소 향상되었다고 볼 수 있음
+  - 또한 Redis에 저장된 사용자 ID는 짧은 TTL를 통해서 노출이 최소화 되도록 구현함
+
+- 적용 전
+
+![kakao login](./docs/readme-images//kakao-login1.png)
+
+- 적용 후
+
+![kakao login](./docs/readme-images//kakao-login2.png)
