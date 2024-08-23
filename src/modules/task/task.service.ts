@@ -17,13 +17,20 @@ export class TaskService {
   ) {}
 
   // 매 분마다 실행되어 쇼 데이터를 동기화
-  @Cron(CronExpression.EVERY_MINUTE, { name: 'syncAllShows' })
+  @Cron(CronExpression.EVERY_MINUTE)
   async syncAllShowsCron() {
     await this.searchService.syncAllShows();
   }
 
+  //10분 마다 실행되어 쇼 조회수와 예매수 업데이트
+  @Cron('*/10 * *  * *')
+  async updateUnionKey() {
+    await this.showService.updateUnionKey('views');
+    await this.showService.updateUnionKey('bookings');
+  }
+
   // 매 시간마다 실행되어 쇼 랭킹을 업데이트
-  @Cron(CronExpression.EVERY_HOUR, { name: 'hourlyRankingUpdate' })
+  @Cron(CronExpression.EVERY_HOUR)
   async HourlyRankingUpdate() {
     await this.showService.HourlyRankingUpdate();
   }
