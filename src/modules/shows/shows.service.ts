@@ -17,7 +17,7 @@ import { Bookmark } from 'src/entities/users/bookmark.entity';
 import { Schedule } from 'src/entities/shows/schedule.entity';
 import { Ticket } from 'src/entities/shows/ticket.entity';
 import { Image } from 'src/entities/images/image.entity';
-import { ShowRanking } from 'src/entities/shows/showRanking.entity';
+import { ShowRanking } from 'src/entities/shows/show_ranking.entity';
 import { PointLog } from 'src/entities/users/point-log.entity';
 
 import { CreateShowDto } from './dto/create-show.dto';
@@ -262,7 +262,7 @@ export class ShowsService {
 
   // 특정 공연 ID의 조회수를 주기적으로 증가시키기
   async increaseShowViewCount() {
-    const targetShowIds = [1, 5, 20, 35, 67];
+    const targetShowIds = [3, 22, 35, 43, 66];
 
     for (const showId of targetShowIds) {
       try {
@@ -320,46 +320,61 @@ export class ShowsService {
     try {
       const date = new Date();
       const minTimestamp = this.getMinTimestamp(date);
-      const hourTimestamp = this.getHourTimestamp(date);
-
       const minKey = `show:${type}:${minTimestamp}`;
-      const unionKey = `show:${type}:union:${hourTimestamp}`;
 
       // 조회수 또는 예매수 증가
       await this.redisClient.zincrby(minKey, 1, String(showId));
       //TTL 설정 (1시간)
       await this.redisClient.expire(minKey, 3600);
+    } catch (error) {
+      console.log(`레디스 ${type} minKey 증가 오류:`, error);
+    }
+  }
 
-      //unionKey 생성 및 업데이트
-      const keys = await this.getKeys(`show:${type}:${hourTimestamp}*`);
+  //unionKey 생성
+  async updateUnionKey(type: 'views' | 'bookings'): Promise<void> {
+    try {
+      const date = new Date();
+      const hourTimestamp = this.getHourTimestamp(date);
+      const unionKey = `show:${type}:union:${hourTimestamp}`;
+
+      // 6개의 최신 minKey 검색
+      const keys = [];
+      for (let i = 0; i < 6; i++) {
+        const targetTime = new Date(date.getTime() - i * 10 * 60 * 1000);
+        keys.push(...(await this.getKeys(`show:${type}:${this.getMinTimestamp(targetTime)}`)));
+      }
+
       if (keys.length > 0) {
         await this.redisClient.zunionstore(unionKey, keys.length, ...keys);
       }
       //TTL 설정 (1시간)
       await this.redisClient.expire(unionKey, 3600);
     } catch (error) {
-      console.log(`레디스 ${type} 증가 오류:`, error);
+      console.log(`레디스 ${type} unionKey 증가 오류:`, error);
     }
   }
 
   // 매 시간마다 이전 시각의 unionKey 업데이트
   async HourlyRankingUpdate() {
-    //1시간 전의 unionKey 계산
-    const previousHour = new Date(Date.now() - 60 * 60 * 1000);
+    try {
+      // 1시간 전의 unionKey 계산
+      const previousHour = new Date(Date.now() - 60 * 60 * 1000);
 
-    for (const type of ['views', 'bookings'] as const) {
-      const unionKey = await this.getUnionKeyForHour(type, previousHour);
-      if (unionKey) await this.updateRanking(type, unionKey);
+      for (const type of ['views', 'bookings'] as const) {
+        // 1시간 동안의 unionKey 찾기
+        const pattern = `show:${type}:union:${this.getHourTimestamp(previousHour)}`;
+        const keys = await this.getKeys(pattern);
+
+        // 키가 있다면 가장 최신 키 반환 및 DB업데이트
+        if (keys.length > 0) {
+          const unionKey = keys.sort().reverse()[0];
+          await this.updateRanking(type, unionKey);
+        }
+      }
+    } catch (error) {
+      console.log(`HourlyRankingUpdate 오류:`, error);
     }
-  }
-
-  //1시간 동안의 unionKey 찾기
-  private async getUnionKeyForHour(type: 'views' | 'bookings', date: Date): Promise<string | null> {
-    const pattern = `show:${type}:union:${this.getHourTimestamp(date)}`;
-    const keys = await this.getKeys(pattern);
-
-    //키가 있다면 가장 최신 키 반환
-    return keys.length > 0 ? keys.sort().reverse()[0] : null;
   }
 
   //DB에 unionKey 저장
@@ -378,24 +393,24 @@ export class ShowsService {
 
       if (rankingData.has(showId)) {
         const existingEntry = rankingData.get(showId);
-        // 기존 데이터가 있으면 합산
+        // MAP에 데이터가 있다면 합산
         existingEntry[type] += count;
       } else {
+        //없다면 DB에서 조회
         const existingData = await this.showRankingRepository.findOne({
           where: { date: today, showId },
         });
 
         if (existingData) {
-          //기존 DB 데이터가 있으면 합산
+          //DB에 데이터가 있다면 합산
           existingData[type] += count;
           rankingData.set(showId, existingData);
         } else {
+          //없다면 데이터 생성
           const newDateRanking = this.showRankingRepository.create({
             date: today,
             showId,
-            //조회수 초기화
             views: type === 'views' ? count : 0,
-            //예매수 초기화
             bookings: type === 'bookings' ? count : 0,
           });
           //새로운 랭킹 데이터 생성
@@ -403,7 +418,6 @@ export class ShowsService {
         }
       }
     }
-
     //MAP 객체 DB에 저장
     await this.showRankingRepository.save(Array.from(rankingData.values()));
   }
@@ -414,7 +428,7 @@ export class ShowsService {
       // 모든 union 키를 검색
       const keys = await this.getKeys(`show:${type}:union:*`);
 
-      //키가 있다면 가장 최신 키 반환
+      // 키가 있다면 가장 최신 키 반환
       return keys.length > 0 ? keys.sort().reverse()[0] : null;
     } catch (error) {
       console.log(`Redis ${type} union key 검색 오류:`, error);

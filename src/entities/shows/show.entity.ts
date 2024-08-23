@@ -18,7 +18,7 @@ import { Bookmark } from '../users/bookmark.entity';
 import { Ticket } from './ticket.entity';
 import { Factory } from 'nestjs-seeder';
 import { ShowReview } from '../show-reviews/show-reviews.entity';
-import { ShowRanking } from './showRanking.entity';
+import { ShowRanking } from './show_ranking.entity';
 
 @Entity({ name: 'shows' })
 export class Show {
