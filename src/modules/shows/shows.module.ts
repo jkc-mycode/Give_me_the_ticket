@@ -15,7 +15,7 @@ import { PointLog } from 'src/entities/users/point-log.entity';
 import { ShowsController } from './shows.controller';
 import { ShowsService } from './shows.service';
 import { ImagesService } from '../images/images.service';
-import { ShowRanking } from 'src/entities/shows/showRanking.entity';
+import { ShowRanking } from 'src/entities/shows/show_ranking.entity';
 import { BatchController } from '../task/batch.controller';
 
 @Module({

@@ -28,8 +28,8 @@ export class TaskService {
     await this.showService.HourlyRankingUpdate();
   }
 
-  // 10분마다 실행되어 공연의 조회수를 업데이트
-  @Cron('*/10 * * * *')
+  // 매 시간마다 실행되어 공연의 조회수를 업데이트
+  @Cron(CronExpression.EVERY_HOUR)
   async increaseShowViewCount() {
     await this.showService.increaseShowViewCount();
   }

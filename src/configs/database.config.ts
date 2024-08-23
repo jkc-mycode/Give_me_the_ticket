@@ -11,7 +11,7 @@ import { TradeLog } from '../entities/trades/trade-log.entity';
 import { Schedule } from '../entities/shows/schedule.entity';
 import { Image } from '../entities/images/image.entity';
 import { ShowReview } from 'src/entities/show-reviews/show-reviews.entity';
-import { ShowRanking } from 'src/entities/shows/showRanking.entity';
+import { ShowRanking } from 'src/entities/shows/show_ranking.entity';
 
 export const typeOrmModuleOptions: TypeOrmModuleAsyncOptions = {
   imports: [ConfigModule],

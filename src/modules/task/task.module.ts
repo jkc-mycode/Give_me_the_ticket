@@ -9,11 +9,12 @@ import { Ticket } from 'src/entities/shows/ticket.entity';
 import { Show } from 'src/entities/shows/show.entity';
 import { Bookmark } from 'src/entities/users/bookmark.entity';
 import { Image } from 'src/entities/images/image.entity';
+import { ShowRanking } from 'src/entities/shows/show_ranking.entity';
 
 import { BatchController } from './batch.controller';
 import { TaskService } from './task.service';
 import { ShowsService } from '../shows/shows.service';
-import { ShowRanking } from 'src/entities/shows/showRanking.entity';
+
 import { ImagesService } from '../images/images.service';
 import { RedisService } from '../redis/redis.service';
 

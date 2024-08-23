@@ -17,7 +17,7 @@ import { Bookmark } from 'src/entities/users/bookmark.entity';
 import { Schedule } from 'src/entities/shows/schedule.entity';
 import { Ticket } from 'src/entities/shows/ticket.entity';
 import { Image } from 'src/entities/images/image.entity';
-import { ShowRanking } from 'src/entities/shows/showRanking.entity';
+import { ShowRanking } from 'src/entities/shows/show_ranking.entity';
 import { PointLog } from 'src/entities/users/point-log.entity';
 
 import { CreateShowDto } from './dto/create-show.dto';
