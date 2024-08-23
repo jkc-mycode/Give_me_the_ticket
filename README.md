@@ -5,12 +5,18 @@
 - 서비스명: Give_me_the_ticket
 - 프로젝트 한 줄 설명: 공연 예매와 예매한 티켓의 중고 거래를 한 곳에서 지원하는 서비스
 - 서비스 기획 의도:
+
   - 일반적인 중고 거래 티켓은 암표 형태로 진행되며, 가격의 상한선이 존재하지 않고 사기 당할 위험도 사용자가 부담해야 함
   - 해당 서비스를 통해 티켓을 예매한 곳에서 중고 거래 함으로써 안전하고 알맞은 가격에 거래가 가능하게 지원할 수 있음
-- 서비스 배포 URL : https://mymycode.shop/views
-- 팀 노션 URL :
-  [No Pain No Code](https://www.notion.so/No-Pain-No-Code-2ce80522fefd4216bae9986af368b6b3?pvs=21)
-- GitHub : [Give_me_the_ticket](https://github.com/jkc-mycode/Give_me_the_ticket)
+  - 기존의 환불 정책은 회사가 지는 취소표에 대한 리스크에 대한 올바른 방향성을 제시하고, 고객의 선택의 폭을 넓히기 위해서 이러한 서비스를 기획하게 됨.
+  - 이는 단순히 고객의 니즈를 위해서만 존재하는 것이 아니라, 서비스를 제공하는 업체에서도 취소표에 대한 리스크를 고려할 요소를 줄여준다는 이점이 있음.
+  - 기존의 상품가치에 대해 환불 시 발생하는 수수료가 불만족스러운 고객은, 본인의 선택에 따라 중고 티켓 거래를 할 수 있고 더 나은 가격을 받을 수 있기 때문에, 불법적으로 벌어지는 암표 행위를 일부 억제할 수 있음.
+
+- [서비스 바로 가기](https://www.givemetheticket.shop/views)
+- [팀 노션](https://www.notion.so/No-Pain-No-Code-2ce80522fefd4216bae9986af368b6b3?pvs=21)
+- [Github](https://github.com/jkc-mycode/Give_me_the_ticket)
+
+- [브로셔](https://www.notion.so/teamsparta/Give-me-the-ticket-d6b13f43e5564718a2062bcbc01cd15a?pvs=4)
 
 <br>
 
@@ -18,56 +24,93 @@
 
 - 팀장 : 안지윤 [@komiharuu](https://github.com/komiharuu)
   - 공연 티켓 구매, 환불 구현
+  - 공연 리뷰 작성 구현
   - 공연 찜하기, 취소 구현
-  - 발표 PPT 제작
+  - README 작성
 - 부팀장 : 김정찬 [@jkc-mycode](https://github.com/jkc-mycode)
   - 회원가입, 로그인/로그아웃, 토큰 재발급 구현
   - 카카오 소셜 로그인 구현
   - AWS S3를 이용한 이미지 업로드 구현
   - 초기 세팅 및 CI/CD 설정
-  - 서비스 배포
+  - 서비스 배포 및 프로젝트 총괄
+  - 최종 프로젝트 발표
 - 팀원 : 이윤형 [@clearghost3](https://github.com/clearghost3)
   - 중고 거래 게시물 CRUD 구현
-  - 중고 티켓 구매 로직 구현
+  - 중고 티켓 구매, 중고거래 검색 구현
   - 시연 영상 제작
 - 팀원 : 이수빈 [@soobeen0301](https://github.com/soobeen0301)
   - 공연 CRUD 구현
   - Elasticsearch를 이용한 공연 검색 기능 구현
-  - README 작성
+  - PPT 제작
 - 팀원 : 방채은 [@xszvvfm](https://github.com/xszvvfm)
   - 사용자 정보 조회, 수정, 회원 탈퇴 구현
   - portone을 이용한 사용자 포인트 충전 기능 구현
-  - 프로젝트 MVP 발표
+  - PPT 제작
     <br>
 
 ## 1. MVP 개발 기간
 
 - 2024.07.22 ~ 2024.08.08 (총 18일)
 
-<br>
+## 2. 배포 및 피드백 반영 기간
 
-## 2. 개발 환경
+- 2024.08.12 ~ 2024.08.22 (총 10일)
+  <br>
+
+## 3. 개발 환경
 
 - 운영체제 : Window/Mac
 
-  - Front-End : HTML, CSS, JavaScript, EJS
-  - Back-End : TypeScript, Node.js, Nest.js
-  - DataBase : MySQL, TypeORM, AWS RDS
-  - Deploy : Gibhub Actions, AWS EC2, ALB, ACM
+  - Back-End
 
-  ![SOA](./images/SOA.png)
+    <img src="https://img.shields.io/badge/typescript-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
+    <img src="https://img.shields.io/badge/node.js-5FA04E?style=for-the-badge&logo=nodedotjs&logoColor=white">
+    <img src="https://img.shields.io/badge/nestjs-E0234E?style=for-the-badge&logo=nestjs&logoColor=white">
+
+  - Front-End
+
+    <img src="https://img.shields.io/badge/html5-E34F26?style=for-the-badge&logo=html5&logoColor=white">  
+    <img src="https://img.shields.io/badge/css-1572B6?style=for-the-badge&logo=css3&logoColor=white">
+    <img src="https://img.shields.io/badge/javascript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black">
+    <img src="https://img.shields.io/badge/ejs-B4CA65?style=for-the-badge&logo=ejs&logoColor=black">
+    <img src="https://img.shields.io/badge/axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white">
+
+  - DataBase
+
+    <img src="https://img.shields.io/badge/mysql-4479A1?style=for-the-badge&logo=mysql&logoColor=white">
+    <img src="https://img.shields.io/badge/typeorm-FE0803?style=for-the-badge&logo=typeorm&logoColor=white">
+    <img src="https://img.shields.io/badge/redis-FF4438?style=for-the-badge&logo=redis&logoColor=white">
+    <img src="https://img.shields.io/badge/amazon rds-527FFF?style=for-the-badge&logo=amazon rds&logoColor=white">
+     <img src="https://img.shields.io/badge/amazon s3-569A31?style=for-the-badge&logo=amazon s3&logoColor=white">
+
+  - Devops / Infra
+
+    <img src="https://img.shields.io/badge/github actions-2088FF?style=for-the-badge&logo=github actions&logoColor=white">
+    <img src="https://img.shields.io/badge/amazon ec2-FF9900?style=for-the-badge&logo=amazon ec2&logoColor=white">
+    <img src="https://img.shields.io/badge/aws elastic load balancing-8C4FFF?style=for-the-badge&logo=awselasticloadbalancing&logoColor=white">
+    <img src="https://img.shields.io/badge/amazon route 53-527FFF?style=for-the-badge&logo=amazonroute53&logoColor=white">
+    <img src="https://img.shields.io/badge/amazon cloud front-527FFF?style=for-the-badge">
+    <img src="https://img.shields.io/badge/apache jmeter-D22128?style=for-the-badge&logo=apachejmeter&logoColor=white">
+
+- 서비스 아키텍쳐
+
+![SOA](./docs/readme-images//SOA.png)
 
 <br>
 
 ## 3. 프로젝트 이용
 
-## Installation
+## 패키지 설치
 
 ```bash
 $ npm install
 ```
 
-## Running the app
+## 환경변수 설정
+
+.env.example을 복사하여 .env 파일 생성
+
+## 서버 실행
 
 ```bash
 # development
@@ -80,24 +123,27 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Test
+## API 호출 테스트
 
-- swagger : http://localhost:3000/
+ <img src="https://img.shields.io/badge/swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black">
+
+http://localhost:3000/
 
 <br>
 
 ## 4. 기획 관련
 
-- 일정 계획 (간트차트) : https://docs.google.com/spreadsheets/d/1_2s0liNMu8FX_m3TipS1r_ZdDQyDjgLJToEeR5Tb-Mo/edit?gid=446658082#gid=446658082
+- [일정 계획 (간트차트)](https://docs.google.com/spreadsheets/d/1_2s0liNMu8FX_m3TipS1r_ZdDQyDjgLJToEeR5Tb-Mo/edit?gid=446658082#gid=446658082)
 
-- API 명세서 : https://www.notion.so/teamsparta/a3adab1478264779b4be45c417490229?v=271c930fb8ac4db8a5c3e5662bb39287
+- [API 명세서](https://www.notion.so/teamsparta/a3adab1478264779b4be45c417490229?v=271c930fb8ac4db8a5c3e5662bb39287)
 
-- ERD : https://www.erdcloud.com/d/pgD4S7yRJLJ2nfFBg
+- [ERD](https://www.erdcloud.com/d/pgD4S7yRJLJ2nfFBg)
 
-- 와이어프레임 : https://www.figma.com/file/FhXzCnzAKXrQAvpXVqRdNV?embed_host=notion&kind=file&node-id=0-1&t=5SS3F7d713NJ63yQ-1&viewer=1
+- [와이어프레임](https://www.figma.com/file/FhXzCnzAKXrQAvpXVqRdNV?embed_host=notion&kind=file&node-id=0-1&t=5SS3F7d713NJ63yQ-1&viewer=1)
 
-- 전체, 핵심 로직 흐름도 : https://miro.com/app/board/uXjVKw91G9Q=/
-  ![Flow Chat](./images/flowchat.png)
+- [전체, 핵심 로직 흐름도](https://miro.com/app/board/uXjVKw91G9Q=/)
+
+  ![Flow Chat](./docs/readme-images//flowchart.png)
 
 <br>
 
@@ -105,9 +151,11 @@ $ npm run start:prod
 
 ### 5-1. 사용자 포인트 충전 API
 
+![user point](./docs/readme-images/point.flowchart.png)
+
 #### 5-1-1. /src/modules/users/users.service.ts
 
-- 포인트를 충전하고, 로그를 기록합니다.
+- 포인트를 충전한 후, 충전한 포인트에 해당하는 금액이 사용자의 계좌에서 인출되며, 이 과정을 로그로 기록하여 DB에 저장합니다.
 
 - https://github.com/jkc-mycode/Give_me_the_ticket/blob/3fa41ab72531a177aff08c53434bf55cb5dcffd1/src/modules/users/users.service.ts#L277-L319
 
@@ -117,27 +165,9 @@ $ npm run start:prod
 
 - https://github.com/jkc-mycode/Give_me_the_ticket/blob/3fa41ab72531a177aff08c53434bf55cb5dcffd1/src/modules/payments/payments.service.ts#L50-L105
 
-- 포인트 충전 흐름도
-  ![user point](./images/point.flowchat.png)
-
-- 내 정보 페이지 -> MY POINT 탭 -> 포인트 충전 버튼 클릭합니다.
-
-  ![user point](./images/my-page.point.png)
-
-- 이동한 포인트 충전 페이지에서 충전할 포인트 금액 입력 후 결제하기 버튼 클릭합니다.
-  ![user point](./images/point-payments1.png)
-
-- 사용자가 원하는 결제 방법 선택 가능합니다.
-  ![user point](./images/point-payments2.png)
-
-- 결제 완료 시 결제 성공 창이 뜨며 내정보 페이지로 이동합니다.
-  ![user point](./images/point-payments3.png)
-
-- 변동된 포인트 금액과 내역을 확인 가능합니다.
-  ![user point](./images/point-payments4.png)
-  <br>
-
 ### 5-2. 공연 목록 조회 및 검색 API
+
+![show search chart](./docs/readme-images//show-search-flowchart.png)
 
 #### 5-2-1. /src/modules/shows/search/search.service.ts
 
@@ -156,83 +186,166 @@ $ npm run start:prod
 - https://github.com/jkc-mycode/Give_me_the_ticket/blob/3fa41ab72531a177aff08c53434bf55cb5dcffd1/src/modules/shows/shows.service.ts#L132-L143
 
 - 오타 검색 결과 : '시하고'라고 오타로 검색했을 경우 원하는 결과인 '시카고'를 조회할 수 있습니다.
-  ![show search](./images/show-search.png)
+  ![show search](./docs/readme-images//show-search.png)
 
 <br>
 
-### 5-3. 공연 티켓 환불 API
+### 5-3. 공연 티켓 예매 API
+
+![ticket booking](./docs/readme-images/booking-flowchart.png)
 
 #### 5-3-1. /src/modules/shows/shows.service.ts
 
-- 공연 티켓 환불 시 정책을 기반으로 에러 처리를 합니다.
+- 사용자가 사이트에 있는 공연을 예매합니다.
+- 공연 티켓 예매 시 공연 시작 2시간 전에는 예매를 할 수 없습니다.
+- 매크로 방지를 위해 한 사람당 한 공연의 티켓을 최대 5장 구매하게 합니다.
+- 공연 예매에 성공하면 사용자의 포인트를 공연 금액만큼 감소시키고, 잔여 좌석수를 감소시킵니다.
+
+- https://github.com/jkc-mycode/Give_me_the_ticket/blob/dev/src/modules/shows/shows.service.ts#L640-L755
+
+#### 5-3-2. 동시성 처리
+
+![ticket booking](./docs/readme-images/ticket-flowchart.jpg)
+
+- 한 좌석이 남은 공연이 있을 경우, 먼저 락을 획득한 사람이 공연을 예매할 수 있게 합니다.
+
+### 5-4. 공연 티켓 환불 API
+
+![ticket deposit](./docs/readme-images/refund-flowchart.png)
+
+#### 5-4-1. /src/modules/shows/shows.service.ts
+
+- 공연 티켓 환불 시 위 차트의 정책을 기반으로 에러 처리를 합니다.
 - 환불된 금액을 사용자 포인트에 입금하고, 해당 공연의 잔여 좌석을 증가시킵니다.
 
-- https://github.com/jkc-mycode/Give_me_the_ticket/blob/3fa41ab72531a177aff08c53434bf55cb5dcffd1/src/modules/shows/shows.service.ts#L517-L612
+- https://github.com/jkc-mycode/Give_me_the_ticket/blob/dev/src/modules/shows/shows.service.ts#L758-L883
 
-- 공연 티켓 환불 흐름도
-  ![ticket deposit](./images/ticket.flowchat.png)
+### 5-5. 중고 거래 티켓 구매 API
+
+![ticket trades](./docs/readme-images//trades.flowchart.png)
+
+#### 5-5-1. /src/modules/trades/trades.service.ts
+
+- 사용자가 중고 티켓을 구매 시 해당 티켓을 구매자에게 재발급합니다.
+  (이 때 판매자의 티켓은 로그만 남고 사용하지 못하게 됩니다.)
+
+- 중고 거래 게시물의 상태를 판매 완료로 변경합니다.
+
+- https://github.com/jkc-mycode/Give_me_the_ticket/blob/dev/src/modules/trades/trades.service.ts#L463-L598
+
+## 6. 사이트 이용 안내
+
+### 6-1. 포인트 충전 안내
+
+- 내 정보 페이지 -> MY POINT 탭 -> 포인트 충전 버튼 클릭
+
+  ![user point](./docs/readme-images//my-page-point.png)
+
+- 이동한 포인트 충전 페이지에서 충전할 포인트 금액 선택 후 결제하기 버튼 클릭.
+
+  ![user point](./docs/readme-images/point-payments1.png)
+
+- 사용자가 원하는 결제 방법을 선택 가능.
+
+  ![user point](./docs/readme-images/point-payments2.png)
+
+- 결제 완료 시 결제 성공 창이 뜨며 내정보 페이지로 이동하여 변동된 포인트 금액과 내역을 확인 가능
+
+  ![user point](./docs/readme-images/point-payments3.png)
+
+  <br>
+
+### 6-2. 공연 예매 안내
+
+- 공연 티켓 예매 페이지
+- 메인페이지 -> 원하는 공연을 클릭합니다.
+
+  ![ticket booking](./docs/readme-images/show-booking1.png)
+
+- 공연을 예매하기 전에 날짜 및 시간 선택 드롭다운 버튼을 눌러 날짜 및 스케줄을 선택합니다.
+
+  ![ticket booking](./docs/readme-images/show-booking2.png)
+
+- 예매하기 버튼을 클릭합니다.
+  ![ticket booking](./docs/readme-images/show-booking3.png)
+
+- 예매 한 공연의 정보와 포인트 정보를 다시 한번 확인 해 예매를 진행합니다.
+  ![ticket booking](./docs/readme-images/show-booking4.png)
+  <br>
+
+### 6-3 공연 환불 안내
 
 - 공연 티켓 환불 페이지
 - 내 정보 페이지 -> MY TICKET -> 환불을 원하는 티켓의 환불 버튼을 클릭합니다.
-  ![ticket deposit](./images/ticket-deposit1.png)
+  ![ticket deposit](./docs/readme-images/show-refund1.png)
 
-  - 티켓 환불 페이지로 이동되며, Refund 버튼을 클릭합니다.
-    ![ticket deposit](./images/ticket-deposit2.png)
+- 티켓 환불 페이지로 이동되며, Refund 버튼을 클릭합니다.
+  ![ticket deposit](./docs/readme-images/show-refund2.png)
 
-  - 환불이 완료되었다는 창이 뜨며, 티켓 내역 조회 시 티켓의 상태가 변경된 것을 확인 가능합니다.
-    ![ticket deposit](./images/ticket-deposit3.png)
-    ![ticket deposit](./images/ticket-deposit4.png)
+- 환불이 완료되었다는 창이 뜨며, 티켓 내역 조회 시 티켓의 상태가 변경된 것을 확인 할 수 있습니다.
+
+  ![ticket deposit](./docs/readme-images/show-refund3.png)
+
     <br>
 
-<br>
+### 6-4 공연 중고거래 등록 안내
 
-### 5-4. 중고 거래 티켓 구매 API
+- 중고 거래 등록 페이지
+- 마이페이지 -> 예매 목록 조회 페이지에서 예매한 티켓을 확인한 후 중고 판매 버튼을 누릅니다.
 
-#### 5-4-1. /src/modules/trades/trades.service.ts
+  ![create trades](./docs/readme-images//create-trade1.png)
 
-- 사용자가 중고 티켓을 구매 시 티켓을 구매자의 티켓으로 재발급합니다.
-  (판매자의 티켓은 로그만 남고 사용하지 못하는 티켓이 되도록)
+- 원하는 중고거래 가격 금액을 입력하여 등록을 합니다.
 
-- 중고 거래 게시물의 상태를 변경한 뒤 목록에서 조회되지 않도록 삭제합니다.
-
-- https://github.com/jkc-mycode/Give_me_the_ticket/blob/3fa41ab72531a177aff08c53434bf55cb5dcffd1/src/modules/trades/trades.service.ts#L389-L437
-
-- 중고 거래 티켓 구매 흐름도
-  ![ticket trades](./images/trades.flowchat.png)
-
-- 중고 거래 페이지
-- 중고 거래 목록 조회 페이지에서 중고 거래 게시물을 확인할 수 있습니다.
-  ![ticket trades](./images/trades-1.png)
-
-- 원하는 중고거래 게시글을 클릭하여 중고 거래 구매 버튼을 클릭합니다.
-  ![ticket trades](./images/trades-2.png)
+  ![create trades](./docs/readme-images//create-trade2.png)
 
 - 거래에 성공했다는 창이 뜨며, 내 정보 조회 -> MY TICKET 확인 시 구매한 티켓이 있는 것을 확인 할 수 있습니다.
-  ![ticket trades](./images/trades-3.png)
-  ![ticket trades](./images/trades-4.png)
+  ![create trades](./docs/readme-images//create-trade3.png)
+
   <br>
 
-## 6. 트러블슈팅
+### 6-5 공연 중고거래 구매 안내
 
-### 6-1. bull 사용
+1. **중고 거래 구매 페이지로 이동**
 
-- **문제** : bull을 사용한 동시성 처리 테스트에서 특정 좌석에 대해 중복 점유 및 실패해도 201 성공이 발생하는 문제 발생
+   - **설명**: 중고 거래 목록 조회 페이지에서 원하는 중고거래 게시글을 클릭하여 중고 거래 상세 페이지로 이동합니다.
+   - ![ticket trades](./docs/readme-images/trades-1.png)
 
-- **추정 원인** : 특정 자원을 큐에서 하나씩 꺼내 결제를 진행하는 과정에서 자원에 대한 락이 없었음
+2. **중고 거래 구매 버튼 클릭**
 
-- **시도한 내용** : bull을 지우고 bull의 업그레이드 버전인 bullmq를 설치
+   - **설명**: 중고 거래 상세 페이지에서 '구매' 버튼을 클릭합니다.
+   - ![ticket trades](./docs/readme-images/trades-2.png)
 
-- **해결 방안** : bull queue도 사용이 가능하지만, 구매 로직에서는 큐보다 락이 더 적합하다고 판단되어 TypeORM에서 제공하는 비관적 락을 사용하여 티켓 구매 로직의 동시성 처리를 구현
+3. **구매 확인창 확인 및 확인 버튼 클릭**
+
+   - **설명**: '구매' 버튼을 클릭하면 구매 확인창이 뜨고, 확인을 눌러서 구매를 완료합니다.
+   - ![ticket trades](./docs/readme-images/trades-3.png)
+
+4. **마이페이지에서 중고 거래 내역 확인**
+   - **설명**: 마이페이지에서 '중고거래 내역'을 확인하면 구매한 중고 티켓의 정보와 함께 판매자의 이름도 조회할 수 있습니다.
+   - ![ticket trades](./docs/readme-images/trades-4.png)
+
+## 7. 트러블슈팅
+
+### 7-1. Red Lock 동시성 테스트
+
+- **문제** : 문제: 10명의 사용자가 5개의 공연 좌석을 예매하는 상황으로 동시성 테스트를 진행. 좌석 5개가 예매 완료 되어야 하는데, 4개가 예매 완료되는 상황이 발생
+
+- **추정 원인** : 락 획득 재시도 지연시간 문제라고 추정
+
+- **시도한 내용** : 락 획득 재시도 지연시간을 짧게 설정
+
+- **해결 방안** : 티켓 예매 로직이 트랜잭션 시작 - 락 획득 - 트랜잭션 종료 - 락 반납 순서대로 되어있었고, 티켓 예매 로직을 락 획득 - 트랜잭션 시작 - 트랜잭션 종료 - 락 반납으로 수정
 
 <br>
 
-### 6-2. Elasticsearch 이용
+### 7-2. Elasticsearch 이용
 
-#### 6-2-1. 데이터 휘발
+#### 7-2-1. 데이터 휘발
 
 - **문제** : 공연 목록 조회 시 전달 data안에 이미지 URL을 함께 전달하고 있지만 새로고침을 연달아 클릭 시 data안에 이미지URL이 휘발되는 문제 발생
 
-![show search](./images/show-search-1.png)
+![show search](./docs/readme-images//show-search-1.png)
 
 - **추정 원인**
 
@@ -257,7 +370,7 @@ $ npm run start:prod
   - 최종 해결 방법 : 기존에 연결한 AWS OpenSearch 도메인을 삭제하고, 새로운 도메인을 생성하여 연결하였더니 기존에 작성한 코드로도 데이터가 휘발되지 않고 정상 작동함
     <br>
 
-#### 6-2-2. 유사 검색
+#### 7-2-2. 유사 검색
 
 - **문제** : 유사 검색을 위해 match쿼리에 fuzziness를 설정하여 검색 시 너무 많은 정보가 검색됨
 
@@ -269,18 +382,18 @@ $ npm run start:prod
 
 - 유사 검색 해결 전 (minimum_should_match 옵션 설정 전)
 - '테스트공연' 검색을 위해 '테스트'를 검색 시 '스'와 '트'가 포함된 다른 공연도 조회됩니다.
-  ![show search](./images/show-search-2.png)
+  ![show search](./docs/readme-images//show-search-2.png)
 
 - 유사 검색 해결 후 (minimum_should_match : 55% 설정 후)
 - '테스트공연' 검색을 위해 '테스트'를 검색 시 원하는 결과인 '테스트공연'만 조회됩니다.
-  ![show search](./images/show-search-3.png)
+  ![show search](./docs/readme-images//show-search-3.png)
   <br>
 
-### 6-3. CI/CD 설정
+### 7-3. CI/CD 설정
 
 - **문제** : CD workflow 멈춤 현상
-  ![CI/CD](./images/ci-cd-1.png)
-  ![CI/CD](./images/ci-cd-2.png)
+  ![CI/CD](./docs/readme-images//ci-cd-1.png)
+  ![CI/CD](./docs/readme-images//ci-cd-2.png)
 
 - **추정 원인**
 
