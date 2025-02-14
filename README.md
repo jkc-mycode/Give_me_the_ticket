@@ -13,10 +13,8 @@
   - 기존의 상품가치에 대해 환불 시 발생하는 수수료가 불만족스러운 고객은, 본인의 선택에 따라 중고 티켓 거래를 할 수 있고 더 나은 가격을 받을 수 있기 때문에, 불법적으로 벌어지는 암표 행위를 일부 억제할 수 있음.
 
 - [서비스 바로 가기](https://www.givemetheticket.shop/views)
-- [팀 노션](https://www.notion.so/No-Pain-No-Code-2ce80522fefd4216bae9986af368b6b3?pvs=21)
-- [Github](https://github.com/jkc-mycode/Give_me_the_ticket)
-
-- [브로셔](https://www.notion.so/teamsparta/Give-me-the-ticket-d6b13f43e5564718a2062bcbc01cd15a?pvs=4)
+- [팀 노션](https://west-territory-778.notion.site/No-Pain-No-Code-19a53f4fb6b5803b96c3c16952831781?pvs=4)
+- [브로셔](https://west-territory-778.notion.site/Give-me-the-ticket-cbb1d5e4cd0e4cffb7e72220bd3a373e?pvs=4)
 
 <br>
 
